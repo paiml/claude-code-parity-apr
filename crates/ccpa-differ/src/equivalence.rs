@@ -6,6 +6,7 @@
 //! syntactically-different inputs may be semantically equivalent
 //! (`Bash "ls"` vs `Bash " ls "`) — the rules normalize before equality.
 
+use ccpa_trace::{HookDecision, SkillSource};
 use sha2::{Digest, Sha256};
 
 /// Lightweight projection of a [`ccpa_trace::Block::ToolUse`] reduced to
@@ -17,6 +18,34 @@ pub struct ToolCall {
     pub name: String,
     /// JSON-shaped tool input (verbatim from the trace).
     pub input: serde_json::Value,
+}
+
+/// Lightweight projection of a [`ccpa_trace::Record::HookEvent`] reduced
+/// to the fields the equivalence rule cares about. Schema-v2 (M15).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct HookProjection {
+    /// Canonical event name (`"PreToolUse"`, …).
+    pub event: String,
+    /// What the hook matched on, if applicable.
+    pub matcher: Option<String>,
+    /// `Allow` / `Warn` / `Block`.
+    pub decision: HookDecision,
+    /// Literal exit code the hook returned.
+    pub exit_code: i32,
+    /// Hook stdout/stderr; equivalence normalizes whitespace before compare.
+    pub output: String,
+}
+
+/// Lightweight projection of a [`ccpa_trace::Record::SkillInvocation`].
+/// Schema-v2 (M15).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SkillProjection {
+    /// Skill name.
+    pub name: String,
+    /// `UserInvoked` / `AutoMatched`.
+    pub source: SkillSource,
+    /// Whether the skill body was injected into the assistant's context.
+    pub instructions_injected: bool,
 }
 
 /// Drift category emitted when two tool calls are NOT equivalent.
@@ -39,6 +68,24 @@ pub enum DriftCategory {
     /// after the session ended. Detail in the [`crate::FileMutationDrift`]
     /// returned alongside.
     MismatchedFileState,
+    /// Hook event mismatch — different `(event, matcher, decision,
+    /// exit_code)` tuple, or normalized output differs. Schema-v2 (M15).
+    MismatchedHookEvent,
+    /// Teacher fired a hook at this position; student didn't.
+    MissingHookEvent,
+    /// Student fired a hook at this position; teacher didn't.
+    ExtraHookEvent,
+    /// Skill invocation mismatch — different `(name, source,
+    /// instructions_injected)`. Schema-v2 (M15).
+    MismatchedSkillInvocation,
+    /// Teacher invoked a skill at this position; student didn't.
+    MissingSkillInvocation,
+    /// Student invoked a skill at this position; teacher didn't.
+    ExtraSkillInvocation,
+    /// Action-kind mismatch — teacher and student emitted different
+    /// kinds of action at the same position (e.g. teacher fired a
+    /// `HookEvent`, student emitted a tool call). Schema-v2 (M15).
+    MismatchedActionKind,
 }
 
 /// Decide whether two tool calls are semantically equivalent under the
@@ -219,6 +266,50 @@ fn agent_equivalent(a: &serde_json::Value, b: &serde_json::Value) -> bool {
 
 fn default_equivalent(a: &serde_json::Value, b: &serde_json::Value) -> bool {
     canonical_sha(a) == canonical_sha(b)
+}
+
+/// Decide whether two hook events are semantically equivalent. Equality
+/// is on `(event, matcher, decision, exit_code)`; `output` is normalized
+/// via the same whitespace-collapse rule as `Bash` commands so a
+/// trailing newline or doubled space doesn't trigger drift.
+///
+/// # Errors
+///
+/// Returns [`DriftCategory::MismatchedHookEvent`] when projections differ.
+pub fn hook_event_equivalent(
+    a: &HookProjection,
+    b: &HookProjection,
+) -> Result<(), DriftCategory> {
+    if a.event == b.event
+        && a.matcher == b.matcher
+        && a.decision == b.decision
+        && a.exit_code == b.exit_code
+        && normalize_bash(&a.output) == normalize_bash(&b.output)
+    {
+        Ok(())
+    } else {
+        Err(DriftCategory::MismatchedHookEvent)
+    }
+}
+
+/// Decide whether two skill invocations are semantically equivalent.
+/// Equality is bytewise on `(name, source, instructions_injected)`.
+///
+/// # Errors
+///
+/// Returns [`DriftCategory::MismatchedSkillInvocation`] when any field differs.
+pub fn skill_invocation_equivalent(
+    a: &SkillProjection,
+    b: &SkillProjection,
+) -> Result<(), DriftCategory> {
+    if a.name == b.name
+        && a.source == b.source
+        && a.instructions_injected == b.instructions_injected
+    {
+        Ok(())
+    } else {
+        Err(DriftCategory::MismatchedSkillInvocation)
+    }
 }
 
 fn path_str(v: &serde_json::Value) -> &str {

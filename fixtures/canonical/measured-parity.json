@@ -1,6 +1,6 @@
 {
   "aggregate_score": 1.0,
-  "fixture_count": 17,
+  "fixture_count": 19,
   "passes_gate": true,
   "per_fixture": [
     {
@@ -102,6 +102,18 @@
     {
       "drift_count": 0,
       "id": "0017-managed-org-policy",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0018-hook-pre-tool-use",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0019-skill-auto-match",
       "passes_individual": true,
       "score": 1.0
     }

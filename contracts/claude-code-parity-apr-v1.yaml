@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.2.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. FALSIFY-CCPA-013 discharged 2026-04-27 with first measured_parity over 5 paired canonical fixtures: aggregate=1.0000 (PASSES 0.95 floor), every fixture=1.0 (PASSES 0.80 floor). See status_history § 'measured_parity'.
+version: "1.3.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. FALSIFY-CCPA-013 discharged 2026-04-27 with first measured_parity over 5 paired canonical fixtures: aggregate=1.0000 (PASSES 0.95 floor), every fixture=1.0 (PASSES 0.80 floor). v1.3.0 bumps trace schema to v2 (additive HookEvent + SkillInvocation record kinds) and extends the differ with hook+skill equivalence rules + 4 new DriftCategory variants. Parity-matrix coverage 13/17 → 15/17. See status_history § 'measured_parity' M15.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -192,7 +192,7 @@ roles:
 # kinds bump trace_schema_version and require a contract revision.
 
 trace_schema:
-  version: 1
+  version: 2  # M15 — added HookEvent + SkillInvocation; per-record `v` field still 1 (record-level back-compat layer unused so far)
   format: 'application/x-ndjson'
   filename_pattern: 'fixtures/[0-9]{4}-[a-z0-9-]+.ccpa-trace.jsonl'
   envelope:
@@ -202,10 +202,10 @@ trace_schema:
       v:
         type: integer
         const: 1
-        description: 'trace_schema.version; incrementing requires a contract revision'
+        description: 'per-record schema version; trace_schema.version is the file-level surface (now v2)'
       kind:
         type: string
-        enum: [session_start, user_prompt, assistant_turn, tool_result, session_end]
+        enum: [session_start, user_prompt, assistant_turn, tool_result, session_end, hook_event, skill_invocation]
   records:
     session_start:
       required: [v, kind, session_id, ts, actor, model, cwd_sha256]
@@ -804,6 +804,99 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.2.0'
+    to: 'ACTIVE_RUNTIME v1.3.0'
+    note: 'M15 — trace schema v2: additive HookEvent + SkillInvocation record kinds; differ extended; parity-matrix coverage 13/17 → 15/17'
+    reason: |
+      M15 closes the two corpus-authoring blockers identified under
+      M14's `remaining_uncovered_classification`:
+
+        - hooks  → required HookEvent record kind  (now present)
+        - skills → required SkillInvocation record kind (now present)
+
+      The schema bump is purely additive: existing M0-M14 fixtures and
+      record kinds round-trip byte-identical. New record kinds:
+
+        Record::HookEvent {
+          v, turn,
+          event: String,             // PreToolUse / PostToolUse / ...
+          matcher: Option<String>,
+          decision: HookDecision,    // Allow / Warn / Block
+          exit_code: i32,
+          output: String,            // optional, normalized at compare
+        }
+
+        Record::SkillInvocation {
+          v, turn,
+          name: String,
+          source: SkillSource,       // user_invoked / auto_matched
+          instructions_injected: bool,
+        }
+
+      Differ extension:
+        - new equivalence functions hook_event_equivalent +
+          skill_invocation_equivalent
+        - 7 new DriftCategory variants (Mismatched/Missing/Extra
+          variants for both Hook + Skill, plus MismatchedActionKind
+          when teacher fires Hook and student emits Tool)
+        - compute_parity_score now reduces over the union of
+          tool calls + hook events + skill invocations, not just
+          tool calls (denominator and numerator both grow)
+
+      Two new canonical fixtures:
+        0018-hook-pre-tool-use   — Bash with PreToolUse Warn hook firing
+                                   between tool_use and tool_result
+        0019-skill-auto-match    — rust-debug skill auto-matched by
+                                   when_to_use heuristic on user prompt
+
+      Coverage closure status:
+        13/17 → 15/17 (+ hooks, + skills)
+        2 remaining uncovered: keyboard-shortcuts, status-line —
+        both REPL-render artifacts that never reach the trace
+        boundary, so they're permanently out-of-scope under the
+        current schema.
+
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 19
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 15
+        required_count: 17
+        covered_rows: ['builtin-tools-rwegs', 'subagent-spawn', 'mcp-client', 'slash-commands', 'claude-md-memory', 'permission-modes', 'builtin-tools-web', 'non-interactive-mode', 'session-management', 'custom-agents', 'worktree-isolation', 'configuration-ladder', 'managed-org-policy', 'hooks', 'skills']
+        uncovered_rows: ['keyboard-shortcuts', 'status-line']
+      teacher_source: 'Curated canonical reference (AUTHORED).'
+      student_source: 'Curated canonical reference; per-fixture identical to teacher at equivalence-rule level.'
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      newly_covered_in_m15: ['hooks', 'skills']
+      schema_extension: 'ccpa-trace SCHEMA_VERSION 1 → 2 (additive); 19/19 fixtures still round-trip byte-identical via existing FALSIFY-CCPA-001 harness'
+      remaining_uncovered_classification: |
+        Two rows remain uncovered after M15. Both are
+        permanently out-of-scope at the trace boundary:
+
+          - keyboard-shortcuts — Claude-Code REPL keystroke
+            handling (Ctrl-C, double-Esc, Ctrl-R, Shift-Enter).
+            These never reach the API or any tool call; they
+            mutate REPL state directly. No record kind would
+            faithfully capture them.
+
+          - status-line — REPL render artifact (model name +
+            session cost in the bottom strip). Pure UI; never
+            crosses a trace boundary.
+
+        Closing FALSIFY-CCPA-007's hard-blocking gate would require
+        either: (a) accepting that these two rows are
+        permanently OOS and counting `15/15 reachable` as full
+        coverage (recommended); (b) introducing a REPL-event
+        record kind that intercepts at the TUI layer (heavy,
+        likely not worth the discriminating power gained).
 
   - date: '2026-04-27'
     note: 'corpus expansion M14 — 14 → 17 fixtures, parity-matrix coverage 10/17 → 13/17'

@@ -16,7 +16,11 @@
 use serde::{Deserialize, Serialize};
 
 /// Trace-schema version. Bumping this requires a contract revision.
-pub const SCHEMA_VERSION: u32 = 1;
+///
+/// `v2` (M15) adds two additive record kinds — [`Record::HookEvent`] and
+/// [`Record::SkillInvocation`] — to cover the `hooks` and `skills` rows
+/// of the apr-code parity matrix. Existing v1 traces remain parse-compatible.
+pub const SCHEMA_VERSION: u32 = 2;
 
 /// Which orchestrator produced the trace.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -67,6 +71,31 @@ pub enum Block {
         /// JSON-shaped tool input — opaque to this schema.
         input: serde_json::Value,
     },
+}
+
+/// Decision a hook reached for the matched event. Mirrors
+/// `aprender-orchestrate/agent/hooks.rs::HookDecision` 1:1 so a fixture
+/// authored against either Claude Code or `apr code` semantics encodes
+/// the same closed enum.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum HookDecision {
+    /// Hook returned `exit_code=0` — proceed.
+    Allow,
+    /// Hook returned `exit_code=1` — proceed with a warning surfaced to the user.
+    Warn,
+    /// Hook returned `exit_code=2` — abort the in-flight event (tool, prompt, ...).
+    Block,
+}
+
+/// How a skill came to be invoked.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SkillSource {
+    /// User typed `/skill-name` (or otherwise explicitly requested it).
+    UserInvoked,
+    /// `SkillRegistry::auto_match` fired on the active turn's text.
+    AutoMatched,
 }
 
 /// File-system / process side-effects of a tool invocation.
@@ -137,6 +166,58 @@ pub enum Record {
         /// Optional file-system / process side-effects.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         side_effects: Option<SideEffects>,
+    },
+    /// One hook firing during the session. Schema-v2 (M15).
+    ///
+    /// Records a single hook invocation — for example a `PreToolUse` hook
+    /// matching `Bash` and exiting with code `2` (Block). The runtime fires
+    /// hooks at six canonical points (`SessionStart` / `PreToolUse` /
+    /// `PostToolUse` / `UserPromptSubmit` / `Stop` / `SubagentStop`); the
+    /// `event` field MUST be one of those, but is kept as a `String` so
+    /// fixtures don't break if a future Claude Code revision adds a 7th.
+    HookEvent {
+        /// Schema version (1 — invariant under additive record-kind growth).
+        v: u32,
+        /// Turn number the hook fired against (`0` for `SessionStart` hooks
+        /// that fire before any user prompt).
+        turn: u32,
+        /// Canonical event name (`"PreToolUse"`, `"PostToolUse"`, …).
+        event: String,
+        /// What the hook matched on, if applicable. For `PreToolUse` /
+        /// `PostToolUse` this is the tool name (`"Bash"`); for
+        /// `UserPromptSubmit` it may be a regex or `None`.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        matcher: Option<String>,
+        /// `Allow` / `Warn` / `Block` — see [`HookDecision`].
+        decision: HookDecision,
+        /// The literal exit code the hook process returned (`0` / `1` / `2`).
+        /// Asserted equal to `decision`'s canonical mapping by the differ.
+        exit_code: i32,
+        /// Hook stdout/stderr concatenation, surfaced to the user verbatim.
+        /// Empty when the hook silently allowed.
+        #[serde(default, skip_serializing_if = "String::is_empty")]
+        output: String,
+    },
+    /// One skill being invoked. Schema-v2 (M15).
+    ///
+    /// Records the moment a skill (markdown-frontmatter-defined or
+    /// agent-bundled) was loaded into the assistant's context, either
+    /// because the user typed `/skill-name` or because
+    /// `SkillRegistry::auto_match` fired on the turn text.
+    SkillInvocation {
+        /// Schema version (1 — invariant under additive record-kind growth).
+        v: u32,
+        /// Turn the skill was applied to.
+        turn: u32,
+        /// Skill name (matches the file stem of `<dir>/<name>.md` or the
+        /// frontmatter `name:` of `<dir>/<name>/SKILL.md`).
+        name: String,
+        /// `UserInvoked` / `AutoMatched` — see [`SkillSource`].
+        source: SkillSource,
+        /// Whether the skill body was injected into the assistant's
+        /// system prompt. Authored fixtures default this to `true`.
+        #[serde(default)]
+        instructions_injected: bool,
     },
     /// Closing record of a session.
     SessionEnd {

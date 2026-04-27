@@ -1,0 +1,7 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000012","ts":"2026-04-27T16:30:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"c2b3a4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"List the files in the current directory"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_h1","name":"Bash","input":{"command":"ls -la"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"hook_event","turn":1,"event":"PreToolUse","matcher":"Bash","decision":"warn","exit_code":1,"output":"Reminder: review long-listing output before piping it elsewhere."}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_h1","ok":true,"content":"total 32\ndrwxr-xr-x 5 user user 4096 Apr 27 16:30 .\ndrwxr-xr-x 8 user user 4096 Apr 27 16:30 ..\n-rw-r--r-- 1 user user 1234 Apr 27 16:30 README.md\ndrwxr-xr-x 3 user user 4096 Apr 27 16:30 src","side_effects":{"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"4 entries: README.md and src/ (plus . and ..)."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":840,"tokens_in":340,"tokens_out":42}
