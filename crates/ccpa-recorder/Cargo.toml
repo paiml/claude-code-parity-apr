@@ -1,0 +1,19 @@
+[package]
+name = "ccpa-recorder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Records Claude Code as JSONL traces by parsing Anthropic Messages-API exchanges. Pure-parser core; HTTPS proxy lands in a follow-up PR."
+
+[lints]
+workspace = true
+
+[dependencies]
+ccpa-trace = { path = "../ccpa-trace" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = "2.0"
