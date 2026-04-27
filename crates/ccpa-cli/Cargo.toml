@@ -1,0 +1,28 @@
+[package]
+name = "ccpa-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "ccpa CLI — schema validate, parity diff, corpus coverage. Wraps the four ccpa-* library crates."
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "ccpa"
+path = "src/main.rs"
+
+[dependencies]
+ccpa-trace = { path = "../ccpa-trace" }
+ccpa-differ = { path = "../ccpa-differ" }
+clap = { version = "4.5", features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = "2.0"
+
+[dev-dependencies]
+tempfile = "3.20"
