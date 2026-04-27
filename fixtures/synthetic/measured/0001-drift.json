@@ -1,0 +1,21 @@
+=== ccpa diff teacher ↔ drift-student (--json) ===
+{
+  "drifts": [
+    {
+      "category": "MismatchedToolName",
+      "position": 0,
+      "tool_name": "Read"
+    },
+    {
+      "category": "MissingToolCall",
+      "position": 1,
+      "tool_name": "Edit"
+    }
+  ],
+  "matched_count": 0,
+  "passes_individual_floor": false,
+  "score": 0.0,
+  "student_count": 1,
+  "teacher_count": 2
+}
+exit=1

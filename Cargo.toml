@@ -5,6 +5,7 @@ members = [
     "crates/ccpa-recorder",
     "crates/ccpa-differ",
     "crates/ccpa-replayer",
+    "crates/ccpa-cli",
 ]
 
 [workspace.package]

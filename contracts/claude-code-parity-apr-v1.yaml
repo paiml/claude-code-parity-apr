@@ -25,7 +25,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   created: '2026-04-26'
   last_modified: '2026-04-27'
   author: PAIML Engineering
@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.0.0"
-status: ACTIVE   # promoted from DRAFT at M6 — all 12 gates have algorithm-level detectors mechanically green on every PR
+version: "1.1.0"
+status: ACTIVE_ALGORITHM_LEVEL   # 12/13 gates green (009..012, 001..008). FALSIFY-CCPA-013 (first_recorded_parity_score) is the OPEN gate that flips status to ACTIVE_RUNTIME once a real Claude Code ↔ apr code corpus run lands a measured score.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -86,6 +86,7 @@ invariants:
   - { id: FALSIFY-CCPA-006, name: sovereignty_on_replay,      summary: 'no outbound api.anthropic.com sockets during replay' }
   - { id: FALSIFY-CCPA-007, name: corpus_coverage,            summary: '>=1 fixture per non-MISSING row of apr-code-parity-v1.yaml' }
   - { id: FALSIFY-CCPA-008, name: parity_score_bound,         summary: 'aggregate parity_score >= 0.95, per-fixture >= 0.80' }
+  - { id: FALSIFY-CCPA-013, name: first_recorded_parity_score, summary: 'AT LEAST ONE real Claude Code ↔ apr code corpus run produced a measured parity_score recorded in status_history. Flips ACTIVE_ALGORITHM_LEVEL → ACTIVE_RUNTIME.' }
 
 scope: >
   every recorded fixture under <ccpa-repo>/fixtures/, every replay run the
@@ -474,6 +475,51 @@ falsification_conditions:
     cross_check_command: |
       ccpa coverage --json | jq -e '.uncovered_shipped_or_partial == []'
 
+  - id: FALSIFY-CCPA-013
+    name: first_recorded_parity_score
+    status: OPEN
+    assertion: |
+      The contract's status field reaches ACTIVE_RUNTIME if and only if
+      at least one row of `status_history` contains a `measured_parity:`
+      block of shape:
+        { date, fixture_corpus_sha256, aggregate_score: <float>,
+          per_fixture: [{id, score}], teacher_revision, student_revision }
+      where:
+        - aggregate_score >= parity_score.thresholds.aggregate_min (0.95)
+        - every per_fixture[*].score >= parity_score.thresholds.individual_min (0.80)
+        - fixture_corpus_sha256 matches a real recorded corpus from
+          a Claude Code session (NOT a synthetic teacher/student pair)
+        - teacher_revision is the resolved Claude Code build at record time
+        - student_revision is the apr-cli SHA at replay time
+    test_harness: |
+      companion-repo: ci.yml step `ccpa diff fixtures/<corpus>/ --json
+      --teacher-revision <sha> --student-revision <sha>` writes a
+      measured_parity entry into contracts/claude-code-parity-apr-v1.yaml
+      via `pv contract record-measurement`. The PR landing that entry
+      is what flips the gate from OPEN → DISCHARGED.
+    rationale: |
+      Through M6 the contract reached ACTIVE because every gate had an
+      algorithm-level detector. That is necessary but NOT sufficient
+      to claim "apr code is identical to Claude Code". The detectors
+      can correctly diff two TRACES; whether the two traces represent
+      a real Claude Code session vs a real apr code session is a
+      separate empirical claim that requires:
+        1. A working HTTPS proxy that records Claude Code (M2.3)
+        2. A real apr code LlmDriver adapter (depends on aprender's
+           PMAT-CODE-LLM-DRIVER-PUBLIC-001)
+        3. A fixture corpus from real recorded sessions
+        4. A run of `ccpa diff` over that corpus emitting an
+           aggregate_score and per_fixture rollups
+        5. Recording that score in this contract's status_history
+
+      v1.0.0's ACTIVE was over-claiming. v1.1.0 splits status into
+      ACTIVE_ALGORITHM_LEVEL (today) and ACTIVE_RUNTIME (after
+      FALSIFY-CCPA-013 discharges). The 12 algorithm gates remain
+      green; this 13th gate makes the unmet runtime claim explicit.
+    semantic_change_log:
+      - { date: '2026-04-27', version_before: '1.0.0', version_after: '1.1.0',
+          change: 'Added FALSIFY-CCPA-013. Refined status enum: ACTIVE_ALGORITHM_LEVEL ⊂ ACTIVE_RUNTIME. v1.0.0 over-claimed by labeling the 12-gate state as ACTIVE without clarifying that runtime parity was unmeasured.' }
+
   - id: FALSIFY-CCPA-008
     name: parity_score_bound
     status: PLANNED_M6
@@ -676,3 +722,24 @@ status_history:
 
       First production use-case: enforced on every commit to
       paiml/claude-code-parity-apr@main from this PR onward.
+  - date: '2026-04-27'
+    from: 'ACTIVE v1.0.0'
+    to: 'ACTIVE_ALGORITHM_LEVEL v1.1.0'
+    reason: |
+      v1.0.0 was over-claimed. The 12 gates that are green are
+      *algorithm-level detectors* — given two traces, they correctly
+      report drift. Whether those traces represent real Claude Code
+      and real apr code behavior is a separate empirical claim
+      requiring HTTPS proxy + apr-code LlmDriver adapter + fixture
+      corpus + a measured score. None of those exist on main yet.
+
+      v1.1.0 adds FALSIFY-CCPA-013 (first_recorded_parity_score)
+      and renames status from ACTIVE → ACTIVE_ALGORITHM_LEVEL until
+      the 13th gate discharges with a real measured parity score
+      recorded under measured_parity in this status_history.
+
+      The ccpa CLI binary lands in this same PR cycle; it can produce
+      a parity score from any teacher/student trace pair. But to
+      DISCHARGE FALSIFY-CCPA-013 the teacher trace must be from a
+      real Claude Code session through ccpa-recorder's HTTPS proxy
+      (M2.3 follow-up), not from a synthetic pair.
