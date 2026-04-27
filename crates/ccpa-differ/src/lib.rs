@@ -15,5 +15,7 @@
 #![deny(missing_docs)]
 
 mod equivalence;
+mod score;
 
 pub use equivalence::{tool_call_equivalent, DriftCategory, ToolCall};
+pub use score::{compute_parity_score, Drift, ParityReport};
