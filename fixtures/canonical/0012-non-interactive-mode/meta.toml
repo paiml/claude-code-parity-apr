@@ -1,0 +1,4 @@
+[fixture]
+id = "0012-non-interactive-mode"
+covers = ["non-interactive-mode"]
+description = "Single-prompt one-shot session — `apr code -p 'What is 2+2?'` style. Exercises the non-interactive (-p) flag path: one user_prompt, one assistant_turn, immediate session_end. No REPL loop. Parity holds when student also produces a single-turn flow."

@@ -1,0 +1,4 @@
+[fixture]
+id = "0014-custom-agent"
+covers = ["custom-agents"]
+description = "Agent tool dispatched with a USER-DEFINED subagent_type ('security-review' — not in the built-in roster of general-purpose / explore / plan). Verifies the Agent equivalence rule treats custom types the same way: (subagent_type, sha256(prompt)) tuple equality."
