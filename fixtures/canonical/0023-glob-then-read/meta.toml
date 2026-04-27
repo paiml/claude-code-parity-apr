@@ -1,0 +1,4 @@
+[fixture]
+id = "0023-glob-then-read"
+covers = ["builtin-tools-rwegs"]
+description = "Multi-tool sequence in one assistant turn: Glob to find Cargo.toml files, then Read the first match. Exercises position-aligned tool dispatch — both tools must match teacher↔student at the same global action positions (0=Glob, 1=Read). Tests glob_equivalent (pattern verbatim) + read_equivalent (path tuple) in sequence."

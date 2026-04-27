@@ -1,0 +1,4 @@
+[fixture]
+id = "0022-grep-with-context"
+covers = ["builtin-tools-rwegs"]
+description = "Grep with -A 3 -B 2 context flags. Exercises grep_equivalent's tuple form (pattern.trim(), path_normalized, regex_or_literal). Teacher and student emit identical Grep calls with the same regex pattern + context flags + path scope. Parity holds when normalized inputs match."

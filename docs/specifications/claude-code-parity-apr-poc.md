@@ -227,11 +227,12 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-27)**: M0–M16 all SHIPPED; contract at
-> `claude-code-parity-apr-v1` v1.4.0 ACTIVE_RUNTIME; corpus at 19
-> paired canonical fixtures with parity-matrix coverage 15/15
-> reachable (2 OOS at trace boundary); FALSIFY-CCPA-007 promoted to
-> HARD-BLOCKING CI gate at M16. Live PR cadence is on
+> **Status snapshot (2026-04-27)**: M0–M19 all SHIPPED; contract at
+> `claude-code-parity-apr-v1` v1.7.0 ACTIVE_RUNTIME; corpus at **30**
+> paired canonical fixtures (spec ≥30 target met) with parity-matrix
+> coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
+> HARD-BLOCKING CI gate live since M16. All four non-Error
+> `StopReason` variants exercised. Live PR cadence on
 > https://github.com/paiml/claude-code-parity-apr.
 
 ### Major phases (M0–M6)
@@ -260,7 +261,9 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M14** | Corpus 14 → 17; coverage 10/17 → 13/17 (worktree-isolation, configuration-ladder, managed-org-policy added) | 1.0000 / 17 fixtures | #19 |
 | **M15** | Trace schema v1 → v2 (additive `HookEvent` + `SkillInvocation` record kinds); differ extension (7 new DriftCategory variants); coverage 13/17 → 15/17 | 1.0000 / 19 fixtures; contract v1.2.0 → v1.3.0 | #20 |
 | **M16** | FALSIFY-CCPA-007 informational → HARD-BLOCKING; OOS exclusion mechanism (`--oos-rows`) shipped for `keyboard-shortcuts` + `status-line` | 15/15 reachable, gate PASS; contract v1.3.0 → v1.4.0 | #21 |
-| **M17** | Spec milestone table refreshed to reflect M0–M16; contract v1.4.0 → v1.5.0 | this PR | this PR |
+| **M17** | Spec milestone table refreshed to reflect M0–M16; contract v1.4.0 → v1.5.0 | doc-only | #22 |
+| **M18** | Corpus depth 19 → 24; 5 schema-v2 surface variants (Bash multiline, Edit replace_all, HookDecision::Block, SkillSource::UserInvoked, StopReason::MaxTokens) | 1.0000 / 24 fixtures; contract v1.5.0 → v1.6.0 | #23 |
+| **M19** | Corpus complete 24 → 30 (spec ≥30 target met); multi-tool sequences + multi-turn correction + StopReason::StopSequence | 1.0000 / 30 fixtures; contract v1.6.0 → v1.7.0 | this PR |
 
 ## Falsification conditions (12 gates total)
 

@@ -22,16 +22,16 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      c1b47c5af9a296c79c958d7bb75bd54ebc24e23a7961594fea5736f07ea2c099
-last_synced_utc:      2026-04-27T09:30:00Z
+contract_sha256:      020e7c6624bda1b6d518ef5c9b855a6245b7f57ccfced27e9021e255bc7faf82
+last_synced_utc:      2026-04-27T10:00:00Z
 note: |
-  M18 — contract bumps v1.5.0 → v1.6.0 (minor). Five new canonical
-  fixtures (0020-bash-multiline-pipe, 0021-edit-replace-all,
-  0027-hook-block, 0028-skill-user-invoked, 0029-max-tokens) bring
-  the corpus to 24 paired fixtures all scoring 1.0. Each exercises
-  a schema-v2 surface variant not previously in the corpus. Coverage
-  holds at 15/15 reachable. Spec ≥30-target progress 19 → 24. The
-  gate surface, OOS list, schema v2, differ rules are all unchanged
-  from v1.4.0.
+  M19 — contract bumps v1.6.0 → v1.7.0 (minor). The spec's ≥30-fixture
+  target is now MET. Six new canonical fixtures (0022-grep-with-context,
+  0023-glob-then-read, 0024-edit-then-bash-test, 0025-grep-edit-loop,
+  0026-multi-turn-correction, 0030-stop-sequence) bring the corpus to
+  30 paired fixtures all scoring 1.0. The 4th and final non-Error
+  StopReason variant (StopSequence) is now exercised; all four
+  (EndTurn / ToolUse / MaxTokens / StopSequence) covered. Coverage
+  still 15/15 reachable. Gate surface unchanged from v1.4.0.
 
-  contract_sha256 above is the v1.6.0 hash.
+  contract_sha256 above is the v1.7.0 hash.

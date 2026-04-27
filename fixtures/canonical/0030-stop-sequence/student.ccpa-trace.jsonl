@@ -1,0 +1,4 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000030","ts":"2026-04-27T18:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Write me a short haiku about Rust then say ---END--- to finish"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"a borrow checker\nguards the path through every scope\nzero-cost contracts\n"}],"stop_reason":"stop_sequence"}
+{"v":1,"kind":"session_end","turn":1,"stop_reason":"stop_sequence","elapsed_ms":420,"tokens_in":42,"tokens_out":24}

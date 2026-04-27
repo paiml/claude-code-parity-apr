@@ -1,0 +1,7 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000023","ts":"2026-04-27T17:40:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Find all Cargo.toml files in this workspace and show me the first one"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_gl1","name":"Glob","input":{"pattern":"**/Cargo.toml"}},{"type":"tool_use","id":"toolu_r1","name":"Read","input":{"path":"Cargo.toml"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_gl1","ok":true,"content":"./Cargo.toml\n./crates/foo/Cargo.toml\n./crates/bar/Cargo.toml","side_effects":{"exit_code":0}}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_r1","ok":true,"content":"[workspace]\nmembers = [\"crates/foo\", \"crates/bar\"]\n\n[workspace.package]\nedition = \"2021\"","side_effects":{"files_read":["Cargo.toml"],"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Found 3 Cargo.toml files. The root one is a workspace with members crates/foo and crates/bar."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":720,"tokens_in":230,"tokens_out":48}

@@ -1,0 +1,4 @@
+[fixture]
+id = "0025-grep-edit-loop"
+covers = ["builtin-tools-rwegs"]
+description = "Grep-then-Edit cycle within a single turn: assistant searches for the relevant function with Grep, then Edits the file at the located path. Tests that the differ position-aligns mixed tools (Grep at index 0, Edit at index 1) without false drift."

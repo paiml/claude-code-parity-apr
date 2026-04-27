@@ -1,0 +1,4 @@
+[fixture]
+id = "0026-multi-turn-correction"
+covers = ["builtin-tools-rwegs"]
+description = "Multi-turn refinement: user asks for a fix, assistant attempts an Edit, the edit fails (old_string not found), user clarifies, assistant retries with corrected old_string and succeeds. Exercises multi-turn alignment — assistant emits 2 separate Edit calls (one failed, one successful) at distinct turns; both must position-align teacher↔student."
