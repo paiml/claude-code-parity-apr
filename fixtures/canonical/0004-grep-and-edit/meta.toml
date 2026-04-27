@@ -1,0 +1,4 @@
+[fixture]
+id = "0004-grep-and-edit"
+covers = ["builtin-tools-rwegs"]
+description = "Grep multi-result followed by sequential Edits across multiple files. Verifies Grep equivalence and Edit-on-different-paths."
