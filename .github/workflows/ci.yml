@@ -53,6 +53,11 @@ jobs:
       - name: pv validate (FALSIFY-CCPA-012)
         run: pv validate contracts/claude-code-parity-apr-v1.yaml
 
+      # ── M6 deliverable — pv lint sweep ──
+      # Cross-contract gates: enforcement level, composition, etc.
+      - name: pv lint (M6 deliverable)
+        run: pv lint contracts/
+
       # ── FALSIFY-CCPA-012 (b) — pin freshness ──
       # Bytes-only integrity check — NOT a re-implementation of pv.
       - name: pin-check (FALSIFY-CCPA-012)

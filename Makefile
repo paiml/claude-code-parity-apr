@@ -57,6 +57,7 @@ pmat-comply:
 
 pv-validate:
 	pv validate contracts/claude-code-parity-apr-v1.yaml
+	pv lint contracts/
 
 pin-check:
 	bash scripts/pin-check.sh contracts/pin.lock
