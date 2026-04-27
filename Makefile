@@ -42,7 +42,7 @@ build:
 	cargo build --workspace --all-features
 
 test:
-	cargo test --workspace --all-features
+	PROPTEST_CASES=256 RUST_MIN_STACK=8388608 cargo test --workspace --all-features
 
 cov:
 	cargo llvm-cov --workspace --all-features \

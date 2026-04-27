@@ -1,10 +1,50 @@
 # claude-code-parity-apr
 
-> Record-replay-distill harness proving [`apr code`](https://github.com/paiml/aprender) is byte-stable against [Claude Code](https://docs.anthropic.com/claude/docs/claude-code) at the action-stream level.
+[![CI](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg)](https://github.com/paiml/claude-code-parity-apr#license)
+[![Spec](https://img.shields.io/badge/spec-v0.2.0-blue.svg)](docs/specifications/claude-code-parity-apr-poc.md)
+[![Status](https://img.shields.io/badge/status-DRAFT%20M1-yellow.svg)](docs/specifications/claude-code-parity-apr-poc.md#phases--milestones)
 
-Treats Claude Code as a **teacher** orchestrator and `apr code` as a **student**. Captures the teacher's full action stream (prompts, tool calls, tool results, final messages) via a recording HTTPS proxy at `ANTHROPIC_BASE_URL`, replays it deterministically against `apr code` with mocked LLM responses, then `pv`-validates the diff. Output: a falsifiable parity score per fixture and a closed-enum contract verdict per gate.
+> Record-replay-distill harness proving
+> [`apr code`](https://github.com/paiml/aprender) is byte-stable against
+> [Claude Code](https://docs.anthropic.com/claude/docs/claude-code) at the
+> action-stream level.
+
+Treats Claude Code as a **teacher** orchestrator and `apr code` as a
+**student**. Captures the teacher's full action stream via a recording
+HTTPS proxy at `ANTHROPIC_BASE_URL`, replays it deterministically against
+`apr code` with mocked LLM responses, then `pv`-validates the diff. Output:
+a falsifiable parity score per fixture and a closed-enum contract verdict
+per gate.
 
 **Repo status**: `M1` — scaffold landing, behavioral gates not yet online.
+
+## Usage
+
+```bash
+# Install local tools (matches CI exactly)
+make install-tools
+
+# Install the FALSIFY-CCPA-012 pre-commit hook
+make install-hooks
+
+# Run every gate locally (mirror of CI)
+make tier3
+```
+
+Once `M2` lands you'll be able to:
+
+```bash
+# Record a Claude Code session as a fixture
+ccpa record --out fixtures/0001-edit-readme.ccpa-trace.jsonl
+ANTHROPIC_BASE_URL=http://127.0.0.1:8443 claude   # session captured
+
+# Replay it against apr code (M3)
+ccpa replay fixtures/0001-edit-readme.ccpa-trace.jsonl
+
+# Diff teacher vs student traces (M4)
+ccpa diff fixtures/ --json
+```
 
 ## Architecture
 
