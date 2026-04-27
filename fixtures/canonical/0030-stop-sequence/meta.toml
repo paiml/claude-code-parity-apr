@@ -1,0 +1,4 @@
+[fixture]
+id = "0030-stop-sequence"
+covers = ["non-interactive-mode"]
+description = "Assistant emission interrupted by a configured stop_sequence (`---END---`). Turn ends with stop_reason=stop_sequence (the fourth StopReason variant — all four non-Error variants now exercised in the corpus). Tests round-trip of the StopReason::StopSequence enum."

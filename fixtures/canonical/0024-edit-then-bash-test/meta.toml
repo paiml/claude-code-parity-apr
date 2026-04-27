@@ -1,0 +1,4 @@
+[fixture]
+id = "0024-edit-then-bash-test"
+covers = ["builtin-tools-rwegs"]
+description = "Two-tool sequence: Edit src/lib.rs to fix a bug, then Bash `cargo test --lib`. Exercises the full mutate-then-verify cycle within a single assistant turn. Both tools must position-align teacher↔student. Tests file_state continuity (Edit's side_effect.files_written feeds Bash's read scope; both fixtures honor the same write→test ordering)."

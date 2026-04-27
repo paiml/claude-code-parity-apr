@@ -1,6 +1,6 @@
 {
   "aggregate_score": 1.0,
-  "fixture_count": 24,
+  "fixture_count": 30,
   "passes_gate": true,
   "per_fixture": [
     {
@@ -131,6 +131,36 @@
     },
     {
       "drift_count": 0,
+      "id": "0022-grep-with-context",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0023-glob-then-read",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0024-edit-then-bash-test",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0025-grep-edit-loop",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0026-multi-turn-correction",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
       "id": "0027-hook-block",
       "passes_individual": true,
       "score": 1.0
@@ -144,6 +174,12 @@
     {
       "drift_count": 0,
       "id": "0029-max-tokens",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0030-stop-sequence",
       "passes_individual": true,
       "score": 1.0
     }

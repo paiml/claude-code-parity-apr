@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.6.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. v1.6.0 (M18) — corpus depth: 19 → 24 fixtures. Five new fixtures exercise schema-v2 surface variants not previously in the corpus: Bash whitespace-collapse on multi-line input (0020), Edit replace_all flag (0021), HookDecision::Block via PreToolUse hook (0027), SkillSource::UserInvoked via /<skill> syntax (0028), StopReason::MaxTokens on long-output truncation (0029). Coverage holds at 15/15 reachable; gate surface unchanged from v1.4.0/v1.5.0.
+version: "1.7.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. v1.7.0 (M19) closes the spec's ≥30-fixture target. 30/30 paired canonical fixtures all scoring 1.0; corpus complete at the spec-prescribed depth. Six new fixtures (0022/0023/0024/0025/0026/0030) exercise multi-tool sequences (Glob+Read, Edit+Bash-test, Grep+Edit) + multi-turn correction + StopReason::StopSequence variant. All four non-Error StopReason variants (EndTurn, ToolUse, MaxTokens, StopSequence) now in the corpus. Coverage holds at 15/15 reachable; gate surface unchanged from v1.4.0.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -831,6 +831,93 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.6.0'
+    to: 'ACTIVE_RUNTIME v1.7.0'
+    note: 'M19 — corpus complete: 24 → 30 fixtures (spec ≥30 target met)'
+    reason: |
+      M19 closes the spec's ≥30-fixture target stated in the original
+      Distillation framing § Demonstration corpus row. Six new
+      canonical fixtures, all scoring 1.0:
+
+        0022-grep-with-context        — Grep with -A 3 -B 2 context
+                                        flags; tests grep_equivalent's
+                                        tuple form with context fields.
+
+        0023-glob-then-read           — Glob (pattern '**/Cargo.toml')
+                                        then Read first match in ONE
+                                        assistant turn. Two-tool
+                                        position-alignment.
+
+        0024-edit-then-bash-test      — Edit src/lib.rs to fix off-by-one
+                                        + Bash 'cargo test --lib' in one
+                                        turn. Mutate-then-verify cycle
+                                        with file_state continuity.
+
+        0025-grep-edit-loop           — Grep to locate fn compute_offset,
+                                        then Edit (replace_all=true) to
+                                        rename it to compute_index in
+                                        one turn. Mixed-tool alignment.
+
+        0026-multi-turn-correction    — User asks fix → assistant Edit
+                                        fails (old_string not found) →
+                                        user clarifies → assistant
+                                        retries with corrected old_string
+                                        → succeeds. 7-turn refinement
+                                        cycle exercising multi-turn
+                                        position alignment + ok=false
+                                        tool_result variant.
+
+        0030-stop-sequence            — Assistant haiku-emission halted
+                                        by configured stop_sequence
+                                        (`---END---`). First StopReason::
+                                        StopSequence in the corpus —
+                                        the FOURTH and final non-Error
+                                        StopReason variant. All four
+                                        (EndTurn / ToolUse / MaxTokens
+                                        / StopSequence) now exercised.
+
+      Aggregate corpus check: 30/30 fixtures score 1.0
+      (passes_gate=true, aggregate_score=1.0000).
+      Coverage holds at 15/15 reachable rows covered.
+      Bidirectional sensitivity: regression corpus still FAILS
+      (3-fixture pair, drift detected as required).
+
+      Spec target progress: 30 / 30 — DONE. M20+ work would shift
+      to depth-per-row beyond spec target if further discrimination
+      is needed.
+
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 30
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 15
+        required_count: 17
+        oos_count: 2
+        reachable_count: 15
+        reachable_covered_count: 15
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      newly_authored_in_m19:
+        - { id: '0022-grep-with-context',     exercises: 'Grep with -A/-B context flags' }
+        - { id: '0023-glob-then-read',        exercises: 'Glob+Read two-tool sequence in one turn' }
+        - { id: '0024-edit-then-bash-test',   exercises: 'Edit+Bash mutate-then-verify cycle' }
+        - { id: '0025-grep-edit-loop',        exercises: 'Grep+Edit (replace_all) mixed-tool sequence' }
+        - { id: '0026-multi-turn-correction', exercises: '7-turn refinement w/ ok=false tool_result' }
+        - { id: '0030-stop-sequence',         exercises: 'StopReason::StopSequence (4th non-Error variant)' }
+      progress_to_spec_target: '30 / 30  —  DONE'
+      stop_reason_coverage:
+        end_turn: covered  # most fixtures
+        tool_use: covered  # most fixtures
+        max_tokens: covered  # 0029
+        stop_sequence: covered  # 0030
+        error: not_in_corpus  # session-terminal only; intentional, edge-case-y
 
   - date: '2026-04-27'
     from: 'ACTIVE_RUNTIME v1.5.0'
