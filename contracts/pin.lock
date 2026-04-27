@@ -16,13 +16,13 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      ce4a6f0c7
+aprender_commit:      f5cfbb370
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      298cfb15cb4b412cf2b64c80b27d0604540bf7087c08dcd73264b2e84f97b676
+contract_sha256:      390904893b9491eaaa126aaecb29c44cd0e1262ba8274368b2f7e005eb30c1db
 last_synced_utc:      2026-04-27T07:00:00Z
 note: |
   Pre-merge of paiml/aprender#1078. v0.3.0 of the contract refines
