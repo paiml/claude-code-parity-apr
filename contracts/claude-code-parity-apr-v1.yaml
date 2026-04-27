@@ -25,9 +25,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 metadata:
-  version: 0.2.0
+  version: 0.3.0
   created: '2026-04-26'
-  last_modified: '2026-04-26'
+  last_modified: '2026-04-27'
   author: PAIML Engineering
   # `pv validate` reads ContractKind from metadata.kind (see
   # crates/aprender-contracts/src/schema/kind.rs::ContractKind). This is a
