@@ -1,0 +1,4 @@
+[fixture]
+id = "0016-configuration-ladder"
+covers = ["configuration-ladder"]
+description = "User asks for the config-precedence resolution. Assistant emits the 5-level ladder (CLI flag > env > project > user scope > embedded default) with which entries are active. Zero tool calls — exercises pure config-resolution logic. Parity holds when student emits the same ordered ladder + active-state mapping."

@@ -806,6 +806,37 @@ status_history:
         passes the gate.
 
   - date: '2026-04-27'
+    note: 'corpus expansion M14 — 14 → 17 fixtures, parity-matrix coverage 10/17 → 13/17'
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 17
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 13
+        required_count: 17
+        covered_rows: ['builtin-tools-rwegs', 'subagent-spawn', 'mcp-client', 'slash-commands', 'claude-md-memory', 'permission-modes', 'builtin-tools-web', 'non-interactive-mode', 'session-management', 'custom-agents', 'worktree-isolation', 'configuration-ladder', 'managed-org-policy']
+        uncovered_rows: ['hooks', 'skills', 'keyboard-shortcuts', 'status-line']
+      teacher_source: 'Curated canonical reference (AUTHORED).'
+      student_source: 'Curated canonical reference; per-fixture identical to teacher at equivalence-rule level.'
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      newly_covered_in_m14: ['worktree-isolation', 'configuration-ladder', 'managed-org-policy']
+      remaining_uncovered_classification: |
+        The four uncovered rows are not corpus-authoring tasks against
+        the current ccpa-trace schema:
+          - hooks                — requires HookEvent record kind (trace schema extension)
+          - skills               — requires SkillInvocation record kind (trace schema extension)
+          - keyboard-shortcuts   — REPL-only event, never reaches trace boundary
+          - status-line          — REPL render artifact, never reaches trace boundary
+        FALSIFY-CCPA-007 remains informational; M15+ will pursue
+        schema-extension PRs for hooks+skills before the gate flips
+        to a hard blocker.
+
+  - date: '2026-04-27'
     note: 'corpus expansion M13 — 11 → 14 fixtures, parity-matrix coverage 7/17 → 10/17'
     measured_parity:
       date: '2026-04-27'

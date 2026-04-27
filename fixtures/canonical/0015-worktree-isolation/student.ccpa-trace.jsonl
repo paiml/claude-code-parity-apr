@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-00000000000f","ts":"2026-04-27T16:10:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"afa2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3bf"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Spawn a parallel branch agent to refactor src/parser.rs while I keep editing main"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_w1","name":"Agent","input":{"subagent_type":"general-purpose","prompt":"Refactor src/parser.rs to extract token stream into a separate module. Preserve public API.","worktree":true,"branch":"refactor/parser-extract"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_w1","ok":true,"content":"Worktree created at .git/apr-worktrees/refactor-parser-extract. Refactor complete on isolated branch; ready for review."}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Done in an isolated worktree on branch `refactor/parser-extract`."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":21240,"tokens_in":620,"tokens_out":86}
