@@ -276,10 +276,7 @@ fn default_equivalent(a: &serde_json::Value, b: &serde_json::Value) -> bool {
 /// # Errors
 ///
 /// Returns [`DriftCategory::MismatchedHookEvent`] when projections differ.
-pub fn hook_event_equivalent(
-    a: &HookProjection,
-    b: &HookProjection,
-) -> Result<(), DriftCategory> {
+pub fn hook_event_equivalent(a: &HookProjection, b: &HookProjection) -> Result<(), DriftCategory> {
     if a.event == b.event
         && a.matcher == b.matcher
         && a.decision == b.decision

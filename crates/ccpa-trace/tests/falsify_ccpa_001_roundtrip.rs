@@ -15,8 +15,7 @@
 )]
 
 use ccpa_trace::{
-    Actor, Block, HookDecision, Record, SideEffects, SkillSource, StopReason, Trace,
-    SCHEMA_VERSION,
+    Actor, Block, HookDecision, Record, SideEffects, SkillSource, StopReason, Trace, SCHEMA_VERSION,
 };
 use serde_json::json;
 
