@@ -16,17 +16,17 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      04b5ad959
+aprender_commit:      731314c24
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      d5f7d7f28f2d72aa235c754e2e0199631bb645638c6d9f9f463f3db07f8a27d9
-last_synced_utc:      2026-04-27T12:30:00Z
+contract_sha256:      be33a0e468f539ec7075658f4d64fde0a419a139d63fbc9f3615c61513f6006b
+last_synced_utc:      2026-04-27T13:00:00Z
 note: |
-  M23 — CONTRIBUTING.md authored. Contract bumps v1.10.0 → v1.11.0
-  with the M23 status_history entry (no code/contract-surface change).
-  Aprender mirror pushed in paired commit 04b5ad959 at byte-identical
-  sha256 d5f7d7f28f2d72aa235c754e2e0199631bb645638c6d9f9f463f3db07f8a27d9.
-  M22 round-trip guard validates this across both repos.
+  M24 — 100% mutation coverage on ccpa-differ achieved. Contract
+  bumps v1.11.0 → v1.12.0 with the M24 status_history entry (5 new
+  kill-tests in ccpa-differ harness; new `make mutants` target).
+  Aprender mirror pushed in paired commit 731314c24 at byte-identical
+  sha256 be33a0e468f539ec7075658f4d64fde0a419a139d63fbc9f3615c61513f6006b.

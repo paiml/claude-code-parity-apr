@@ -413,3 +413,83 @@ fn skill_instructions_injected_difference_drifts() {
         Err(DriftCategory::MismatchedSkillInvocation)
     );
 }
+
+// ── M24: mutation-coverage kill-tests ─────────────────────────────────
+// These tests exercise the *distinction* between dedicated per-tool
+// equivalence rules and the `default_equivalent` canonical-JSON fallback.
+// Without them, deleting a Read/Write/Glob/Agent match arm in
+// `tool_call_equivalent` survives mutation testing because the test
+// suite never authored a pair that the dedicated rule says-equivalent
+// but default-equivalent says drift. Each test below pairs (a) two
+// inputs the dedicated rule accepts as equivalent (b) those same
+// inputs differ syntactically enough that default_equivalent's
+// canonical sha256 would say drift. Asserting Ok(()) kills the
+// arm-deletion mutation.
+
+#[test]
+fn read_arm_kills_arm_deletion_mutant_via_extra_field() {
+    // Same (path, offset, limit) tuple — read_equivalent accepts.
+    // Extra field on `b` makes canonical JSON differ — default_equivalent
+    // would reject. Asserting Ok kills "delete match arm Read".
+    let a = tc(
+        "Read",
+        json!({ "path": "src/lib.rs", "offset": 0, "limit": 100 }),
+    );
+    let b = tc(
+        "Read",
+        json!({ "path": "src/lib.rs", "offset": 0, "limit": 100, "_origin": "auto" }),
+    );
+    assert_eq!(tool_call_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn write_arm_kills_arm_deletion_mutant_via_extra_field() {
+    let a = tc("Write", json!({ "path": "x.rs", "content": "hello" }));
+    let b = tc(
+        "Write",
+        json!({ "path": "x.rs", "content": "hello", "_atime_hint": 1234 }),
+    );
+    assert_eq!(tool_call_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn glob_arm_kills_arm_deletion_mutant_via_extra_field() {
+    let a = tc("Glob", json!({ "pattern": "**/*.rs" }));
+    let b = tc("Glob", json!({ "pattern": "**/*.rs", "_max_results": 50 }));
+    assert_eq!(tool_call_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn agent_arm_kills_arm_deletion_mutant_via_extra_field() {
+    // (subagent_type, prompt_sha256) tuple — agent_equivalent accepts.
+    let a = tc(
+        "Agent",
+        json!({ "subagent_type": "Explore", "prompt": "find foo" }),
+    );
+    let b = tc(
+        "Agent",
+        json!({ "subagent_type": "Explore", "prompt": "find foo", "description": "scout" }),
+    );
+    assert_eq!(tool_call_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn edit_fallback_uses_logical_and_not_or() {
+    // Edit fallback path (no post_state_sha256 supplied): rule is
+    // `old_a == old_b && new_a == new_b`. If a mutation flipped this to
+    // ||, two edits with matching old_string but DIFFERENT new_string
+    // would falsely pass. This test catches that.
+    let a = tc(
+        "Edit",
+        json!({ "path": "x.rs", "old_string": "foo", "new_string": "bar" }),
+    );
+    let b = tc(
+        "Edit",
+        json!({ "path": "x.rs", "old_string": "foo", "new_string": "DIFFERENT" }),
+    );
+    assert_eq!(
+        tool_call_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedToolInput),
+        "old matches but new differs MUST fail (kills && -> || mutation)"
+    );
+}
