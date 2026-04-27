@@ -1,0 +1,4 @@
+[fixture]
+id = "0011-web-fetch"
+covers = ["builtin-tools-web"]
+description = "WebFetch tool with (url, prompt) inputs. Verifies parity on the `*`-fallback canonical-JSON sha rule (WebFetch isn't enumerated per-tool in contract § tool_equivalence_rules; it falls through to default)."

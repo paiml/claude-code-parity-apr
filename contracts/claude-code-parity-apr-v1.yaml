@@ -806,6 +806,27 @@ status_history:
         passes the gate.
 
   - date: '2026-04-27'
+    note: 'corpus expansion M12 — 8 → 11 fixtures, parity-matrix coverage 4/17 → 7/17'
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 11
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 7
+        required_count: 17
+        covered_rows: ['builtin-tools-rwegs', 'subagent-spawn', 'mcp-client', 'slash-commands', 'claude-md-memory', 'permission-modes', 'builtin-tools-web']
+        uncovered_rows: ['hooks', 'skills', 'worktree-isolation', 'custom-agents', 'session-management', 'configuration-ladder', 'non-interactive-mode', 'keyboard-shortcuts', 'status-line', 'managed-org-policy']
+      teacher_source: 'Curated canonical reference (AUTHORED).'
+      student_source: 'Curated canonical reference; per-fixture identical to teacher at equivalence-rule level.'
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      newly_covered_in_m12: ['claude-md-memory', 'permission-modes', 'builtin-tools-web']
+
+  - date: '2026-04-27'
     note: 'corpus expansion M11 — 5 → 8 fixtures, parity-matrix coverage 1/17 → 4/17'
     measured_parity:
       date: '2026-04-27'

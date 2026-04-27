@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-00000000000b","ts":"2026-04-27T15:40:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"aba2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3bb"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Fetch https://example.com/api/status and tell me if it's healthy"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_w1","name":"WebFetch","input":{"url":"https://example.com/api/status","prompt":"return the value of the `status` field"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_w1","ok":true,"content":"healthy"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Healthy."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":2120,"tokens_in":380,"tokens_out":42}

@@ -1,0 +1,4 @@
+[fixture]
+id = "0010-permission-mode-ask"
+covers = ["permission-modes"]
+description = "Default permission mode blocks a destructive Bash invocation. Tool result carries the permission-denied error; assistant explains how to escalate via `/permissions`. Parity holds when student also receives the same denial AND advises the same escalation path (text content compared at semantic level via tool_result.content)."
