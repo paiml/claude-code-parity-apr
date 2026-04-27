@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.4.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. v1.4.0 (M16) flips FALSIFY-CCPA-007 from informational-until-17/17 to HARD-BLOCKING on 15/15 reachable rows. The 2 OOS rows (keyboard-shortcuts, status-line) live as REPL render artifacts that never cross the trace boundary; ccpa-coverage `--oos-rows` flag implements the contract-declared exclusion. CI now fails any PR that drops a reachable row from coverage.
+version: "1.5.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. v1.5.0 (M17) refreshes the spec milestone table to reflect M0-M16 SHIPPED status (was stale "planned" for everything past M0); no semantics change — purely a documentation truth-up reflecting the M11-M16 sub-milestone work that landed via PRs #13-#21 since DRAFT v0.1.0. The corpus / gate / contract surface is unchanged from v1.4.0.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -831,6 +831,29 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.4.0'
+    to: 'ACTIVE_RUNTIME v1.5.0'
+    note: 'M17 — spec milestone table refreshed; M0-M16 documented as SHIPPED; no semantics change'
+    reason: |
+      Documentation truth-up. The companion-repo spec markdown
+      (docs/specifications/claude-code-parity-apr-poc.md) had a stale
+      milestone table claiming M1-M6 were "planned" — but they all
+      landed via PRs #1-#12 between 2026-04-26 and 2026-04-27, and
+      the M11-M16 sub-milestones (corpus growth + schema v2 +
+      hard-blocking gate flip) were entirely invisible in the spec
+      table despite being authoritative in this contract's
+      status_history.
+
+      v1.5.0 ships the table refresh (M0-M6 marked DONE with PR
+      pointers; new sub-milestones M11-M17 sub-section; status
+      snapshot block at the top of the section). No semantics
+      change — the gate surface, OOS list, schema, differ rules,
+      and corpus all remain at v1.4.0.
+
+      pin.lock sha256 refreshed to track the new contract bytes;
+      no other code change.
 
   - date: '2026-04-27'
     from: 'ACTIVE_RUNTIME v1.3.0'
