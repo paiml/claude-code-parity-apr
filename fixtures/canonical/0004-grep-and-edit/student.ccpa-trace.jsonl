@@ -1,0 +1,10 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000004","ts":"2026-04-27T12:15:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"d3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b5"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Find every TODO in src/ and replace with FIXME"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_g1","name":"Grep","input":{"pattern":"TODO","path":"src","regex":false}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_g1","ok":true,"content":"src/main.rs:18: // TODO: handle missing config\nsrc/lib.rs:42: // TODO: drop this hack"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"tool_use","id":"toolu_e1","name":"Edit","input":{"path":"src/main.rs","old_string":"// TODO: handle missing config","new_string":"// FIXME: handle missing config"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":4,"tool_use_id":"toolu_e1","ok":true,"content":"file edited"}
+{"v":1,"kind":"assistant_turn","turn":5,"blocks":[{"type":"tool_use","id":"toolu_e2","name":"Edit","input":{"path":"src/lib.rs","old_string":"// TODO: drop this hack","new_string":"// FIXME: drop this hack"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":6,"tool_use_id":"toolu_e2","ok":true,"content":"file edited"}
+{"v":1,"kind":"assistant_turn","turn":7,"blocks":[{"type":"text","text":"Both TODOs replaced."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":7,"stop_reason":"end_turn","elapsed_ms":3870,"tokens_in":1820,"tokens_out":134}

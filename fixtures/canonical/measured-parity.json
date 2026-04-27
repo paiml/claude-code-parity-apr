@@ -1,0 +1,41 @@
+{
+  "aggregate_score": 1.0,
+  "fixture_count": 5,
+  "passes_gate": true,
+  "per_fixture": [
+    {
+      "drift_count": 0,
+      "id": "0001-edit-readme",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0002-fix-failing-test",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0003-create-new-file",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0004-grep-and-edit",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0005-bash-cascade",
+      "passes_individual": true,
+      "score": 1.0
+    }
+  ],
+  "thresholds": {
+    "aggregate_min": 0.95,
+    "individual_min": 0.8
+  }
+}

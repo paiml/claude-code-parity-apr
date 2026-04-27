@@ -1,0 +1,8 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000001","ts":"2026-04-27T12:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Add a one-line intro sentence to README.md"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"I'll read README.md, then add the intro."},{"type":"tool_use","id":"toolu_01a","name":"Read","input":{"path":"README.md"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_01a","ok":true,"content":"# myproject\n\nA project.\n"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"tool_use","id":"toolu_01b","name":"Edit","input":{"path":"README.md","old_string":"A project.","new_string":"A project that does X efficiently."}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":4,"tool_use_id":"toolu_01b","ok":true,"content":"file edited"}
+{"v":1,"kind":"assistant_turn","turn":5,"blocks":[{"type":"text","text":"Done."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":5,"stop_reason":"end_turn","elapsed_ms":2210,"tokens_in":1240,"tokens_out":89}
