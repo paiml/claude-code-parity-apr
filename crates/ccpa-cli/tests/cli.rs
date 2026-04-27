@@ -705,6 +705,111 @@ fn corpus_teacher_path_is_directory_triggers_io_error() {
     assert_eq!(ec(code), 2);
 }
 
+// ── M16: --oos-rows flag ──────────────────────────────────────────────
+
+#[test]
+fn coverage_oos_row_excluded_from_gate_exits_0() {
+    // alpha is required + uncovered; beta is required + OOS. With
+    // alpha covered + beta declared OOS, the gate must pass.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: alpha
+    status: SHIPPED
+  - id: beta
+    status: PARTIAL
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(fixdir.join("0001-alpha")).expect("mkdir");
+    fs::write(
+        fixdir.join("0001-alpha/meta.toml"),
+        "[fixture]\nid = \"0001-alpha\"\ncovers = [\"alpha\"]\n",
+    )
+    .expect("write meta");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+        "--oos-rows",
+        "beta",
+    ]));
+    assert_eq!(ec(code), 0, "OOS row excluded → gate passes");
+}
+
+#[test]
+fn coverage_oos_row_unrelated_uncovered_still_fails() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: alpha
+    status: SHIPPED
+  - id: beta
+    status: SHIPPED
+  - id: gamma
+    status: PARTIAL
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(fixdir.join("0001-alpha")).expect("mkdir");
+    fs::write(
+        fixdir.join("0001-alpha/meta.toml"),
+        "[fixture]\nid = \"0001-alpha\"\ncovers = [\"alpha\"]\n",
+    )
+    .expect("write meta");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+        "--oos-rows",
+        "gamma",
+    ]));
+    // beta still uncovered + reachable → exit 1
+    assert_eq!(ec(code), 1);
+}
+
+#[test]
+fn coverage_oos_rows_csv_with_whitespace_is_tolerated() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: a
+    status: SHIPPED
+  - id: b
+    status: SHIPPED
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+        "--oos-rows",
+        "  a , b  ",
+    ]));
+    // both required rows declared OOS → uncovered is empty after subtraction → gate passes
+    assert_eq!(ec(code), 0);
+}
+
 #[test]
 fn binary_main_handles_version_flag() {
     // Exercises src/main.rs end-to-end (the lib tests above call

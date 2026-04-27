@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.3.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. FALSIFY-CCPA-013 discharged 2026-04-27 with first measured_parity over 5 paired canonical fixtures: aggregate=1.0000 (PASSES 0.95 floor), every fixture=1.0 (PASSES 0.80 floor). v1.3.0 bumps trace schema to v2 (additive HookEvent + SkillInvocation record kinds) and extends the differ with hook+skill equivalence rules + 4 new DriftCategory variants. Parity-matrix coverage 13/17 → 15/17. See status_history § 'measured_parity' M15.
+version: "1.4.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. v1.4.0 (M16) flips FALSIFY-CCPA-007 from informational-until-17/17 to HARD-BLOCKING on 15/15 reachable rows. The 2 OOS rows (keyboard-shortcuts, status-line) live as REPL render artifacts that never cross the trace boundary; ccpa-coverage `--oos-rows` flag implements the contract-declared exclusion. CI now fails any PR that drops a reachable row from coverage.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -465,15 +465,42 @@ falsification_conditions:
 
   - id: FALSIFY-CCPA-007
     name: corpus_coverage
-    status: PLANNED_M5
+    status: HARD_BLOCKING_M16
     assertion: >
       For every row in apr-code-parity-v1.yaml § categories[*] whose status
-      is in {SHIPPED, PARTIAL}, at least one fixture in fixtures/ exercises
-      that capability (fixture is annotated with `covers: [<row.id>, ...]`
-      in a header comment, machine-readable). MISSING rows are exempt.
-    test_harness: 'ccpa-cli/tests/falsify_ccpa_007_coverage.rs (planned)'
+      is in {SHIPPED, PARTIAL} AND whose id is NOT in the contract-declared
+      out-of-scope list {keyboard-shortcuts, status-line}, at least one
+      fixture in fixtures/canonical/ exercises that capability (fixture's
+      meta.toml declares `covers = [<row.id>, ...]`).
+      MISSING rows are exempt; OOS rows are explicitly excluded.
+      Reachable = (SHIPPED ∪ PARTIAL) \ OOS.
+      As of M16, gate semantics are HARD-BLOCKING: a PR that drops any
+      reachable row from coverage fails CI.
+    oos_rows:
+      - id: keyboard-shortcuts
+        reason: |
+          REPL keystroke handling (Shift+Tab cycle, Ctrl+C, REPL Phase
+          1/2 keys). REPL events never cross the trace boundary. The
+          `!` shell-prefix and `@path` file-injection sub-features are
+          partially observable via UserPrompt.text but not faithfully
+          distinguishable from the literal-text alternative. OOS at
+          schema v2.
+      - id: status-line
+        reason: |
+          REPL render artifact (`StatusLine { model, mode, cost_usd,
+          branch, cwd_short }`). Pure UI; rendered each frame but
+          never crosses a trace boundary. Apr-code's `status_line.rs`
+          primitive is unit-tested in-repo; parity at the rendering
+          level is a separate concern from action-stream parity. OOS
+          at schema v2.
+    test_harness: 'crates/ccpa-differ/tests/falsify_ccpa_007_coverage.rs (15 tests inc. 4 OOS-handling tests added M16)'
     cross_check_command: |
-      ccpa coverage --json | jq -e '.uncovered_shipped_or_partial == []'
+      ccpa coverage \
+        --apr-code-parity-yaml ../aprender/contracts/apr-code-parity-v1.yaml \
+        --fixtures-dir fixtures/canonical/ \
+        --oos-rows keyboard-shortcuts,status-line
+    expected_exit: 0  # any non-zero exit FAILS the gate
+    ci_step: '.github/workflows/ci.yml § "corpus_coverage hard-blocking gate"'
 
   - id: FALSIFY-CCPA-013
     name: first_recorded_parity_score
@@ -804,6 +831,74 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.3.0'
+    to: 'ACTIVE_RUNTIME v1.4.0'
+    note: 'M16 — FALSIFY-CCPA-007 flips informational → HARD-BLOCKING; OOS exclusion mechanism shipped'
+    reason: |
+      M15 closed the corpus-authoring story (15/17 covered, 2 OOS).
+      M16 promotes the gate from informational-only to a CI hard-blocker
+      on the 15/15 reachable-row basis.
+
+      Mechanism:
+        - ccpa_differ::corpus_coverage gains a third parameter
+          `oos_rows: &[String]`. OOS rows are excluded from the
+          uncovered list and from passes_gate.
+        - ccpa-cli `coverage` subcommand exposes a new `--oos-rows`
+          CSV flag.
+        - .github/workflows/ci.yml adds a sparse-checkout of
+          paiml/aprender@main and a step that runs:
+            ccpa coverage \
+              --apr-code-parity-yaml aprender-upstream/contracts/apr-code-parity-v1.yaml \
+              --fixtures-dir fixtures/canonical/ \
+              --oos-rows keyboard-shortcuts,status-line
+          The step fails the build on any non-zero exit.
+
+      Drift-prevention semantics:
+        - If a future apr-code-parity-v1.yaml flip moves a row from
+          MISSING to SHIPPED/PARTIAL, the new row enters the reachable
+          set and CI fails until a fixture covers it. This is the
+          intended ratcheting behavior — coverage cannot regress.
+        - If a fixture is deleted that was the sole coverer of a
+          reachable row, CI fails for the same reason.
+        - If a row's status flips back to NONE in the upstream
+          contract, the row exits the required set; the corresponding
+          fixture(s) remain in the corpus harmlessly.
+
+      OOS list is contract-authoritative (declared in the new
+      `oos_rows:` block on FALSIFY-CCPA-007 above). Any future change
+      to the OOS list requires a contract revision + this entry's
+      successor.
+
+      Tests:
+        - 4 new corpus_coverage unit tests (oos_row_excluded_from_gate,
+          oos_already_covered_still_oos, oos_not_in_required_silently_ignored,
+          uncovered_outside_oos_still_fails).
+        - 3 new ccpa-cli integration tests
+          (coverage_oos_row_excluded_from_gate_exits_0,
+           coverage_oos_row_unrelated_uncovered_still_fails,
+           coverage_oos_rows_csv_with_whitespace_is_tolerated).
+
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 19
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 15
+        required_count: 17
+        oos_count: 2
+        reachable_count: 15
+        reachable_covered_count: 15  # = covered_count when no reachable row uncovered
+        covered_rows: ['builtin-tools-rwegs', 'subagent-spawn', 'mcp-client', 'slash-commands', 'claude-md-memory', 'permission-modes', 'builtin-tools-web', 'non-interactive-mode', 'session-management', 'custom-agents', 'worktree-isolation', 'configuration-ladder', 'managed-org-policy', 'hooks', 'skills']
+        oos_rows: ['keyboard-shortcuts', 'status-line']
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa coverage --apr-code-parity-yaml ... --fixtures-dir fixtures/canonical/ --oos-rows keyboard-shortcuts,status-line'
+      cli_exit: 0
+      gate_kind: 'HARD_BLOCKING'
 
   - date: '2026-04-27'
     from: 'ACTIVE_RUNTIME v1.2.0'
