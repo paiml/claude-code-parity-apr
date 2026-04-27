@@ -15,7 +15,7 @@ use ccpa_cli::run;
 use tempfile::tempdir;
 
 /// Path to the compiled `ccpa` binary that cargo built for this test
-/// run. Set by cargo via the CARGO_BIN_EXE_<name> env var.
+/// run. Set by cargo via the `CARGO_BIN_EXE_<name>` env var.
 const CCPA_BIN: &str = env!("CARGO_BIN_EXE_ccpa");
 
 fn args(parts: &[&str]) -> Vec<OsString> {
