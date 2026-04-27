@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.7.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. v1.7.0 (M19) closes the spec's ≥30-fixture target. 30/30 paired canonical fixtures all scoring 1.0; corpus complete at the spec-prescribed depth. Six new fixtures (0022/0023/0024/0025/0026/0030) exercise multi-tool sequences (Glob+Read, Edit+Bash-test, Grep+Edit) + multi-turn correction + StopReason::StopSequence variant. All four non-Error StopReason variants (EndTurn, ToolUse, MaxTokens, StopSequence) now in the corpus. Coverage holds at 15/15 reachable; gate surface unchanged from v1.4.0.
+version: "1.8.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. v1.8.0 (M20) — README truth-up. The README was 5+ contract-versions stale (badges said v1.2.0; behavioral-gates table said "planned" for M2-M8 even though all 8 are DISCHARGED; repo status said M1; HTTPS-proxy architecture diagram conflicted with the post-rescope AUTHORED-fixture reality). v1.8.0 ships an honest README reflecting M0-M19 SHIPPED + corpus complete (30/30) + hard-blocking gate live. No code or contract-surface change.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -831,6 +831,48 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.7.0'
+    to: 'ACTIVE_RUNTIME v1.8.0'
+    note: 'M20 — README truth-up to v1.7.0 reality (no code change)'
+    reason: |
+      The README at the repo root was 5+ contract-versions stale and
+      contained two factually-incorrect sections:
+
+        1. The behavioral-gates table (lines 91-100 pre-M20) showed
+           FALSIFY-CCPA-001 as "ACTIVE" but FALSIFY-CCPA-002 through
+           FALSIFY-CCPA-008 as "planned" — even though every one of
+           those gates has been DISCHARGED for at least 5 contract
+           revisions and is asserted on every PR's CI run.
+
+        2. The architecture diagram showed a HTTPS-proxy recording
+           branch ("ANTHROPIC_BASE_URL" → ccpa-recorder → fixture)
+           which has been intentionally OOS since the user's
+           "we will not call api, we will assume claude code"
+           rescope. The corpus is curated/AUTHORED, not recorded.
+
+      v1.8.0 ships an honest README:
+
+        - 8 status badges including new corpus (30/30) + parity-matrix
+          (15/15 reachable) badges
+        - Status banner naming M0-M19 SHIPPED + contract v1.7.0
+          + corpus complete + M16 hard-blocking gate live
+        - Updated Usage section showing the actually-shipped CLI
+          surface (ccpa diff / corpus / coverage / validate)
+        - Replaced architecture diagram showing AUTHORED fixtures
+          + per-tool equivalence + ccpa-differ → CI hard-blocker
+          (no proxy branch)
+        - Behavioral-gates table flipped to "✅ ACTIVE" / "✅
+          HARD-BLOCKING" with per-gate test-file pointers + test
+          counts; FALSIFY-CCPA-013 added to the table as DISCHARGED
+        - New "Adding a new fixture" section documenting the
+          meta.toml + paired-trace authoring workflow (closes the
+          on-ramp gap that has been implicit since M11)
+        - arXiv basis section retained verbatim
+
+      No code change; no contract-surface change beyond the version
+      bump documenting this README truth-up. pin.lock sha256 refreshed.
 
   - date: '2026-04-27'
     from: 'ACTIVE_RUNTIME v1.6.0'
