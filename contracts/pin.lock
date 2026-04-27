@@ -22,16 +22,13 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      020e7c6624bda1b6d518ef5c9b855a6245b7f57ccfced27e9021e255bc7faf82
-last_synced_utc:      2026-04-27T10:00:00Z
+contract_sha256:      ce4bea33db19b995e717e684c4a1e0c39aefdb9c31bb7aa1cd3800c4fae59610
+last_synced_utc:      2026-04-27T10:30:00Z
 note: |
-  M19 — contract bumps v1.6.0 → v1.7.0 (minor). The spec's ≥30-fixture
-  target is now MET. Six new canonical fixtures (0022-grep-with-context,
-  0023-glob-then-read, 0024-edit-then-bash-test, 0025-grep-edit-loop,
-  0026-multi-turn-correction, 0030-stop-sequence) bring the corpus to
-  30 paired fixtures all scoring 1.0. The 4th and final non-Error
-  StopReason variant (StopSequence) is now exercised; all four
-  (EndTurn / ToolUse / MaxTokens / StopSequence) covered. Coverage
-  still 15/15 reachable. Gate surface unchanged from v1.4.0.
+  M20 — contract bumps v1.7.0 → v1.8.0 (minor). README truth-up
+  only: badges + status banner + behavioral-gates table + usage
+  section + architecture diagram + new "Adding a new fixture"
+  section, all reflecting M0-M19 SHIPPED reality. No code or
+  contract-surface change.
 
-  contract_sha256 above is the v1.7.0 hash.
+  contract_sha256 above is the v1.8.0 hash.
