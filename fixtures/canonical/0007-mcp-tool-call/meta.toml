@@ -1,0 +1,4 @@
+[fixture]
+id = "0007-mcp-tool-call"
+covers = ["mcp-client"]
+description = "Invoke an MCP-registered tool (`mcp__github__list_issues`). Verifies parity on the default tool-equivalence rule (canonical-JSON sha256) since MCP tool names aren't enumerated in the per-tool rule set — caught by the `*` fallback in contract § tool_equivalence_rules."

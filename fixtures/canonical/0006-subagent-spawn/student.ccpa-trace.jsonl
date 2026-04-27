@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000006","ts":"2026-04-27T15:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"a6a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b6"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Find every place that calls foo() across the codebase."}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"I'll spawn an explore subagent to scan."},{"type":"tool_use","id":"toolu_a1","name":"Agent","input":{"subagent_type":"explore","prompt":"List all callers of foo() in the workspace. Report path + line."}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_a1","ok":true,"content":"3 callers:\n- src/main.rs:18\n- src/lib.rs:42\n- tests/integration.rs:7"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Three call sites: main.rs:18, lib.rs:42, tests/integration.rs:7."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":5180,"tokens_in":820,"tokens_out":89}

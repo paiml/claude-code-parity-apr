@@ -804,3 +804,37 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    note: 'corpus expansion M11 — 5 → 8 fixtures, parity-matrix coverage 1/17 → 4/17'
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 8
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      per_fixture:
+        - { id: '0001-edit-readme',      score: 1.0, drift_count: 0, passes_individual: true }
+        - { id: '0002-fix-failing-test', score: 1.0, drift_count: 0, passes_individual: true }
+        - { id: '0003-create-new-file',  score: 1.0, drift_count: 0, passes_individual: true }
+        - { id: '0004-grep-and-edit',    score: 1.0, drift_count: 0, passes_individual: true }
+        - { id: '0005-bash-cascade',     score: 1.0, drift_count: 0, passes_individual: true }
+        - { id: '0006-subagent-spawn',   score: 1.0, drift_count: 0, passes_individual: true, covers: ['subagent-spawn'] }
+        - { id: '0007-mcp-tool-call',    score: 1.0, drift_count: 0, passes_individual: true, covers: ['mcp-client'] }
+        - { id: '0008-slash-help',       score: 1.0, drift_count: 0, passes_individual: true, covers: ['slash-commands'] }
+      parity_matrix_coverage:
+        covered_count: 4
+        required_count: 17
+        covered_rows: ['builtin-tools-rwegs', 'subagent-spawn', 'mcp-client', 'slash-commands']
+        uncovered_rows: ['claude-md-memory', 'hooks', 'skills', 'worktree-isolation', 'custom-agents', 'permission-modes', 'builtin-tools-web', 'session-management', 'configuration-ladder', 'non-interactive-mode', 'keyboard-shortcuts', 'status-line', 'managed-org-policy']
+      teacher_source: 'Curated canonical reference (AUTHORED) — same policy as prior measurement.'
+      student_source: 'Curated canonical reference; per-fixture identical to teacher at equivalence-rule level.'
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      followup: |
+        Continue M12+ adding fixtures for the 13 still-uncovered rows.
+        Each new fixture ticks parity_matrix_coverage.covered_count up.
+        FALSIFY-CCPA-007 stays informational-only in CI until the corpus
+        reaches 17/17 — at which point the gate becomes a hard CI blocker.
