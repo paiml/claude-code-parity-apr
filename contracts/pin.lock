@@ -22,15 +22,20 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      1ac35605550e98e2e1d2d1b5dc7602c6eecc38cd8595adf3eef4dcb2e6218c32
-last_synced_utc:      2026-04-27T07:00:00Z
+contract_sha256:      2038755e79f1f30bd1d0977aed1cc35d29362a0d392608eae51c8f85d7ce1ade
+last_synced_utc:      2026-04-27T07:30:00Z
 note: |
-  Pre-merge of paiml/aprender#1078. v0.3.0 of the contract refines
-  FALSIFY-CCPA-010 (gate on `is_compliant=true` instead of `--strict`,
-  see contract status_history). aprender-side copy at 5a3b8f10c is now
-  one revision behind; sync push to refresh aprender#1078 follows this
-  commit. contract_sha256 above is the v0.3.0 hash.
+  M14 corpus expansion. Contract version held at v1.2.0 (informational
+  measured_parity append, no semver bump). New status_history entry
+  records 17-fixture corpus, aggregate=1.0000, parity-matrix coverage
+  10/17 → 13/17 (newly covered: worktree-isolation, configuration-ladder,
+  managed-org-policy). Four uncovered rows (hooks, skills,
+  keyboard-shortcuts, status-line) tracked under
+  remaining_uncovered_classification with explicit schema-extension
+  / out-of-scope reasoning.
 
-  Refresh `aprender_commit` to the squash-merge hash on aprender@main
-  once #1078 lands; `contract_sha256` should be unchanged across the
-  merge (squash preserves byte identity).
+  contract_sha256 above is the v1.2.0+M14-append hash. Refresh
+  `aprender_commit` to the squash-merge hash on aprender@main when
+  the matching aprender-side mirror PR merges; `contract_sha256`
+  should be byte-identical across that merge (we keep the two
+  contract files in lock-step).

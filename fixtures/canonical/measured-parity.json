@@ -1,6 +1,6 @@
 {
   "aggregate_score": 1.0,
-  "fixture_count": 14,
+  "fixture_count": 17,
   "passes_gate": true,
   "per_fixture": [
     {
@@ -84,6 +84,24 @@
     {
       "drift_count": 0,
       "id": "0014-custom-agent",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0015-worktree-isolation",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0016-configuration-ladder",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0017-managed-org-policy",
       "passes_individual": true,
       "score": 1.0
     }

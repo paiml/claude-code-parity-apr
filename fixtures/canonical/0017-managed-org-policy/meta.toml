@@ -1,0 +1,4 @@
+[fixture]
+id = "0017-managed-org-policy"
+covers = ["managed-org-policy"]
+description = "Tool call blocked by an organization-managed policy (POL-007 'no-direct-push-from-agent'). Tool result includes policy_id + override syntax. Exercises the managed-org-policy gate: a tool dispatch attempt is captured, the policy machinery rejects, and the assistant explains the override path. Parity holds when student receives the same denial + advises the same escalation."

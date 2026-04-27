@@ -1,0 +1,4 @@
+[fixture]
+id = "0015-worktree-isolation"
+covers = ["worktree-isolation"]
+description = "Agent dispatch with `worktree: true` + a branch name. Tool result confirms a `.git/apr-worktrees/<sanitized>` path was created. Verifies the Agent equivalence rule serializes the full input including worktree flag in the canonical-JSON sha (carried by the `*` fallback for fields not enumerated in the per-tool rule)."

@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000011","ts":"2026-04-27T16:20:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"b1a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3c1"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Push this branch to origin"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_o1","name":"Bash","input":{"command":"git push -u origin HEAD"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_o1","ok":false,"content":"blocked by managed-org-policy: 'no-direct-push-from-agent' rule (org=paiml, policy_id=POL-007). Override requires `apr code --policy-override POL-007 --justification \"...\"` (org admin only).","side_effects":{"exit_code":3}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Org policy POL-007 blocks direct pushes from agents. Push manually or request override."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":960,"tokens_in":380,"tokens_out":48}
