@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/ccpa-trace",
     "crates/ccpa-recorder",
+    "crates/ccpa-differ",
 ]
 
 [workspace.package]

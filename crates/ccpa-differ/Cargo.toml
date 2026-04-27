@@ -1,0 +1,19 @@
+[package]
+name = "ccpa-differ"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Per-tool semantic equivalence rules for teacher/student trace diffing. Ships the FALSIFY-CCPA-004 (tool_call_equivalence) primitives."
+
+[lints]
+workspace = true
+
+[dependencies]
+ccpa-trace = { path = "../ccpa-trace" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = "0.10"
