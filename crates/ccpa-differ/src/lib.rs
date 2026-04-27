@@ -15,7 +15,12 @@
 #![deny(missing_docs)]
 
 mod equivalence;
+mod file_mutation;
 mod score;
 
 pub use equivalence::{tool_call_equivalent, DriftCategory, ToolCall};
+pub use file_mutation::{
+    file_mutation_drifts, file_mutation_equivalent, FileMutationDrift, FileState,
+    Options as FileMutationOptions,
+};
 pub use score::{compute_parity_score, Drift, ParityReport};

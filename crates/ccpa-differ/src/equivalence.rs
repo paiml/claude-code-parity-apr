@@ -35,6 +35,10 @@ pub enum DriftCategory {
     MissingToolCall,
     /// Student emitted a tool call at this position; teacher didn't.
     ExtraToolCall,
+    /// File-system snapshot diverged between teacher and student
+    /// after the session ended. Detail in the [`crate::FileMutationDrift`]
+    /// returned alongside.
+    MismatchedFileState,
 }
 
 /// Decide whether two tool calls are semantically equivalent under the
