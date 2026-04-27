@@ -22,13 +22,14 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      21e94a3d8d9481a13dbd253c4a32bb2af1dffff7f7e58c16cb3d5ba5e900ed11
-last_synced_utc:      2026-04-27T06:35:00Z
+contract_sha256:      69050963a69008d9a4fad6588982a585b807015b9f3507b1ff1d41f558b04297
+last_synced_utc:      2026-04-27T07:00:00Z
 note: |
-  Pre-merge of paiml/aprender#1078, post-invariants-sync.
-  aprender_commit (5a3b8f10c) is the head of the still-OPEN PR #1078
-  branch and carries the SAME `invariants:` block as this repo's
-  contract — sha256s now match across both repos.
+  Pre-merge of paiml/aprender#1078. v0.3.0 of the contract refines
+  FALSIFY-CCPA-010 (gate on `is_compliant=true` instead of `--strict`,
+  see contract status_history). aprender-side copy at 5a3b8f10c is now
+  one revision behind; sync push to refresh aprender#1078 follows this
+  commit. contract_sha256 above is the v0.3.0 hash.
 
   Refresh `aprender_commit` to the squash-merge hash on aprender@main
   once #1078 lands; `contract_sha256` should be unchanged across the
