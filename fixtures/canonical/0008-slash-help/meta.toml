@@ -1,0 +1,4 @@
+[fixture]
+id = "0008-slash-help"
+covers = ["slash-commands"]
+description = "User types `/help`; the assistant responds with the slash-command list. Zero tool calls (the parity_score numerator/denominator are both 0 → score 1.0 vacuously). What this exercises: the orchestration recognizes the slash prefix and dispatches without invoking the LLM in the same way as a free-form prompt."

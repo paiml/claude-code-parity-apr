@@ -1,6 +1,6 @@
 {
   "aggregate_score": 1.0,
-  "fixture_count": 5,
+  "fixture_count": 8,
   "passes_gate": true,
   "per_fixture": [
     {
@@ -30,6 +30,24 @@
     {
       "drift_count": 0,
       "id": "0005-bash-cascade",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0006-subagent-spawn",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0007-mcp-tool-call",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0008-slash-help",
       "passes_individual": true,
       "score": 1.0
     }

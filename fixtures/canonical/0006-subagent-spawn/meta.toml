@@ -1,0 +1,4 @@
+[fixture]
+id = "0006-subagent-spawn"
+covers = ["subagent-spawn"]
+description = "Spawn an explore subagent via the Agent tool with a prompt; verify parity on (subagent_type, prompt_sha256) tuple per contract § tool_equivalence_rules.Agent."
