@@ -87,6 +87,27 @@ jobs:
             --fail-under-functions 100 \
             --fail-under-lines 99
 
+      # ── FALSIFY-CCPA-013 runtime evidence — bidirectional sensitivity test ──
+      # Canonical corpus MUST pass; regression corpus MUST fail.
+      # If regression somehow passes the meter is broken (false negatives).
+      - name: install ccpa CLI (binary needed for next two steps)
+        run: cargo install --path crates/ccpa-cli --locked
+
+      - name: canonical corpus PASSES (FALSIFY-CCPA-013 runtime evidence)
+        run: ccpa corpus fixtures/canonical/
+
+      - name: regression corpus FAILS (meter sensitivity bidirectional)
+        run: |
+          set +e
+          ccpa corpus fixtures/regression/
+          code=$?
+          set -e
+          if [ "$code" -eq 0 ]; then
+            echo "ERROR: regression corpus passed — meter NOT detecting drift!"
+            exit 1
+          fi
+          echo "OK: regression corpus correctly exited $code (drift detected)"
+
       # ── FALSIFY-CCPA-010 — pmat comply (is_compliant=true, no Fail-status checks) ──
       # `--strict` exits 2 on ANY Warn-status check (incl. advisory ones like
       # "Bronze reproducibility" or "missing memory profiler"). The contract's

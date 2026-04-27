@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"reg-0003","ts":"2026-04-27T13:02:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"f3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3c3"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Print the README contents"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_r1","name":"Read","input":{"path":"README.md"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_r1","ok":true,"content":"# myproject\n\nA project.\n"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"# myproject\n\nA project."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":640,"tokens_in":320,"tokens_out":18}
