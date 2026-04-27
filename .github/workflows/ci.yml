@@ -90,7 +90,7 @@ jobs:
       # ── FALSIFY-CCPA-013 runtime evidence — bidirectional sensitivity test ──
       # Canonical corpus MUST pass; regression corpus MUST fail.
       # If regression somehow passes the meter is broken (false negatives).
-      - name: install ccpa CLI (binary needed for next two steps)
+      - name: install ccpa CLI (binary needed for next steps)
         run: cargo install --path crates/ccpa-cli --locked
 
       - name: canonical corpus PASSES (FALSIFY-CCPA-013 runtime evidence)
@@ -107,6 +107,29 @@ jobs:
             exit 1
           fi
           echo "OK: regression corpus correctly exited $code (drift detected)"
+
+      # ── FALSIFY-CCPA-007 — corpus_coverage HARD-BLOCKING (M16) ──
+      # Reachable rows = SHIPPED+PARTIAL apr-code-parity-v1 rows MINUS
+      # the contract-declared OOS list. As of M15 contract v1.3.0,
+      # OOS at trace boundary = {keyboard-shortcuts, status-line}.
+      # See contract status_history M15 § remaining_uncovered_classification.
+      # CI requires we sync the parity-matrix yaml from a known
+      # aprender commit; a fork checkout would diverge.
+      - name: checkout aprender for canonical apr-code-parity-v1.yaml
+        uses: actions/checkout@v4
+        with:
+          repository: paiml/aprender
+          ref: main
+          path: aprender-upstream
+          sparse-checkout: |
+            contracts/apr-code-parity-v1.yaml
+
+      - name: corpus_coverage hard-blocking gate (FALSIFY-CCPA-007)
+        run: |
+          ccpa coverage \
+            --apr-code-parity-yaml aprender-upstream/contracts/apr-code-parity-v1.yaml \
+            --fixtures-dir fixtures/canonical/ \
+            --oos-rows keyboard-shortcuts,status-line
 
       # ── FALSIFY-CCPA-010 — pmat comply (is_compliant=true, no Fail-status checks) ──
       # `--strict` exits 2 on ANY Warn-status check (incl. advisory ones like

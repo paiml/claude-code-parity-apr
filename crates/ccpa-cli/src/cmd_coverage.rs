@@ -68,6 +68,13 @@ pub struct Args {
     /// the rows that fixture covers.
     #[arg(long = "fixtures-dir")]
     pub fixtures_dir: Option<PathBuf>,
+    /// Comma-separated list of row ids classified as **out-of-scope** at
+    /// the trace boundary (REPL render artifacts / keystroke events that
+    /// never cross a trace event). These rows are excluded from
+    /// `passes_gate`. Source-of-truth: contract `status_history` M15
+    /// `remaining_uncovered_classification`.
+    #[arg(long = "oos-rows")]
+    pub oos_rows: Option<String>,
 }
 
 pub(crate) fn run(args: &Args) -> Result<ExitCode, CoverageError> {
@@ -95,17 +102,28 @@ pub(crate) fn run(args: &Args) -> Result<ExitCode, CoverageError> {
         return Err(CoverageError::EmptyRequired);
     }
 
-    let report = corpus_coverage(&fixtures, &required);
+    let oos: Vec<String> = args.oos_rows.as_deref().map(parse_csv).unwrap_or_default();
+
+    let report = corpus_coverage(&fixtures, &required, &oos);
+    let reachable = required.len().saturating_sub(report.oos.len());
 
     println!(
-        "ccpa coverage: {}/{} required rows covered  ({} uncovered)",
+        "ccpa coverage: {}/{} reachable rows covered  ({} required total, {} OOS, {} uncovered)",
         report.covered.len(),
+        reachable,
         required.len(),
+        report.oos.len(),
         report.uncovered.len()
     );
     if !report.uncovered.is_empty() {
         println!("  uncovered:");
         for row in &report.uncovered {
+            println!("    - {row}");
+        }
+    }
+    if !report.oos.is_empty() {
+        println!("  out-of-scope (excluded from gate):");
+        for row in &report.oos {
             println!("    - {row}");
         }
     }
@@ -115,6 +133,13 @@ pub(crate) fn run(args: &Args) -> Result<ExitCode, CoverageError> {
     } else {
         Ok(ExitCode::from(1))
     }
+}
+
+fn parse_csv(s: &str) -> Vec<String> {
+    s.split(',')
+        .map(|x| x.trim().to_owned())
+        .filter(|x| !x.is_empty())
+        .collect()
 }
 
 fn required_from_flag(s: &str) -> Result<Vec<String>, CoverageError> {

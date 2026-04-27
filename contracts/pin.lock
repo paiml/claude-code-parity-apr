@@ -22,23 +22,22 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      fac9139f48d3bd690142131d2bd0a58340f216e6ec59dca24e403d8f56e56e50
-last_synced_utc:      2026-04-27T08:00:00Z
+contract_sha256:      d37f41f9f102398df57a4bad94ec89b99ef2a556831cc243dd488d288bd931f2
+last_synced_utc:      2026-04-27T08:30:00Z
 note: |
-  M15 — contract bumps v1.2.0 → v1.3.0 (minor). The bump documents
-  the trace-schema v2 (additive HookEvent + SkillInvocation record
-  kinds) and the differ extension (4 new DriftCategory variants +
-  hook_event_equivalent + skill_invocation_equivalent + extended
-  compute_parity_score that reduces over tools + hooks + skills).
+  M16 — contract bumps v1.3.0 → v1.4.0 (minor). FALSIFY-CCPA-007
+  flips from informational-until-17/17 to HARD-BLOCKING on 15/15
+  reachable rows. The 2 OOS rows (keyboard-shortcuts, status-line)
+  are now formally declared in the contract's FALSIFY-CCPA-007
+  `oos_rows:` block (with reasoning) and the ccpa-coverage CLI
+  exposes `--oos-rows` to consume that list at gate time.
 
-  Two new canonical fixtures (0018-hook-pre-tool-use,
-  0019-skill-auto-match) bring parity-matrix coverage 13/17 →
-  15/17. Remaining 2 uncovered rows (keyboard-shortcuts, status-line)
-  reclassified as permanently OOS at the trace boundary in the
-  contract's remaining_uncovered_classification block.
+  CI workflow adds a sparse-checkout of paiml/aprender@main to
+  pull the canonical apr-code-parity-v1.yaml and runs
+    ccpa coverage --apr-code-parity-yaml ... --oos-rows ...
+  as a hard-blocker.
 
-  contract_sha256 above is the v1.3.0 hash. Refresh `aprender_commit`
+  contract_sha256 above is the v1.4.0 hash. Refresh `aprender_commit`
   to the squash-merge hash on aprender@main when the matching
   aprender-side mirror PR merges; contract_sha256 should be
-  byte-identical across that merge (we keep the two contract files
-  in lock-step).
+  byte-identical across that merge.
