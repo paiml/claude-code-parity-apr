@@ -16,7 +16,7 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      5a3b8f10c
+aprender_commit:      ce4a6f0c7
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
