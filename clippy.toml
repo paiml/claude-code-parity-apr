@@ -1,0 +1,6 @@
+# Mirrors aprender's `unwrap()` ban (CLAUDE.md § PMAT Quality Analysis).
+# Use `expect("reason")` or `?` instead.
+disallowed-methods = [
+    { path = "std::option::Option::unwrap", reason = "use expect(\"reason\") or `?`" },
+    { path = "std::result::Result::unwrap", reason = "use expect(\"reason\") or `?`" },
+]

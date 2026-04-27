@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+  RUST_BACKTRACE: 1
+  RUST_MIN_STACK: 8388608   # 8 MiB — clap/serde-json deep recursion
+  PROPTEST_CASES: 256
+
+# Single, monolithic `gate` job. Branch protection on `main` requires this
+# check (see FALSIFY-CCPA-009). Failing any step fails the gate.
+
+jobs:
+  gate:
+    name: ci/gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain (stable + llvm-tools-preview)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview, rustfmt, clippy
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      # cargo-binstall fetches prebuilt binaries when crates publish them,
+      # falls back to `cargo install` only when none exist. Drops cold-cache
+      # tool install from ~30 min (compile from source) to ~30 s.
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install pmat / pv / cargo-llvm-cov (binstall)
+        run: |
+          cargo binstall --no-confirm --locked cargo-llvm-cov
+          cargo binstall --no-confirm --locked pmat                   || cargo install --locked pmat
+          cargo binstall --no-confirm --locked aprender-contracts-cli || cargo install --locked aprender-contracts-cli
+
+      # ── FALSIFY-CCPA-012 — pv contract gate ──
+      # `pv validate` is the dogfooded gate per CLAUDE.md § "DOGFOOD pv,
+      # NEVER bash". Bash workarounds are forbidden.
+      - name: pv validate (FALSIFY-CCPA-012)
+        run: pv validate contracts/claude-code-parity-apr-v1.yaml
+
+      # ── FALSIFY-CCPA-012 (b) — pin freshness ──
+      # Bytes-only integrity check — NOT a re-implementation of pv.
+      - name: pin-check (FALSIFY-CCPA-012)
+        run: bash scripts/pin-check.sh contracts/pin.lock
+
+      # ── Build + lint ──
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+      - name: cargo clippy --all-targets
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: cargo build
+        run: cargo build --workspace --all-features
+
+      - name: cargo test
+        run: cargo test --workspace --all-features
+
+      # ── FALSIFY-CCPA-011 — line coverage 100% ──
+      # cargo-tarpaulin is forbidden per CLAUDE.md § "Prohibited Tools".
+      - name: 100% line coverage (FALSIFY-CCPA-011)
+        run: |
+          cargo llvm-cov --workspace --all-features \
+            --fail-under-lines 100 \
+            --fail-uncovered-lines 0
+
+      # ── FALSIFY-CCPA-010 — pmat comply (is_compliant=true, no Fail-status checks) ──
+      # `--strict` exits 2 on ANY Warn-status check (incl. advisory ones like
+      # "Bronze reproducibility" or "missing memory profiler"). The contract's
+      # gate is `is_compliant=true` — i.e. zero Fail-status checks. Warnings
+      # are advisory and tracked separately in the contract's status_history.
+      - name: pmat comply check (FALSIFY-CCPA-010)
+        run: |
+          pmat comply check --format json > comply.json
+          jq -e '.is_compliant == true and ([.checks[] | select(.status == "Fail")] | length == 0)' comply.json
+          warns=$(jq '[.checks[] | select(.status == "Warn")] | length' comply.json)
+          echo "is_compliant=true, 0 Fails, ${warns} advisory Warns (tracked, not gating)"
+
+      # ── FALSIFY-CCPA-009 ──
+      # Enforced by GitHub branch protection, NOT by this job. After this
+      # job lands on main once, follow scripts/install-branch-protection.sh
+      # to require `ci/gate` as a status check on main.
+      - name: Note FALSIFY-CCPA-009
+        run: |
+          echo "FALSIFY-CCPA-009 (ci_main_branch_green) is asserted by"
+          echo "GitHub branch protection — see scripts/install-branch-protection.sh"

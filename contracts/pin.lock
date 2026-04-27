@@ -1,0 +1,36 @@
+# Pin lock — claude-code-parity-apr ↔ aprender contract sync
+#
+# Records the upstream commit + content hash of the authoritative contract
+# this repo gates against. Refreshed by CI step `scripts/pin-check.sh`,
+# which fails the build if the recorded sha256 no longer matches the local
+# contract bytes.
+#
+# Lifecycle:
+#   - On every commit:   pre-commit hook + CI re-run pin-check.
+#   - On contract bump:  bump aprender_commit + contract_sha256 atomically.
+#   - On aprender PR merge: refresh aprender_commit to the squash-merge hash.
+#
+# See:
+#   - contracts/claude-code-parity-apr-v1.yaml § companion_repo.contract_pin
+#   - docs/specifications/claude-code-parity-apr-poc.md § Companion-repo invariants
+#   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
+
+aprender_repo:        paiml/aprender
+aprender_commit:      ce4a6f0c7
+aprender_branch:      feat/claude-code-parity-apr-poc-spec
+aprender_pr:          1078
+aprender_pr_state:    OPEN
+aprender_path:        contracts/claude-code-parity-apr-v1.yaml
+contract_path:        contracts/claude-code-parity-apr-v1.yaml
+contract_sha256:      298cfb15cb4b412cf2b64c80b27d0604540bf7087c08dcd73264b2e84f97b676
+last_synced_utc:      2026-04-27T07:00:00Z
+note: |
+  Pre-merge of paiml/aprender#1078. v0.3.0 of the contract refines
+  FALSIFY-CCPA-010 (gate on `is_compliant=true` instead of `--strict`,
+  see contract status_history). aprender-side copy at 5a3b8f10c is now
+  one revision behind; sync push to refresh aprender#1078 follows this
+  commit. contract_sha256 above is the v0.3.0 hash.
+
+  Refresh `aprender_commit` to the squash-merge hash on aprender@main
+  once #1078 lands; `contract_sha256` should be unchanged across the
+  merge (squash preserves byte identity).
