@@ -2,8 +2,9 @@
 
 [![CI](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg)](https://github.com/paiml/claude-code-parity-apr#license)
-[![Spec](https://img.shields.io/badge/spec-v0.2.0-blue.svg)](docs/specifications/claude-code-parity-apr-poc.md)
-[![Status](https://img.shields.io/badge/status-DRAFT%20M1-yellow.svg)](docs/specifications/claude-code-parity-apr-poc.md#phases--milestones)
+[![Contract](https://img.shields.io/badge/contract-v1.0.0-green.svg)](contracts/claude-code-parity-apr-v1.yaml)
+[![Status](https://img.shields.io/badge/status-ACTIVE%20M6-green.svg)](docs/specifications/claude-code-parity-apr-poc.md#phases--milestones)
+[![Gates](https://img.shields.io/badge/gates-12%2F12%20online-green.svg)](contracts/claude-code-parity-apr-v1.yaml#L70)
 
 > Record-replay-distill harness proving
 > [`apr code`](https://github.com/paiml/aprender) is byte-stable against
