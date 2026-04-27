@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -61,6 +61,9 @@ pv-validate:
 
 pin-check:
 	bash scripts/pin-check.sh contracts/pin.lock
+
+pin-check-roundtrip:
+	bash scripts/pin-check-roundtrip.sh contracts/pin.lock
 
 parity:
 	@echo "=== canonical corpus (must PASS) ==="

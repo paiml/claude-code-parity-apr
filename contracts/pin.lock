@@ -16,19 +16,18 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      f5cfbb370
+aprender_commit:      f4d8444cd
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      ce4bea33db19b995e717e684c4a1e0c39aefdb9c31bb7aa1cd3800c4fae59610
-last_synced_utc:      2026-04-27T10:30:00Z
+contract_sha256:      b0d54fe1fcd96765d499d8f31cf9dd89a42eaafc2d99802b4c687182fe92b6c3
+last_synced_utc:      2026-04-27T12:00:00Z
 note: |
-  M20 — contract bumps v1.7.0 → v1.8.0 (minor). README truth-up
-  only: badges + status banner + behavioral-gates table + usage
-  section + architecture diagram + new "Adding a new fixture"
-  section, all reflecting M0-M19 SHIPPED reality. No code or
-  contract-surface change.
-
-  contract_sha256 above is the v1.8.0 hash.
+  M22 — companion ↔ aprender round-trip CI guard installed. Bumps
+  contract v1.9.0 → v1.10.0 documenting the new gate; aprender mirror
+  pushed in paired commit f4d8444cd at byte-identical sha256
+  b0d54fe1fcd96765d499d8f31cf9dd89a42eaafc2d99802b4c687182fe92b6c3.
+  scripts/pin-check-roundtrip.sh now enforces the equality on every
+  PR — the M21 drift mode is mechanically prevented going forward.

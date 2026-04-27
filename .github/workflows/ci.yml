@@ -63,6 +63,17 @@ jobs:
       - name: pin-check (FALSIFY-CCPA-012)
         run: bash scripts/pin-check.sh contracts/pin.lock
 
+      # ── FALSIFY-CCPA-012 (c) — companion ↔ aprender round-trip (M22) ──
+      # Closes the M21 drift class: refuses companion-side contract bumps
+      # whose bytes don't byte-match the aprender-side at the pinned
+      # commit. Requires `contents:read` on paiml/aprender — the default
+      # GITHUB_TOKEN is sufficient if aprender is in the same org or
+      # public; otherwise the workflow needs an explicit token override.
+      - name: pin-check-roundtrip (M22 — companion ↔ aprender drift guard)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash scripts/pin-check-roundtrip.sh contracts/pin.lock
+
       # ── Build + lint ──
       - name: cargo fmt --check
         run: cargo fmt --all -- --check
