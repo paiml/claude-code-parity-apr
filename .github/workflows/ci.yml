@@ -32,15 +32,20 @@ jobs:
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
 
-      - name: Install pmat
-        run: cargo install pmat --locked
+      # cargo-binstall fetches prebuilt binaries when crates publish them,
+      # falls back to `cargo install` only when none exist. Drops cold-cache
+      # tool install from ~30 min (compile from source) to ~30 s.
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
 
-      - name: Install pv (aprender-contracts-cli)
-        run: cargo install aprender-contracts-cli --locked
-
-      - name: Install cargo-llvm-cov
-        run: cargo install cargo-llvm-cov --locked
+      - name: Install pmat / pv / cargo-llvm-cov (binstall)
+        run: |
+          cargo binstall --no-confirm --locked cargo-llvm-cov
+          cargo binstall --no-confirm --locked pmat                   || cargo install --locked pmat
+          cargo binstall --no-confirm --locked aprender-contracts-cli || cargo install --locked aprender-contracts-cli
 
       # ── FALSIFY-CCPA-012 — pv contract gate ──
       # `pv validate` is the dogfooded gate per CLAUDE.md § "DOGFOOD pv,
