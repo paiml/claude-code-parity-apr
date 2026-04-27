@@ -1,0 +1,24 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# llvm-cov
+/coverage/
+*.profraw
+
+# pmat
+/.pmat/
+
+# pv (provable-contracts) cache
+/.pv/
+**/.pv/
+
+# IDE
+/.vscode/
+/.idea/
+/.zed/
+
+# OS
+.DS_Store
+Thumbs.db

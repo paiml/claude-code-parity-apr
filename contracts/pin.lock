@@ -1,0 +1,38 @@
+# Pin lock — claude-code-parity-apr ↔ aprender contract sync
+#
+# Records the upstream commit + content hash of the authoritative contract
+# this repo gates against. Refreshed by CI step `scripts/pin-check.sh`,
+# which fails the build if the recorded sha256 no longer matches the local
+# contract bytes.
+#
+# Lifecycle:
+#   - On every commit:   pre-commit hook + CI re-run pin-check.
+#   - On contract bump:  bump aprender_commit + contract_sha256 atomically.
+#   - On aprender PR merge: refresh aprender_commit to the squash-merge hash.
+#
+# See:
+#   - contracts/claude-code-parity-apr-v1.yaml § companion_repo.contract_pin
+#   - docs/specifications/claude-code-parity-apr-poc.md § Companion-repo invariants
+#   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
+
+aprender_repo:        paiml/aprender
+aprender_commit:      2d0145ffec472e2eb9be6976a88bd5fe0c9baf6c
+aprender_branch:      feat/claude-code-parity-apr-poc-spec
+aprender_pr:          1078
+aprender_pr_state:    OPEN
+aprender_path:        contracts/claude-code-parity-apr-v1.yaml
+contract_path:        contracts/claude-code-parity-apr-v1.yaml
+contract_sha256:      21e94a3d8d9481a13dbd253c4a32bb2af1dffff7f7e58c16cb3d5ba5e900ed11
+last_synced_utc:      2026-04-27T06:00:00Z
+note: |
+  Pre-merge of paiml/aprender#1078. The pinned `aprender_commit`
+  (2d0145ffe) contains a slightly older revision of this contract — it
+  predates the `invariants:` top-level block added in this M1 PR for
+  pmat CB-1305 contract-surface classification. A follow-up push to
+  aprender#1078 syncs the YAML. Pin-check validates LOCAL contract bytes
+  vs `contract_sha256`; aprender drift is informational, not enforced
+  here (canonical sync gate is `pv lint` on aprender's contracts/ dir).
+
+  Refresh `aprender_commit` to the squash-merge hash on aprender@main
+  once #1078 lands; `contract_sha256` should be unchanged across the
+  merge (squash preserves byte identity).
