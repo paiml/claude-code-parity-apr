@@ -16,24 +16,18 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      2f13c2ce8
+aprender_commit:      f4d8444cd
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      b737c864fbd8ea983f36c842b80895f16eaa15bb119327cbb63b111c3ead6f0a
-last_synced_utc:      2026-04-27T11:30:00Z
+contract_sha256:      b0d54fe1fcd96765d499d8f31cf9dd89a42eaafc2d99802b4c687182fe92b6c3
+last_synced_utc:      2026-04-27T12:00:00Z
 note: |
-  M21 — aprender-side mirror sync. Bumps `aprender_commit` from
-  f5cfbb370 (last sync at v1.2.0 / 2026-04-27T07:00) to 08744c69a
-  (aprender side now at byte-identical v1.8.0). Companion side
-  also bumps to v1.9.0 (this) documenting the sync in
-  status_history.
-
-  After this lands, a follow-up sync push to aprender will
-  restore byte-identity once more (this commit moves companion
-  to v1.9.0, so the aprender side will need an M21.5 sync
-  commit to mirror this very file). M22+ proposes installing
-  a CI-side guard preventing companion-side contract bumps
-  without a paired aprender-side sync.
+  M22 — companion ↔ aprender round-trip CI guard installed. Bumps
+  contract v1.9.0 → v1.10.0 documenting the new gate; aprender mirror
+  pushed in paired commit f4d8444cd at byte-identical sha256
+  b0d54fe1fcd96765d499d8f31cf9dd89a42eaafc2d99802b4c687182fe92b6c3.
+  scripts/pin-check-roundtrip.sh now enforces the equality on every
+  PR — the M21 drift mode is mechanically prevented going forward.
