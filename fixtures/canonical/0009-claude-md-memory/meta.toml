@@ -1,0 +1,4 @@
+[fixture]
+id = "0009-claude-md-memory"
+covers = ["claude-md-memory"]
+description = "Tests CLAUDE.md memory loading: a generic 'run the tests' prompt should resolve to the project-specific test command (`make tier2`) declared in CLAUDE.md, not a default heuristic. Parity holds when student also defers to CLAUDE.md and emits the same Bash command."
