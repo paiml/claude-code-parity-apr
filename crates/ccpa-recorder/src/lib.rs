@@ -14,5 +14,11 @@
 #![deny(missing_docs)]
 
 mod parse;
+mod response;
+
+/// SSE event reconstruction for streaming Anthropic responses.
+pub mod sse;
 
 pub use parse::{parse_messages_request, ParseError};
+pub use response::parse_messages_response;
+pub use sse::{parse_sse_wire_format, reconstruct_sse_stream, SseError, SseEvent};
