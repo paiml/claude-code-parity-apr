@@ -15,14 +15,20 @@
 #![deny(missing_docs)]
 
 mod corpus;
+mod coverage;
 mod equivalence;
 mod file_mutation;
 mod score;
+mod sovereignty;
 
 pub use corpus::{evaluate_corpus, CorpusEntry, CorpusReport, FixtureReport, Thresholds};
+pub use coverage::{corpus_coverage, CoverageReport, FixtureCoverage};
 pub use equivalence::{tool_call_equivalent, DriftCategory, ToolCall};
 pub use file_mutation::{
     file_mutation_drifts, file_mutation_equivalent, FileMutationDrift, FileState,
     Options as FileMutationOptions,
 };
 pub use score::{compute_parity_score, Drift, ParityReport};
+pub use sovereignty::{
+    check_sovereignty, replay_is_sovereign, SovereigntyViolation, FORBIDDEN_REPLAY_EGRESS,
+};
