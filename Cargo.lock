@@ -45,6 +45,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ccpa-replayer"
+version = "0.1.0"
+dependencies = [
+ "ccpa-trace",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "ccpa-trace"
 version = "0.1.0"
 dependencies = [

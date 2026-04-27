@@ -1,0 +1,18 @@
+[package]
+name = "ccpa-replayer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Mock-replayer kernel for FALSIFY-CCPA-002/003. Defines the local LlmDriver trait + RecordedDriver. The aprender-orchestrate adapter lands once that crate's LlmDriver goes public (PMAT-CODE-LLM-DRIVER-PUBLIC-001)."
+
+[lints]
+workspace = true
+
+[dependencies]
+ccpa-trace = { path = "../ccpa-trace" }
+serde_json = { workspace = true }
+thiserror = "2.0"
