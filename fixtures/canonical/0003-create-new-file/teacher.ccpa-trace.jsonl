@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000003","ts":"2026-04-27T12:10:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"c3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b4"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Create a .gitignore file with target/ and .env entries"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_n1","name":"Write","input":{"path":".gitignore","content":"target/\n.env\n"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_n1","ok":true,"content":"file created"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Created .gitignore with the two entries."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":920,"tokens_in":620,"tokens_out":48}

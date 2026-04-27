@@ -15,6 +15,8 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+/// `ccpa corpus` subcommand.
+pub mod cmd_corpus;
 /// `ccpa coverage` subcommand.
 pub mod cmd_coverage;
 /// `ccpa diff` subcommand.
@@ -39,6 +41,8 @@ pub enum CcpaError {
     Diff(cmd_diff::DiffError),
     /// `coverage` failure.
     Coverage(cmd_coverage::CoverageError),
+    /// `corpus` failure.
+    Corpus(cmd_corpus::CorpusError),
 }
 
 impl fmt::Display for CcpaError {
@@ -47,6 +51,7 @@ impl fmt::Display for CcpaError {
             Self::Validate(e) => write!(f, "{e}"),
             Self::Diff(e) => write!(f, "{e}"),
             Self::Coverage(e) => write!(f, "{e}"),
+            Self::Corpus(e) => write!(f, "{e}"),
         }
     }
 }
@@ -66,6 +71,11 @@ impl From<cmd_diff::DiffError> for CcpaError {
 impl From<cmd_coverage::CoverageError> for CcpaError {
     fn from(e: cmd_coverage::CoverageError) -> Self {
         Self::Coverage(e)
+    }
+}
+impl From<cmd_corpus::CorpusError> for CcpaError {
+    fn from(e: cmd_corpus::CorpusError) -> Self {
+        Self::Corpus(e)
     }
 }
 
@@ -95,6 +105,7 @@ where
         Command::Validate(args) => cmd_validate::run(&args).map_err(Into::into),
         Command::Diff(args) => cmd_diff::run(&args).map_err(Into::into),
         Command::Coverage(args) => cmd_coverage::run(&args).map_err(Into::into),
+        Command::Corpus(args) => cmd_corpus::run(&args).map_err(Into::into),
     };
 
     match result {
@@ -128,4 +139,6 @@ enum Command {
     Diff(cmd_diff::Args),
     /// Cross-check fixture corpus against required parity-matrix rows (FALSIFY-CCPA-007).
     Coverage(cmd_coverage::Args),
+    /// Walk a paired-fixture corpus and aggregate parity scores (FALSIFY-CCPA-013).
+    Corpus(cmd_corpus::Args),
 }

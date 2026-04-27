@@ -264,6 +264,182 @@ fn ccpa_error_display_chains_inner_message() {
 }
 
 #[test]
+fn corpus_passes_when_all_pairs_perfect() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-x");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn corpus_fails_below_thresholds() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-drift");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    fs::write(f.join("student.ccpa-trace.jsonl"), STUDENT_DRIFT).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 1);
+}
+
+#[test]
+fn corpus_json_output_includes_aggregate_and_per_fixture() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-x");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        "--json",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn corpus_lax_thresholds_pass_drifting_corpus() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-drift");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    fs::write(f.join("student.ccpa-trace.jsonl"), STUDENT_DRIFT).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        "--aggregate-min",
+        "0.0",
+        "--individual-min",
+        "0.0",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0, "score 0.0 ≥ floor 0.0 → pass");
+}
+
+#[test]
+fn corpus_empty_directory_exits_1() {
+    let dir = tempdir().expect("tempdir");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 1);
+}
+
+#[test]
+fn corpus_missing_directory_exits_2() {
+    let code = run(args(&["ccpa", "corpus", "/no/such/corpus/dir"]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn corpus_subdir_missing_teacher_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-bad");
+    fs::create_dir_all(&f).expect("mkdir");
+    // Only write student — teacher missing.
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn corpus_subdir_missing_student_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-bad");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn corpus_skips_loose_files_in_dir() {
+    let dir = tempdir().expect("tempdir");
+    fs::write(dir.path().join("README.md"), "stray file").expect("write");
+    let f = dir.path().join("0001-ok");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write s");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn corpus_malformed_teacher_trace_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-bad");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("teacher.ccpa-trace.jsonl"), "{not json").expect("write");
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn corpus_sorts_multiple_fixtures_alphabetically() {
+    // Two+ fixtures so collect_fixtures' sort_by closure fires.
+    let dir = tempdir().expect("tempdir");
+    for id in &["0002-second", "0001-first"] {
+        let f = dir.path().join(id);
+        fs::create_dir_all(&f).expect("mkdir");
+        fs::write(f.join("teacher.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write t");
+        fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write s");
+    }
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn corpus_teacher_path_is_directory_triggers_io_error() {
+    // exists() returns true for a directory; fs::read_to_string then
+    // fails with ErrorKind::IsADirectory — covers the read_trace io_err path.
+    let dir = tempdir().expect("tempdir");
+    let f = dir.path().join("0001-dir-trap");
+    fs::create_dir_all(f.join("teacher.ccpa-trace.jsonl")).expect("mkdir trap");
+    fs::write(f.join("student.ccpa-trace.jsonl"), SAMPLE_TRACE).expect("write");
+    let code = run(args(&[
+        "ccpa",
+        "corpus",
+        dir.path().to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
 fn binary_main_handles_version_flag() {
     // Exercises src/main.rs end-to-end (the lib tests above call
     // `ccpa_cli::run` directly; only this test invokes the actual

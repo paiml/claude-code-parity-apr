@@ -22,7 +22,7 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      7eb6a7b8651180173661f0731d27d865aa43a4d8056c1ad21f3b3bc6085da940
+contract_sha256:      a6089c974a23cd84df82ac90132bc8500f8943332fba852b5cfbb627fcc207b2
 last_synced_utc:      2026-04-27T07:00:00Z
 note: |
   Pre-merge of paiml/aprender#1078. v0.3.0 of the contract refines
