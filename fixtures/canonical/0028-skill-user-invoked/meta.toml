@@ -1,0 +1,4 @@
+[fixture]
+id = "0028-skill-user-invoked"
+covers = ["skills"]
+description = "User explicitly invokes a skill via /<skill-name> syntax. The SkillRegistry resolves the name + injects the skill body into the assistant's system prompt. SkillInvocation record carries source=user_invoked (distinct from 0019 which uses auto_matched). Exercises the second SkillSource enum variant — the differ's skill_invocation_equivalent rule must distinguish the two sources."

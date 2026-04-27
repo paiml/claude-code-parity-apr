@@ -1,0 +1,4 @@
+[fixture]
+id = "0027-hook-block"
+covers = ["hooks"]
+description = "PreToolUse hook fires Block (exit_code=2) for a Bash command matching a forbidden pattern. The tool dispatch is ABORTED — no tool_result follows; the assistant transitions directly to a text block explaining the block. Exercises HookDecision::Block path: differ's hook_event_equivalent must accept (event=PreToolUse, matcher=Bash, decision=Block, exit_code=2) on both sides. Distinct from 0018 which exercises Warn (exit_code=1, dispatch proceeds)."

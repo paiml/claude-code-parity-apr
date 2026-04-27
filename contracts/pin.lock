@@ -22,14 +22,16 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      254c24942b076f46c17f0881cdb0e02bb885a660fad275bff62beab0de1af831
-last_synced_utc:      2026-04-27T09:00:00Z
+contract_sha256:      c1b47c5af9a296c79c958d7bb75bd54ebc24e23a7961594fea5736f07ea2c099
+last_synced_utc:      2026-04-27T09:30:00Z
 note: |
-  M17 — contract bumps v1.4.0 → v1.5.0 (minor). Documentation
-  truth-up only: the companion-repo spec markdown's milestone
-  table is refreshed to reflect M0-M16 SHIPPED status with PR
-  pointers, plus a new sub-milestones M11-M17 table. No semantics
-  change — the gate surface, OOS list, schema v2, differ rules,
-  and corpus are all unchanged from v1.4.0.
+  M18 — contract bumps v1.5.0 → v1.6.0 (minor). Five new canonical
+  fixtures (0020-bash-multiline-pipe, 0021-edit-replace-all,
+  0027-hook-block, 0028-skill-user-invoked, 0029-max-tokens) bring
+  the corpus to 24 paired fixtures all scoring 1.0. Each exercises
+  a schema-v2 surface variant not previously in the corpus. Coverage
+  holds at 15/15 reachable. Spec ≥30-target progress 19 → 24. The
+  gate surface, OOS list, schema v2, differ rules are all unchanged
+  from v1.4.0.
 
-  contract_sha256 above is the v1.5.0 hash.
+  contract_sha256 above is the v1.6.0 hash.

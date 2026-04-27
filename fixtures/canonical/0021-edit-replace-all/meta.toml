@@ -1,0 +1,4 @@
+[fixture]
+id = "0021-edit-replace-all"
+covers = ["builtin-tools-rwegs"]
+description = "Edit with replace_all=true to rename a variable across multiple occurrences in one file. Teacher and student emit identical Edit calls (same path, same old_string, same new_string, same replace_all flag). Exercises the Edit equivalence rule's tuple form (path_normalized, post_state_sha256) — caller of the differ would compute the post-state sha; here we test that two structurally-identical Edit calls produce zero drift."

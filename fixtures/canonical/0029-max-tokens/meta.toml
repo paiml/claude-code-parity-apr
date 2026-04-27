@@ -1,0 +1,4 @@
+[fixture]
+id = "0029-max-tokens"
+covers = ["non-interactive-mode"]
+description = "Long-output prompt that hits the max_tokens budget mid-emission. Assistant turn ends with stop_reason=max_tokens (distinct from end_turn / tool_use). Session_end carries the same stop_reason — the second StopReason variant beyond EndTurn / ToolUse seen in the corpus. Exercises StopReason enum coverage; tests that the trace round-trip preserves the rare variant."

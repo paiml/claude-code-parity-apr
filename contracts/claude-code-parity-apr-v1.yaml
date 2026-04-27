@@ -63,8 +63,8 @@ metadata:
     - crates/aprender-orchestrate/contracts/batuta/apr-code-v1.yaml
 
 name: claude-code-parity-apr
-version: "1.5.0"
-status: ACTIVE_RUNTIME   # 13/13 gates green. v1.5.0 (M17) refreshes the spec milestone table to reflect M0-M16 SHIPPED status (was stale "planned" for everything past M0); no semantics change — purely a documentation truth-up reflecting the M11-M16 sub-milestone work that landed via PRs #13-#21 since DRAFT v0.1.0. The corpus / gate / contract surface is unchanged from v1.4.0.
+version: "1.6.0"
+status: ACTIVE_RUNTIME   # 13/13 gates green. v1.6.0 (M18) — corpus depth: 19 → 24 fixtures. Five new fixtures exercise schema-v2 surface variants not previously in the corpus: Bash whitespace-collapse on multi-line input (0020), Edit replace_all flag (0021), HookDecision::Block via PreToolUse hook (0027), SkillSource::UserInvoked via /<skill> syntax (0028), StopReason::MaxTokens on long-output truncation (0029). Coverage holds at 15/15 reachable; gate surface unchanged from v1.4.0/v1.5.0.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level invariants — the 12 falsifiable gates this contract asserts.
@@ -831,6 +831,75 @@ status_history:
         identifies the affected scenario. Contract status remains
         ACTIVE_RUNTIME as long as the most-recent measured_parity row
         passes the gate.
+
+  - date: '2026-04-27'
+    from: 'ACTIVE_RUNTIME v1.5.0'
+    to: 'ACTIVE_RUNTIME v1.6.0'
+    note: 'M18 — corpus depth: 19 → 24 fixtures (schema-v2 surface coverage)'
+    reason: |
+      Five new canonical fixtures exercising schema-v2 surface variants
+      that were not previously represented in the corpus:
+
+        0020-bash-multiline-pipe   — Bash command spread across newlines
+                                     with ad-hoc whitespace; tests
+                                     normalize_bash() collapse on a
+                                     non-trivial input (teacher uses
+                                     leading-tab indentation, student
+                                     single-line; both must canonicalize
+                                     identically).
+
+        0021-edit-replace-all      — Edit with replace_all=true; tests
+                                     edit_equivalent's tuple form
+                                     (path_normalized, post_state_sha256)
+                                     when both calls carry the same
+                                     replace_all flag.
+
+        0027-hook-block            — PreToolUse hook fires Block (exit_code=2);
+                                     tool dispatch ABORTED. Distinct from
+                                     0018 (Warn / exit_code=1 / dispatch
+                                     proceeds); first HookDecision::Block
+                                     in the corpus.
+
+        0028-skill-user-invoked    — User types /<skill-name>; SkillRegistry
+                                     resolves via UserInvoked. Distinct
+                                     from 0019 (AutoMatched); first
+                                     SkillSource::UserInvoked in the corpus.
+
+        0029-max-tokens            — assistant turn ends with stop_reason=
+                                     max_tokens on a "list 1000 primes"
+                                     prompt; first StopReason::MaxTokens
+                                     in the corpus (prior fixtures use
+                                     EndTurn / ToolUse only).
+
+      Aggregate corpus check: 24/24 fixtures score 1.0 (passes_gate=true).
+      Coverage holds at 15/15 reachable rows covered (no new rows
+      introduced; all five new fixtures cover already-reachable rows).
+      The new fixtures push the spec's ≥30-target progress 19 → 24;
+      M19 will continue toward 30.
+
+    measured_parity:
+      date: '2026-04-27'
+      fixture_corpus_path: 'fixtures/canonical/'
+      fixture_count: 24
+      aggregate_score: 1.0000
+      thresholds: { aggregate_min: 0.95, individual_min: 0.80 }
+      passes_gate: true
+      parity_matrix_coverage:
+        covered_count: 15
+        required_count: 17
+        oos_count: 2
+        reachable_count: 15
+        reachable_covered_count: 15
+      cli_version: 'ccpa 0.1.0'
+      cli_command: 'ccpa corpus fixtures/canonical/ --json'
+      cli_exit: 0
+      newly_authored_in_m18:
+        - { id: '0020-bash-multiline-pipe',  exercises: 'normalize_bash() whitespace-collapse on multi-line' }
+        - { id: '0021-edit-replace-all',     exercises: 'Edit input with replace_all=true' }
+        - { id: '0027-hook-block',           exercises: 'HookDecision::Block (exit_code=2, dispatch aborted)' }
+        - { id: '0028-skill-user-invoked',   exercises: 'SkillSource::UserInvoked via /<skill> slash' }
+        - { id: '0029-max-tokens',           exercises: 'StopReason::MaxTokens' }
+      progress_to_spec_target: '24 / 30'
 
   - date: '2026-04-27'
     from: 'ACTIVE_RUNTIME v1.4.0'

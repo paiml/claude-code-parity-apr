@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-000000000021","ts":"2026-04-27T17:05:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"f5e6d7c8b9a0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Rename old_var to new_var everywhere in src/lib.rs"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_e1","name":"Edit","input":{"path":"src/lib.rs","old_string":"old_var","new_string":"new_var","replace_all":true}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_e1","ok":true,"content":"replaced 7 occurrences in src/lib.rs","side_effects":{"files_written":["src/lib.rs"],"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Done — renamed 7 occurrences of old_var → new_var in src/lib.rs."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":620,"tokens_in":280,"tokens_out":42}

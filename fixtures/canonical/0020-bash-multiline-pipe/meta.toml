@@ -1,0 +1,4 @@
+[fixture]
+id = "0020-bash-multiline-pipe"
+covers = ["builtin-tools-rwegs"]
+description = "Bash with a multi-line piped command (newlines + heredoc style + multiple pipes). Exercises the Bash equivalence rule's whitespace-collapse normalization on a non-trivial input — teacher writes the command on three lines with leading-tab indentation; student writes it on one line with single spaces. normalize_bash() must collapse both to the same canonical form. Parity holds when the differ confirms semantic equivalence despite syntactic divergence."
