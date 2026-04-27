@@ -1,0 +1,8 @@
+{"v":1,"kind":"session_start","session_id":"reg-0002","ts":"2026-04-27T13:01:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"f3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3c2"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Update both Cargo.toml files to bump version to 0.2.0"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_r1","name":"Edit","input":{"path":"Cargo.toml","old_string":"version = \"0.1.0\"","new_string":"version = \"0.2.0\""}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_r1","ok":true,"content":"file edited"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"tool_use","id":"toolu_r2","name":"Edit","input":{"path":"crates/sub/Cargo.toml","old_string":"version = \"0.1.0\"","new_string":"version = \"0.2.0\""}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":4,"tool_use_id":"toolu_r2","ok":true,"content":"file edited"}
+{"v":1,"kind":"assistant_turn","turn":5,"blocks":[{"type":"text","text":"Both files bumped."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":5,"stop_reason":"end_turn","elapsed_ms":1320,"tokens_in":640,"tokens_out":58}

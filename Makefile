@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -61,6 +61,18 @@ pv-validate:
 
 pin-check:
 	bash scripts/pin-check.sh contracts/pin.lock
+
+parity:
+	@echo "=== canonical corpus (must PASS) ==="
+	ccpa corpus fixtures/canonical/
+	@echo
+	@echo "=== regression corpus (must FAIL) ==="
+	@set +e; ccpa corpus fixtures/regression/; code=$$?; set -e; \
+	if [ "$$code" -eq 0 ]; then \
+		echo "ERROR: regression corpus passed — meter is broken!"; exit 1; \
+	else \
+		echo "OK: regression corpus exited $$code (drift detected)"; \
+	fi
 
 tier1: fmt-check clippy build
 

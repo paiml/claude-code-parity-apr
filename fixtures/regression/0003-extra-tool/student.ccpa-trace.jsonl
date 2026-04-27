@@ -1,0 +1,8 @@
+{"v":1,"kind":"session_start","session_id":"reg-0003","ts":"2026-04-27T13:02:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"f3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3c3"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Print the README contents"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_s1","name":"Read","input":{"path":"README.md"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_s1","ok":true,"content":"# myproject\n\nA project.\n"}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"tool_use","id":"toolu_s2","name":"Read","input":{"path":"Cargo.toml"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":4,"tool_use_id":"toolu_s2","ok":true,"content":"[package]\nname = \"x\""}
+{"v":1,"kind":"assistant_turn","turn":5,"blocks":[{"type":"text","text":"README and Cargo.toml shown."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":5,"stop_reason":"end_turn","elapsed_ms":1240,"tokens_in":320,"tokens_out":36}

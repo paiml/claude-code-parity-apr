@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"reg-0001","ts":"2026-04-27T13:00:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"f3a2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3c1"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"List files in src/"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_r1","name":"Bash","input":{"command":"ls src/"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_r1","ok":true,"content":"main.rs lib.rs","side_effects":{"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"main.rs and lib.rs."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":820,"tokens_in":340,"tokens_out":24}
