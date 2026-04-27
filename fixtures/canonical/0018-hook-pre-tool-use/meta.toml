@@ -1,0 +1,4 @@
+[fixture]
+id = "0018-hook-pre-tool-use"
+covers = ["hooks"]
+description = "PreToolUse hook configured to warn-then-allow for the Bash tool. User asks for a directory listing; the hook fires before the tool dispatch, exit_code=1 (Warn), proceeds. Trace records the HookEvent record kind (schema-v2) inline between the assistant's tool_use block and the tool_result. Exercises the hooks parity-matrix row: ccpa-trace's HookEvent variant is the load-bearing artifact, and the differ's hook_event_equivalent rule must accept (event=PreToolUse, matcher=Bash, decision=Warn, exit_code=1) on both sides. Parity holds when student emits the same HookEvent at the same global action position."

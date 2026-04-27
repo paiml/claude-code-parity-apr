@@ -23,7 +23,10 @@ mod sovereignty;
 
 pub use corpus::{evaluate_corpus, CorpusEntry, CorpusReport, FixtureReport, Thresholds};
 pub use coverage::{corpus_coverage, CoverageReport, FixtureCoverage};
-pub use equivalence::{tool_call_equivalent, DriftCategory, ToolCall};
+pub use equivalence::{
+    hook_event_equivalent, skill_invocation_equivalent, tool_call_equivalent, DriftCategory,
+    HookProjection, SkillProjection, ToolCall,
+};
 pub use file_mutation::{
     file_mutation_drifts, file_mutation_equivalent, FileMutationDrift, FileState,
     Options as FileMutationOptions,

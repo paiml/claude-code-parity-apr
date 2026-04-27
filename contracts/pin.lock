@@ -22,20 +22,23 @@ aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      2038755e79f1f30bd1d0977aed1cc35d29362a0d392608eae51c8f85d7ce1ade
-last_synced_utc:      2026-04-27T07:30:00Z
+contract_sha256:      fac9139f48d3bd690142131d2bd0a58340f216e6ec59dca24e403d8f56e56e50
+last_synced_utc:      2026-04-27T08:00:00Z
 note: |
-  M14 corpus expansion. Contract version held at v1.2.0 (informational
-  measured_parity append, no semver bump). New status_history entry
-  records 17-fixture corpus, aggregate=1.0000, parity-matrix coverage
-  10/17 → 13/17 (newly covered: worktree-isolation, configuration-ladder,
-  managed-org-policy). Four uncovered rows (hooks, skills,
-  keyboard-shortcuts, status-line) tracked under
-  remaining_uncovered_classification with explicit schema-extension
-  / out-of-scope reasoning.
+  M15 — contract bumps v1.2.0 → v1.3.0 (minor). The bump documents
+  the trace-schema v2 (additive HookEvent + SkillInvocation record
+  kinds) and the differ extension (4 new DriftCategory variants +
+  hook_event_equivalent + skill_invocation_equivalent + extended
+  compute_parity_score that reduces over tools + hooks + skills).
 
-  contract_sha256 above is the v1.2.0+M14-append hash. Refresh
-  `aprender_commit` to the squash-merge hash on aprender@main when
-  the matching aprender-side mirror PR merges; `contract_sha256`
-  should be byte-identical across that merge (we keep the two
-  contract files in lock-step).
+  Two new canonical fixtures (0018-hook-pre-tool-use,
+  0019-skill-auto-match) bring parity-matrix coverage 13/17 →
+  15/17. Remaining 2 uncovered rows (keyboard-shortcuts, status-line)
+  reclassified as permanently OOS at the trace boundary in the
+  contract's remaining_uncovered_classification block.
+
+  contract_sha256 above is the v1.3.0 hash. Refresh `aprender_commit`
+  to the squash-merge hash on aprender@main when the matching
+  aprender-side mirror PR merges; contract_sha256 should be
+  byte-identical across that merge (we keep the two contract files
+  in lock-step).

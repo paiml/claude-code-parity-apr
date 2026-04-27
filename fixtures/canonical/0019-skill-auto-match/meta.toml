@@ -1,0 +1,4 @@
+[fixture]
+id = "0019-skill-auto-match"
+covers = ["skills"]
+description = "User asks a Rust borrow-check question. The local skill registry has 'rust-debug' (markdown frontmatter declares when_to_use: 'rust borrow check error compiler diagnostic'). Two trigger tokens of length >=4 match → SkillRegistry::auto_match fires; instructions injected into context. Trace records the SkillInvocation record kind (schema-v2) with source=auto_matched. Exercises the skills parity-matrix row: schema variant + differ's skill_invocation_equivalent rule must accept (name=rust-debug, source=auto_matched, instructions_injected=true) on both sides. Parity holds when student emits the same SkillInvocation at the same global action position."

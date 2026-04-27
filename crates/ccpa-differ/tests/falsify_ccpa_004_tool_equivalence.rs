@@ -9,7 +9,11 @@
     clippy::disallowed_methods // serde_json::json! expands to internal unwrap
 )]
 
-use ccpa_differ::{tool_call_equivalent, DriftCategory, ToolCall};
+use ccpa_differ::{
+    hook_event_equivalent, skill_invocation_equivalent, tool_call_equivalent, DriftCategory,
+    HookProjection, SkillProjection, ToolCall,
+};
+use ccpa_trace::{HookDecision, SkillSource};
 use serde_json::json;
 
 fn tc(name: &str, input: serde_json::Value) -> ToolCall {
@@ -281,4 +285,131 @@ fn drift_category_is_copyable_and_eq() {
     let d = DriftCategory::MismatchedToolInput;
     let copied: DriftCategory = d;
     assert_eq!(d, copied);
+}
+
+// ── Schema-v2 hook+skill equivalence (M15) ──────────────────────────────
+
+fn hp(event: &str, decision: HookDecision, exit_code: i32) -> HookProjection {
+    HookProjection {
+        event: event.to_owned(),
+        matcher: None,
+        decision,
+        exit_code,
+        output: String::new(),
+    }
+}
+
+fn sp(name: &str, source: SkillSource) -> SkillProjection {
+    SkillProjection {
+        name: name.to_owned(),
+        source,
+        instructions_injected: true,
+    }
+}
+
+#[test]
+fn hook_identical_projections_are_equivalent() {
+    let a = hp("PreToolUse", HookDecision::Allow, 0);
+    let b = hp("PreToolUse", HookDecision::Allow, 0);
+    assert_eq!(hook_event_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn hook_different_event_drifts() {
+    let a = hp("PreToolUse", HookDecision::Allow, 0);
+    let b = hp("PostToolUse", HookDecision::Allow, 0);
+    assert_eq!(
+        hook_event_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedHookEvent)
+    );
+}
+
+#[test]
+fn hook_different_decision_drifts() {
+    let a = hp("PreToolUse", HookDecision::Allow, 0);
+    let b = hp("PreToolUse", HookDecision::Block, 2);
+    assert_eq!(
+        hook_event_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedHookEvent)
+    );
+}
+
+#[test]
+fn hook_different_exit_code_drifts_even_if_decision_matches() {
+    let mut a = hp("PreToolUse", HookDecision::Warn, 1);
+    let mut b = hp("PreToolUse", HookDecision::Warn, 99);
+    assert_eq!(
+        hook_event_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedHookEvent)
+    );
+    // sanity: matching exit codes pass
+    a.exit_code = 1;
+    b.exit_code = 1;
+    assert_eq!(hook_event_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn hook_matcher_compared_for_equality() {
+    let mut a = hp("PreToolUse", HookDecision::Allow, 0);
+    let mut b = hp("PreToolUse", HookDecision::Allow, 0);
+    a.matcher = Some("Bash".into());
+    b.matcher = Some("Read".into());
+    assert_eq!(
+        hook_event_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedHookEvent)
+    );
+    b.matcher = Some("Bash".into());
+    assert_eq!(hook_event_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn hook_output_whitespace_normalized_like_bash() {
+    let mut a = hp("PreToolUse", HookDecision::Warn, 1);
+    let mut b = hp("PreToolUse", HookDecision::Warn, 1);
+    a.output = "  warning   line  ".into();
+    b.output = "warning line".into();
+    assert_eq!(
+        hook_event_equivalent(&a, &b),
+        Ok(()),
+        "whitespace must collapse like Bash equivalence"
+    );
+}
+
+#[test]
+fn skill_identical_projections_are_equivalent() {
+    let a = sp("rust-debug", SkillSource::AutoMatched);
+    let b = sp("rust-debug", SkillSource::AutoMatched);
+    assert_eq!(skill_invocation_equivalent(&a, &b), Ok(()));
+}
+
+#[test]
+fn skill_different_name_drifts() {
+    let a = sp("rust-debug", SkillSource::AutoMatched);
+    let b = sp("python-debug", SkillSource::AutoMatched);
+    assert_eq!(
+        skill_invocation_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedSkillInvocation)
+    );
+}
+
+#[test]
+fn skill_different_source_drifts() {
+    let a = sp("rust-debug", SkillSource::UserInvoked);
+    let b = sp("rust-debug", SkillSource::AutoMatched);
+    assert_eq!(
+        skill_invocation_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedSkillInvocation)
+    );
+}
+
+#[test]
+fn skill_instructions_injected_difference_drifts() {
+    let mut a = sp("rust-debug", SkillSource::UserInvoked);
+    let mut b = sp("rust-debug", SkillSource::UserInvoked);
+    a.instructions_injected = true;
+    b.instructions_injected = false;
+    assert_eq!(
+        skill_invocation_equivalent(&a, &b),
+        Err(DriftCategory::MismatchedSkillInvocation)
+    );
 }

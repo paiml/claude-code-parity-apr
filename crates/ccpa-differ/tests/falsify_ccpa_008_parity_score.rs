@@ -11,8 +11,30 @@
 )]
 
 use ccpa_differ::{compute_parity_score, DriftCategory};
-use ccpa_trace::{Actor, Block, Record, StopReason, SCHEMA_VERSION};
+use ccpa_trace::{Actor, Block, HookDecision, Record, SkillSource, StopReason, SCHEMA_VERSION};
 use serde_json::json;
+
+fn hook_event(turn: u32, event: &str, decision: HookDecision, exit_code: i32) -> Record {
+    Record::HookEvent {
+        v: 1,
+        turn,
+        event: event.to_owned(),
+        matcher: None,
+        decision,
+        exit_code,
+        output: String::new(),
+    }
+}
+
+fn skill_invocation(turn: u32, name: &str, source: SkillSource) -> Record {
+    Record::SkillInvocation {
+        v: 1,
+        turn,
+        name: name.to_owned(),
+        source,
+        instructions_injected: true,
+    }
+}
 
 fn session_start() -> Record {
     Record::SessionStart {
@@ -259,6 +281,138 @@ fn assistant_turn_with_only_text_blocks_contributes_zero_calls() {
     let report = compute_parity_score(&teacher, &[]);
     assert_eq!(report.teacher_count, 0);
     assert_eq!(report.score, 1.0);
+}
+
+#[test]
+fn matched_hook_events_count_as_actions() {
+    let teacher = vec![
+        hook_event(0, "SessionStart", HookDecision::Allow, 0),
+        assistant_turn(1, vec![tool_use("t1", "Bash", json!({ "command": "ls" }))]),
+    ];
+    let student = teacher.clone();
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.teacher_count, 2, "hook + tool both count");
+    assert_eq!(report.score, 1.0);
+}
+
+#[test]
+fn mismatched_hook_decision_drops_score() {
+    let teacher = vec![hook_event(1, "PreToolUse", HookDecision::Allow, 0)];
+    let student = vec![hook_event(1, "PreToolUse", HookDecision::Block, 2)];
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.score, 0.0);
+    assert_eq!(report.drifts.len(), 1);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::MismatchedHookEvent
+    );
+    assert_eq!(report.drifts[0].tool_name, "PreToolUse");
+}
+
+#[test]
+fn missing_hook_event_emits_missing_hook_drift() {
+    let teacher = vec![hook_event(0, "SessionStart", HookDecision::Allow, 0)];
+    let report = compute_parity_score(&teacher, &[]);
+    assert_eq!(report.score, 0.0);
+    assert_eq!(report.drifts.len(), 1);
+    assert_eq!(report.drifts[0].category, DriftCategory::MissingHookEvent);
+}
+
+#[test]
+fn extra_hook_event_emits_extra_hook_drift() {
+    let student = vec![hook_event(0, "SessionStart", HookDecision::Allow, 0)];
+    let report = compute_parity_score(&[], &student);
+    assert_eq!(report.drifts.len(), 1);
+    assert_eq!(report.drifts[0].category, DriftCategory::ExtraHookEvent);
+}
+
+#[test]
+fn matched_skill_invocations_count_as_actions() {
+    let teacher = vec![skill_invocation(0, "rust-debug", SkillSource::AutoMatched)];
+    let student = teacher.clone();
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.teacher_count, 1);
+    assert_eq!(report.score, 1.0);
+}
+
+#[test]
+fn mismatched_skill_name_drops_score() {
+    let teacher = vec![skill_invocation(1, "rust-debug", SkillSource::AutoMatched)];
+    let student = vec![skill_invocation(
+        1,
+        "python-debug",
+        SkillSource::AutoMatched,
+    )];
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.score, 0.0);
+    assert_eq!(report.drifts.len(), 1);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::MismatchedSkillInvocation
+    );
+}
+
+#[test]
+fn skill_source_diff_drops_score() {
+    let teacher = vec![skill_invocation(1, "rust-debug", SkillSource::UserInvoked)];
+    let student = vec![skill_invocation(1, "rust-debug", SkillSource::AutoMatched)];
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.score, 0.0);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::MismatchedSkillInvocation
+    );
+}
+
+#[test]
+fn missing_skill_emits_missing_skill_drift() {
+    let teacher = vec![skill_invocation(1, "rust-debug", SkillSource::AutoMatched)];
+    let report = compute_parity_score(&teacher, &[]);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::MissingSkillInvocation
+    );
+}
+
+#[test]
+fn extra_skill_emits_extra_skill_drift() {
+    let student = vec![skill_invocation(1, "rust-debug", SkillSource::AutoMatched)];
+    let report = compute_parity_score(&[], &student);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::ExtraSkillInvocation
+    );
+}
+
+#[test]
+fn action_kind_mismatch_at_same_position_emits_kind_drift() {
+    // Teacher fires a Hook at position 0; student emits a tool call at position 0.
+    let teacher = vec![hook_event(0, "PreToolUse", HookDecision::Allow, 0)];
+    let student = vec![assistant_turn(
+        1,
+        vec![tool_use("s1", "Bash", json!({ "command": "ls" }))],
+    )];
+    let report = compute_parity_score(&teacher, &student);
+    assert_eq!(report.score, 0.0);
+    assert_eq!(report.drifts.len(), 1);
+    assert_eq!(
+        report.drifts[0].category,
+        DriftCategory::MismatchedActionKind
+    );
+}
+
+#[test]
+fn interleaved_actions_align_by_global_index() {
+    // Both traces emit the same Hook→Tool→Skill sequence.
+    let trace = vec![
+        hook_event(0, "SessionStart", HookDecision::Allow, 0),
+        assistant_turn(1, vec![tool_use("t1", "Bash", json!({ "command": "ls" }))]),
+        skill_invocation(1, "rust-debug", SkillSource::AutoMatched),
+    ];
+    let report = compute_parity_score(&trace, &trace);
+    assert_eq!(report.teacher_count, 3);
+    assert_eq!(report.score, 1.0);
+    assert!(report.drifts.is_empty());
 }
 
 #[test]
