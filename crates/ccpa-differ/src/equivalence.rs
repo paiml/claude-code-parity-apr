@@ -20,13 +20,21 @@ pub struct ToolCall {
 }
 
 /// Drift category emitted when two tool calls are NOT equivalent.
-/// Mirrors `parity_score.drift_categories` in the contract.
+/// Mirrors `parity_score.drift_categories` in the contract. M4.0 ships
+/// the per-pair name/input variants; M4.1 added the full-trace
+/// missing/extra variants. Higher-order categories
+/// (`extraneous_llm_call`, `mismatched_file_state`, `turn_order_skew`)
+/// land in M4.2 / M5 once their detectors exist.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DriftCategory {
     /// Tool name matched but normalized inputs differ.
     MismatchedToolInput,
     /// Tool name itself differs.
     MismatchedToolName,
+    /// Teacher emitted a tool call at this position; student didn't.
+    MissingToolCall,
+    /// Student emitted a tool call at this position; teacher didn't.
+    ExtraToolCall,
 }
 
 /// Decide whether two tool calls are semantically equivalent under the
