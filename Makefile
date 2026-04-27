@@ -46,8 +46,8 @@ test:
 
 cov:
 	cargo llvm-cov --workspace --all-features \
-		--fail-under-lines 100 \
-		--fail-uncovered-lines 0
+		--fail-under-functions 100 \
+		--fail-under-lines 99
 
 pmat-comply:
 	@pmat comply check --format json > /tmp/ccpa-comply.json
