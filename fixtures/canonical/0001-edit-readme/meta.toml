@@ -1,0 +1,4 @@
+[fixture]
+id = "0001-edit-readme"
+covers = ["builtin-tools-rwegs"]
+description = "Read README.md, then Edit it to add an intro line. Exercises Read + Edit equivalence."

@@ -241,6 +241,272 @@ fn coverage_malformed_fixture_exits_2() {
 }
 
 #[test]
+fn coverage_auto_mode_with_yaml_and_fixtures_dir() {
+    let dir = tempdir().expect("tempdir");
+    // Minimal yaml with one SHIPPED row and one MISSING row
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: shipped-row
+    name: shipped
+    status: SHIPPED
+  - id: missing-row
+    name: missing
+    status: MISSING
+",
+    )
+    .expect("write yaml");
+    // One fixture covering shipped-row
+    let fixdir = dir.path().join("fixtures");
+    let f = fixdir.join("0001-x");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(
+        f.join("meta.toml"),
+        r#"[fixture]
+id = "0001-x"
+covers = ["shipped-row"]
+"#,
+    )
+    .expect("write meta");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0, "missing-row is not required (MISSING)");
+}
+
+#[test]
+fn coverage_auto_mode_uncovered_row_exits_1() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: alpha
+    status: SHIPPED
+  - id: beta
+    status: PARTIAL
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 1);
+}
+
+#[test]
+fn coverage_auto_mode_yaml_missing_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        "/no/such/parity.yaml",
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn coverage_auto_mode_fixtures_dir_missing_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(&yaml, "categories: []\n").expect("write");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        "/no/such/fixtures",
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn coverage_auto_mode_malformed_meta_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: x
+    status: SHIPPED
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    let f = fixdir.join("0001-bad");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(f.join("meta.toml"), "this is not toml = unclosed [").expect("write");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn coverage_auto_mode_skips_subdirs_without_meta_toml() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: only-row
+    status: SHIPPED
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    let with_meta = fixdir.join("0001-good");
+    fs::create_dir_all(&with_meta).expect("mkdir");
+    fs::write(
+        with_meta.join("meta.toml"),
+        "[fixture]\nid = \"0001-good\"\ncovers = [\"only-row\"]\n",
+    )
+    .expect("write");
+    let no_meta = fixdir.join("0002-no-meta");
+    fs::create_dir_all(&no_meta).expect("mkdir"); // no meta.toml
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0, "second subdir was silently skipped");
+}
+
+#[test]
+fn coverage_auto_mode_skips_loose_files_in_fixtures_dir() {
+    // Stray file in fixtures dir → covered by `if !path.is_dir() continue`.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(&yaml, "categories:\n  - id: x\n    status: SHIPPED\n").expect("write yaml");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    fs::write(fixdir.join("README.md"), "stray").expect("stray file");
+    let f = fixdir.join("0001-good");
+    fs::create_dir_all(&f).expect("mkdir");
+    fs::write(
+        f.join("meta.toml"),
+        "[fixture]\nid = \"0001-good\"\ncovers = [\"x\"]\n",
+    )
+    .expect("write");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn coverage_auto_mode_sorts_multiple_fixtures_alphabetically() {
+    // Two+ subdirs so fixtures_from_dir's sort_by closure fires.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(&yaml, "categories:\n  - id: x\n    status: SHIPPED\n").expect("write");
+    let fixdir = dir.path().join("fixtures");
+    for id in &["0002-second", "0001-first"] {
+        let f = fixdir.join(id);
+        fs::create_dir_all(&f).expect("mkdir");
+        fs::write(
+            f.join("meta.toml"),
+            format!("[fixture]\nid = \"{id}\"\ncovers = [\"x\"]\n"),
+        )
+        .expect("write");
+    }
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn coverage_auto_mode_meta_path_is_directory_io_error() {
+    // exists() returns true for a dir; read_to_string fails with IsADirectory.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(&yaml, "categories:\n  - id: x\n    status: SHIPPED\n").expect("write");
+    let fixdir = dir.path().join("fixtures");
+    let f = fixdir.join("0001-trap");
+    fs::create_dir_all(f.join("meta.toml")).expect("create dir at meta path");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn coverage_neither_mode_exits_2() {
+    // No --required AND no --apr-code-parity-yaml → MissingMode
+    let code = run(args(&["ccpa", "coverage"]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn coverage_yaml_with_no_shipped_rows_yields_empty_required() {
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: only-missing
+    status: MISSING
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    let code = run(args(&[
+        "ccpa",
+        "coverage",
+        "--apr-code-parity-yaml",
+        yaml.to_str().expect("utf8"),
+        "--fixtures-dir",
+        fixdir.to_str().expect("utf8"),
+    ]));
+    // No SHIPPED/PARTIAL rows → required is empty → EmptyRequired error
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
 fn coverage_empty_fixture_id_exits_2() {
     let code = run(args(&[
         "ccpa",

@@ -1,0 +1,4 @@
+[fixture]
+id = "0005-bash-cascade"
+covers = ["builtin-tools-rwegs"]
+description = "Two consecutive Bash invocations with whitespace-different commands. Verifies Bash normalize(command) collapse-whitespace rule."

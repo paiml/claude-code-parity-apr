@@ -23,6 +23,7 @@ clap = { version = "4.5", features = ["derive"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = "2.0"
+toml = { version = "0.8", default-features = false, features = ["parse"] }
 
 [dev-dependencies]
 tempfile = "3.20"

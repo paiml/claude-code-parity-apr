@@ -1,0 +1,4 @@
+[fixture]
+id = "0003-create-new-file"
+covers = ["builtin-tools-rwegs"]
+description = "Single-shot Write tool — create .gitignore. Verifies Write equivalence via content_sha256."

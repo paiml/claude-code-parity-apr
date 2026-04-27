@@ -1,0 +1,4 @@
+[fixture]
+id = "0002-fix-failing-test"
+covers = ["builtin-tools-rwegs"]
+description = "Bash → Read → Edit → Bash cascade to debug + fix an off-by-one. Multi-turn tool_use+tool_result chain."
