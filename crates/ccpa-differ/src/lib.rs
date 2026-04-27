@@ -14,10 +14,12 @@
 #![forbid(unsafe_code)]
 #![deny(missing_docs)]
 
+mod corpus;
 mod equivalence;
 mod file_mutation;
 mod score;
 
+pub use corpus::{evaluate_corpus, CorpusEntry, CorpusReport, FixtureReport, Thresholds};
 pub use equivalence::{tool_call_equivalent, DriftCategory, ToolCall};
 pub use file_mutation::{
     file_mutation_drifts, file_mutation_equivalent, FileMutationDrift, FileState,
