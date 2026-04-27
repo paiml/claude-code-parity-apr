@@ -1,6 +1,6 @@
 {
   "aggregate_score": 1.0,
-  "fixture_count": 11,
+  "fixture_count": 14,
   "passes_gate": true,
   "per_fixture": [
     {
@@ -66,6 +66,24 @@
     {
       "drift_count": 0,
       "id": "0011-web-fetch",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0012-non-interactive-mode",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0013-session-management",
+      "passes_individual": true,
+      "score": 1.0
+    },
+    {
+      "drift_count": 0,
+      "id": "0014-custom-agent",
       "passes_individual": true,
       "score": 1.0
     }

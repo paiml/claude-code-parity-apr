@@ -1,0 +1,4 @@
+[fixture]
+id = "0013-session-management"
+covers = ["session-management"]
+description = "`/sessions` slash command lists recent sessions with their ids, timestamps, and titles. Zero tool calls — exercises the slash-dispatch + session-store-read path. Parity holds when student emits the same structured listing."

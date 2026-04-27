@@ -1,0 +1,4 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-00000000000d","ts":"2026-04-27T15:55:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"ada2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3bd"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"/sessions"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"Recent sessions (most recent first):\n  cur  0192f0e0…000d  2026-04-27 15:55  current\n  -    0192f0e0…000c  2026-04-27 15:50  one-shot\n  -    0192f0e0…000b  2026-04-27 15:40  fetch-status\n\nUse /resume <id> to switch."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":1,"stop_reason":"end_turn","elapsed_ms":210,"tokens_in":18,"tokens_out":68}

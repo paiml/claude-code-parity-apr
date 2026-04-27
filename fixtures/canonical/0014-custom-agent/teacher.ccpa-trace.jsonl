@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"0192f0e0-0000-7000-8000-00000000000e","ts":"2026-04-27T16:00:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"aea2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3be"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Run the security review subagent on this branch"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_c1","name":"Agent","input":{"subagent_type":"security-review","prompt":"Audit the branch for input validation, secret handling, and supply-chain issues. Report findings."}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_c1","ok":true,"content":"No critical findings. 2 advisory: tighten clippy on unwrap_used; pin actions/checkout to SHA."}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Clean — 2 advisory items: clippy unwrap_used, pin checkout action by SHA."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":6240,"tokens_in":540,"tokens_out":68}
