@@ -26,3 +26,5 @@ Cargo.lock.bak
 # OS
 .DS_Store
 Thumbs.db
+mutants.out/
+mutants.out.old/
