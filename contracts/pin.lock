@@ -16,21 +16,19 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      8549cdc69
+aprender_commit:      499f8b978
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      e979ddfde0540810e06cfc2ea3ed77a4a4e2ec1b7fb63133c32ab064c1172cdb
-last_synced_utc:      2026-04-28T08:30:00Z
+contract_sha256:      cbf1695035df1db7c7b87bdc950d3db3196fa6681d91a190cb4db751f2c2fba7
+last_synced_utc:      2026-04-28T11:30:00Z
 note: |
-  M28 — `apr code --emit-trace` upstream PR opened (paiml/aprender#1100).
-  Companion contract bumps v1.15.0 → v1.16.0 with the M28 status_history
-  entry. Aprender contract-mirror pushed in paired commit 8549cdc69 at
-  byte-identical sha256
-  e979ddfde0540810e06cfc2ea3ed77a4a4e2ec1b7fb63133c32ab064c1172cdb.
-
-  The apr-cli feature change itself lives on a separate aprender branch
-  (feat/apr-code-emit-trace-m28, paiml/aprender#1100) — that PR's CI
-  + merge is independent from this contract bump.
+  M29 — five-whys + tensor-names-v1 v1.1.0 contract amendment
+  (qwen3_moe coverage + F-TNV-002 falsifier) landed via
+  paiml/aprender#1103. Companion contract bumps v1.16.0 → v1.17.0
+  with the M29 status_history entry detailing the five-whys
+  transcript and the cross-repo fix. Aprender contract-mirror
+  pushed in paired commit 499f8b978 at byte-identical sha256
+  cbf1695035df1db7c7b87bdc950d3db3196fa6681d91a190cb4db751f2c2fba7.
