@@ -227,9 +227,11 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M32b SHIPPED on the audit
-> surface (M32a + M32b both merged to aprender main); contract at
-> `claude-code-parity-apr-v1` **v1.19.0**
+> **Status snapshot (2026-04-28)**: M0–M32c.2.1 SHIPPED on the
+> audit surface (M32a + M32b + M32c.1 + M32c.2 + M32c.2.1 all
+> merged to aprender main; the qwen3_moe load path now succeeds
+> end-to-end and the contract-named refusal moved to forward
+> dispatch); contract at `claude-code-parity-apr-v1` **v1.19.0**
 > ACTIVE_RUNTIME; corpus at **30** paired canonical fixtures (spec
 > ≥30 target met) with parity-matrix coverage 15/15 reachable
 > (2 OOS at trace boundary); FALSIFY-CCPA-007 HARD-BLOCKING CI gate
@@ -323,7 +325,10 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M30** | Spec-table refresh — extends through M29; contract v1.17.0 → v1.18.0; closes the spec-side audit trail | doc-only | #35 |
 | **M31** | Monorepo scope clarification — aprender and claude-code-parity-apr live in the same monorepo; "upstream / out of scope / not a CCPA POC item" framing removed from spec + contract status_history; future inference-engine work (M32 MoE forward pass) treated as in-scope companion-repo deliverable | doc-only; contract v1.18.0 → v1.19.0 | direct main commit `1f06ac0` |
 | **M32a** | First slice of MoE forward chain. Authored cross-repo kernel contract `qwen3-moe-forward-v1.yaml` (DRAFT, SCAFFOLD) composing `tensor-names-v1` v1.1.0 + `moe-router-v1` + `moe-expert-dispatch-v1` + `qwen3moe-shapes-v1` + swiglu/silu/rmsnorm/rope. 5 acceptance criteria + 4 staged steps (M32a/b/c/d) + 4 falsification tests. Anchors Qwen3-Coder-30B-A3B-Instruct shape algebra (L=48, d=2048, d_ff=6144, N_experts=128, k=8). FALSIFY-QW3-MOE-FORWARD-001 reproduced on lambda-vector RTX 4090. | aprender [#1104 merged](https://github.com/paiml/aprender/pull/1104) at 78101494c | this PR |
-| **M32b** | Architecture-aware FFN load — both `QuantizedGGUFTransformer::from_gguf` and `GGUFTransformer::from_gguf` short-circuit `qwen3_moe` with structured `RealizarError::UnsupportedOperation` referencing the M32a contract id. Cryptic `Tensor 'blk.0.ffn_up.weight' not found` replaced with audit-named error. 2 falsifier tests (synthetic + live 17.3 GB GGUF) discharge FALSIFY-QW3-MOE-FORWARD-002. | aprender [#1106 merged](https://github.com/paiml/aprender/pull/1106) at 90cc293a7 | this PR |
+| **M32b** | Architecture-aware FFN load — both `QuantizedGGUFTransformer::from_gguf` and `GGUFTransformer::from_gguf` short-circuit `qwen3_moe` with structured `RealizarError::UnsupportedOperation` referencing the M32a contract id. Cryptic `Tensor 'blk.0.ffn_up.weight' not found` replaced with audit-named error. 2 falsifier tests (synthetic + live 17.3 GB GGUF) discharge FALSIFY-QW3-MOE-FORWARD-002. | aprender [#1106 merged](https://github.com/paiml/aprender/pull/1106) at 90cc293a7 | direct-merged commit `883a838` |
+| **M32c.1** | `Qwen3MoeQuantizedLayer` struct + `load_qwen3_moe_layer()` loader using the M29 contract namespace (`blk.{L}.ffn_gate_inp/ffn_gate_exps/ffn_up_exps/ffn_down_exps.weight`). Live verification: 4 MoE tensors per layer × 48 layers = 192 expert-tensor descriptors loaded from the cached 17.3 GB GGUF; total expert bytes 17.5 GB matches file size. | aprender [#1116 merged](https://github.com/paiml/aprender/pull/1116) at ced9fe32b | (companion bookkeeping in this PR) |
+| **M32c.2** | `QuantizedGGUFTransformer::from_gguf_for_moe` constructor — qwen3_moe-aware sibling of `from_gguf`. Adds `moe_layers: Vec<Option<Qwen3MoeQuantizedLayer>>` field parallel to `layers`. Loads non-FFN portion via `load_quantized_layer_moe_skeleton`; dense FFN fields stub as zero-element placeholders; `moe_layers[i] = Some(...)` for every L. | aprender [#1117 merged](https://github.com/paiml/aprender/pull/1117) at ffd0b246f | (companion bookkeeping in this PR) |
+| **M32c.2.1** | Flip `from_gguf` dispatch to `from_gguf_for_moe` for arch == qwen3_moe; replace M32b's load-time `UnsupportedOperation` with a forward-time `UnsupportedOperation { operation: "moe_forward_dispatch" }` at `gguf_gpu_generate.rs`. Live `apr run` against 17.3 GB GGUF now reaches inference attempt; error reports load succeeded, only forward dispatch unwired. M32b test updated. | aprender [#1118 merged](https://github.com/paiml/aprender/pull/1118) at 97c808e29 | this PR |
 
 ## Falsification conditions (12 gates total)
 
