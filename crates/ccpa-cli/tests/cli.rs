@@ -821,3 +821,109 @@ fn binary_main_handles_version_flag() {
         .expect("spawn ccpa --version");
     assert!(status.success());
 }
+
+// ── M25: mutation-coverage kill-tests for ccpa-cli ────────────────────
+
+#[test]
+fn binary_main_propagates_nonzero_exit_code() {
+    // Kills `main.rs:6 replace main -> ExitCode with Default::default()`.
+    // If main were `Default::default()` it would return SUCCESS unconditionally.
+    // Invoke the binary with an argument that causes ccpa_cli::run to
+    // return a non-zero ExitCode (e.g. coverage MissingMode).
+    let status = Command::new(CCPA_BIN)
+        .arg("coverage")
+        .status()
+        .expect("spawn ccpa coverage with no flags");
+    assert!(
+        !status.success(),
+        "binary must propagate non-zero exit code from ccpa_cli::run; \
+         the bare `coverage` invocation should exit 2 (MissingMode)"
+    );
+}
+
+#[test]
+fn coverage_prints_uncovered_list_when_uncovered_nonempty() {
+    // Kills `cmd_coverage.rs:118 delete ! in run`.
+    // If the `!` were removed, the `uncovered:` block would only print
+    // when uncovered IS empty (printing nothing), and skip when non-empty.
+    // This test invokes the binary so we can capture stdout, then asserts
+    // the uncovered list IS printed when `report.uncovered` is non-empty.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: alpha
+    status: SHIPPED
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(&fixdir).expect("mkdir");
+    let output = Command::new(CCPA_BIN)
+        .args([
+            "coverage",
+            "--apr-code-parity-yaml",
+            yaml.to_str().expect("utf8"),
+            "--fixtures-dir",
+            fixdir.to_str().expect("utf8"),
+        ])
+        .output()
+        .expect("spawn ccpa coverage");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("uncovered:"),
+        "stdout MUST contain 'uncovered:' when uncovered is non-empty; got: {stdout}"
+    );
+    assert!(
+        stdout.contains("- alpha"),
+        "stdout MUST list the uncovered row 'alpha'; got: {stdout}"
+    );
+}
+
+#[test]
+fn coverage_prints_oos_list_when_oos_nonempty() {
+    // Kills `cmd_coverage.rs:124 delete ! in run`.
+    // Same idea for the OOS block: invoke with --oos-rows naming a
+    // SHIPPED row, then assert the OOS list IS printed.
+    let dir = tempdir().expect("tempdir");
+    let yaml = dir.path().join("parity.yaml");
+    fs::write(
+        &yaml,
+        r"categories:
+  - id: alpha
+    status: SHIPPED
+  - id: beta
+    status: SHIPPED
+",
+    )
+    .expect("write");
+    let fixdir = dir.path().join("fixtures");
+    fs::create_dir_all(fixdir.join("0001-alpha")).expect("mkdir");
+    fs::write(
+        fixdir.join("0001-alpha/meta.toml"),
+        "[fixture]\nid = \"0001-alpha\"\ncovers = [\"alpha\"]\n",
+    )
+    .expect("write meta");
+    let output = Command::new(CCPA_BIN)
+        .args([
+            "coverage",
+            "--apr-code-parity-yaml",
+            yaml.to_str().expect("utf8"),
+            "--fixtures-dir",
+            fixdir.to_str().expect("utf8"),
+            "--oos-rows",
+            "beta",
+        ])
+        .output()
+        .expect("spawn ccpa coverage");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("out-of-scope"),
+        "stdout MUST contain 'out-of-scope' header when OOS is non-empty; got: {stdout}"
+    );
+    assert!(
+        stdout.contains("- beta"),
+        "stdout MUST list the OOS row 'beta'; got: {stdout}"
+    );
+}
