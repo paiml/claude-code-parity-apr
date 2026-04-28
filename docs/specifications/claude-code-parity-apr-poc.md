@@ -227,8 +227,8 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M32a SHIPPED on the audit
-> surface (M32a merged to aprender main, M32b PR open); contract at
+> **Status snapshot (2026-04-28)**: M0–M32b SHIPPED on the audit
+> surface (M32a + M32b both merged to aprender main); contract at
 > `claude-code-parity-apr-v1` **v1.19.0**
 > ACTIVE_RUNTIME; corpus at **30** paired canonical fixtures (spec
 > ≥30 target met) with parity-matrix coverage 15/15 reachable
@@ -254,13 +254,19 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 > (tensor-names-v1 v1.1.0 + moe-router-v1 + moe-expert-dispatch-v1
 > + qwen3moe-shapes-v1 + swiglu/silu/rmsnorm/rope) and names 5
 > acceptance criteria + 4 staged implementation phases + 4
-> falsification tests. **M32b** in flight at
-> [paiml/aprender#1106](https://github.com/paiml/aprender/pull/1106):
-> replaces the cryptic `Tensor 'blk.0.ffn_up.weight' not found`
-> error with a structured `RealizarError::UnsupportedOperation
-> { operation: "moe_forward_pass" }` that names the contract id;
-> live-verified on lambda-vector RTX 4090 against the cached
-> 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf.
+> falsification tests. **M32b** MERGED at
+> [paiml/aprender#1106](https://github.com/paiml/aprender/pull/1106)
+> (squash commit `90cc293a7`): replaces the cryptic
+> `Tensor 'blk.0.ffn_up.weight' not found` error with a structured
+> `RealizarError::UnsupportedOperation { operation: "moe_forward_pass" }`
+> that names the contract id; live-verified on lambda-vector
+> RTX 4090 against the cached 17.3 GB
+> Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf. Both
+> `QuantizedGGUFTransformer::from_gguf` (apr run path) and
+> `GGUFTransformer::from_gguf` (F32 / convert path) now refuse
+> qwen3_moe with the contract-named error before reaching the
+> dense-FFN tensor lookup. 2 falsifier tests discharge
+> FALSIFY-QW3-MOE-FORWARD-002.
 >
 > **Outstanding next-goal (in-scope, M32c → M32d)**: drive a
 > MEASURED tool-dispatch parity score by wiring the existing
@@ -317,7 +323,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M30** | Spec-table refresh — extends through M29; contract v1.17.0 → v1.18.0; closes the spec-side audit trail | doc-only | #35 |
 | **M31** | Monorepo scope clarification — aprender and claude-code-parity-apr live in the same monorepo; "upstream / out of scope / not a CCPA POC item" framing removed from spec + contract status_history; future inference-engine work (M32 MoE forward pass) treated as in-scope companion-repo deliverable | doc-only; contract v1.18.0 → v1.19.0 | direct main commit `1f06ac0` |
 | **M32a** | First slice of MoE forward chain. Authored cross-repo kernel contract `qwen3-moe-forward-v1.yaml` (DRAFT, SCAFFOLD) composing `tensor-names-v1` v1.1.0 + `moe-router-v1` + `moe-expert-dispatch-v1` + `qwen3moe-shapes-v1` + swiglu/silu/rmsnorm/rope. 5 acceptance criteria + 4 staged steps (M32a/b/c/d) + 4 falsification tests. Anchors Qwen3-Coder-30B-A3B-Instruct shape algebra (L=48, d=2048, d_ff=6144, N_experts=128, k=8). FALSIFY-QW3-MOE-FORWARD-001 reproduced on lambda-vector RTX 4090. | aprender [#1104 merged](https://github.com/paiml/aprender/pull/1104) at 78101494c | this PR |
-| **M32b** | Architecture-aware FFN load — both `QuantizedGGUFTransformer::from_gguf` and `GGUFTransformer::from_gguf` short-circuit `qwen3_moe` with structured `RealizarError::UnsupportedOperation` referencing the M32a contract id. Cryptic `Tensor 'blk.0.ffn_up.weight' not found` replaced with audit-named error. 2 falsifier tests (synthetic + live 17.3 GB GGUF) discharge FALSIFY-QW3-MOE-FORWARD-002. | aprender [#1106 in flight](https://github.com/paiml/aprender/pull/1106) | (companion bookkeeping in this PR) |
+| **M32b** | Architecture-aware FFN load — both `QuantizedGGUFTransformer::from_gguf` and `GGUFTransformer::from_gguf` short-circuit `qwen3_moe` with structured `RealizarError::UnsupportedOperation` referencing the M32a contract id. Cryptic `Tensor 'blk.0.ffn_up.weight' not found` replaced with audit-named error. 2 falsifier tests (synthetic + live 17.3 GB GGUF) discharge FALSIFY-QW3-MOE-FORWARD-002. | aprender [#1106 merged](https://github.com/paiml/aprender/pull/1106) at 90cc293a7 | this PR |
 
 ## Falsification conditions (12 gates total)
 
