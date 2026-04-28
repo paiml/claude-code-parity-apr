@@ -21,6 +21,8 @@ pub mod cmd_corpus;
 pub mod cmd_coverage;
 /// `ccpa diff` subcommand.
 pub mod cmd_diff;
+/// `ccpa measure` subcommand (M26 — AUTHORED → MEASURED bridge).
+pub mod cmd_measure;
 /// `ccpa validate` subcommand.
 pub mod cmd_validate;
 
@@ -43,6 +45,8 @@ pub enum CcpaError {
     Coverage(cmd_coverage::CoverageError),
     /// `corpus` failure.
     Corpus(cmd_corpus::CorpusError),
+    /// `measure` failure (M26).
+    Measure(cmd_measure::MeasureError),
 }
 
 impl fmt::Display for CcpaError {
@@ -52,6 +56,7 @@ impl fmt::Display for CcpaError {
             Self::Diff(e) => write!(f, "{e}"),
             Self::Coverage(e) => write!(f, "{e}"),
             Self::Corpus(e) => write!(f, "{e}"),
+            Self::Measure(e) => write!(f, "{e}"),
         }
     }
 }
@@ -76,6 +81,11 @@ impl From<cmd_coverage::CoverageError> for CcpaError {
 impl From<cmd_corpus::CorpusError> for CcpaError {
     fn from(e: cmd_corpus::CorpusError) -> Self {
         Self::Corpus(e)
+    }
+}
+impl From<cmd_measure::MeasureError> for CcpaError {
+    fn from(e: cmd_measure::MeasureError) -> Self {
+        Self::Measure(e)
     }
 }
 
@@ -106,6 +116,7 @@ where
         Command::Diff(args) => cmd_diff::run(&args).map_err(Into::into),
         Command::Coverage(args) => cmd_coverage::run(&args).map_err(Into::into),
         Command::Corpus(args) => cmd_corpus::run(&args).map_err(Into::into),
+        Command::Measure(args) => cmd_measure::run(&args).map_err(Into::into),
     };
 
     match result {
@@ -141,4 +152,6 @@ enum Command {
     Coverage(cmd_coverage::Args),
     /// Walk a paired-fixture corpus and aggregate parity scores (FALSIFY-CCPA-013).
     Corpus(cmd_corpus::Args),
+    /// Measure live `apr code` against a teacher fixture (M26 — AUTHORED → MEASURED bridge).
+    Measure(cmd_measure::Args),
 }
