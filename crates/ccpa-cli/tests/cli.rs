@@ -9,6 +9,7 @@
 
 use std::ffi::OsString;
 use std::fs;
+use std::path::PathBuf;
 use std::process::{Command, ExitCode};
 
 use ccpa_cli::run;
@@ -926,4 +927,296 @@ fn coverage_prints_oos_list_when_oos_nonempty() {
         stdout.contains("- beta"),
         "stdout MUST list the OOS row 'beta'; got: {stdout}"
     );
+}
+
+// ── M26: ccpa measure subcommand ──────────────────────────────────────
+
+fn write_teacher_fixture(dir: &std::path::Path, prompt: &str, expected_text: &str) -> PathBuf {
+    let path = dir.join("teacher.ccpa-trace.jsonl");
+    let body = format!(
+        concat!(
+            "{{\"v\":1,\"kind\":\"session_start\",\"session_id\":\"s\",\"ts\":\"t\",",
+            "\"actor\":\"claude-code\",\"model\":\"m\",\"cwd_sha256\":\"{}\"}}\n",
+            "{{\"v\":1,\"kind\":\"user_prompt\",\"turn\":0,\"text\":{}}}\n",
+            "{{\"v\":1,\"kind\":\"assistant_turn\",\"turn\":1,\"blocks\":[",
+            "{{\"type\":\"text\",\"text\":{}}}],\"stop_reason\":\"end_turn\"}}\n",
+            "{{\"v\":1,\"kind\":\"session_end\",\"turn\":1,\"stop_reason\":\"end_turn\",",
+            "\"elapsed_ms\":0,\"tokens_in\":0,\"tokens_out\":0}}\n"
+        ),
+        "0".repeat(64),
+        serde_json::to_string(prompt).expect("json"),
+        serde_json::to_string(expected_text).expect("json"),
+    );
+    fs::write(&path, body).expect("write teacher fixture");
+    path
+}
+
+fn write_teacher_with_tool_use(dir: &std::path::Path) -> PathBuf {
+    let path = dir.join("teacher_tool.ccpa-trace.jsonl");
+    fs::write(&path, SAMPLE_TRACE).expect("write");
+    path
+}
+
+fn write_apr_stub(path: &std::path::Path, stdout_text: &str) {
+    let script = format!(
+        "#!/usr/bin/env bash\nprintf '%s\\n' {}\n",
+        shell_quote(stdout_text)
+    );
+    fs::write(path, script).expect("write apr stub");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(path, fs::Permissions::from_mode(0o755)).expect("chmod apr stub");
+    }
+}
+
+fn shell_quote(s: &str) -> String {
+    let mut out = String::with_capacity(s.len() + 2);
+    out.push('\'');
+    for c in s.chars() {
+        if c == '\'' {
+            out.push_str(r"'\''");
+        } else {
+            out.push(c);
+        }
+    }
+    out.push('\'');
+    out
+}
+
+#[test]
+fn measure_apr_stub_returns_identical_text_scores_one() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "what is 2+2", "4");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "4");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0, "stub stdout matches teacher text → score 1.0");
+}
+
+#[test]
+fn measure_apr_stub_zero_tool_calls_scores_one_regardless_of_text() {
+    // The parity-score formula counts ToolUse + HookEvent +
+    // SkillInvocation actions. Teacher with zero tool-use blocks =>
+    // teacher_count = 0 => score = 1.0 by formula. This is a known
+    // property: text-only turns don't drive parity score directly.
+    // Tool-dispatch measurement is M27 follow-up.
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "what is 2+2", "4");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "completely different response");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+}
+
+#[test]
+fn measure_refuses_teacher_with_tool_use() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_with_tool_use(dir.path());
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "irrelevant");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(
+        ec(code),
+        2,
+        "teacher with tool_use must be refused with exit 2"
+    );
+}
+
+#[test]
+fn measure_missing_teacher_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "x");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        "/no/such/teacher.jsonl",
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn measure_malformed_teacher_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = dir.path().join("bad.jsonl");
+    fs::write(&teacher, "{not json").expect("write");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "x");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn measure_teacher_without_user_prompt_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = dir.path().join("no_prompt.jsonl");
+    fs::write(
+        &teacher,
+        format!(
+            concat!(
+                "{{\"v\":1,\"kind\":\"session_start\",\"session_id\":\"s\",\"ts\":\"t\",",
+                "\"actor\":\"claude-code\",\"model\":\"m\",\"cwd_sha256\":\"{}\"}}\n",
+                "{{\"v\":1,\"kind\":\"session_end\",\"turn\":0,\"stop_reason\":\"end_turn\",",
+                "\"elapsed_ms\":0,\"tokens_in\":0,\"tokens_out\":0}}\n"
+            ),
+            "0".repeat(64),
+        ),
+    )
+    .expect("write");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "x");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn measure_apr_bin_missing_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "p", "expected");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        "/no/such/apr/binary",
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn measure_apr_bin_nonzero_exit_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "p", "expected");
+    let stub = dir.path().join("failing-stub.sh");
+    fs::write(
+        &stub,
+        "#!/usr/bin/env bash\necho 'simulated apr failure' >&2\nexit 7\n",
+    )
+    .expect("write");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&stub, fs::Permissions::from_mode(0o755)).expect("chmod");
+    }
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 2);
+}
+
+#[test]
+fn measure_writes_emitted_student_when_requested() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "what is 2+2", "4");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "the answer is 4");
+    let emit_path = dir.path().join("student-measured.jsonl");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+        "--emit-student",
+        emit_path.to_str().expect("utf8"),
+    ]));
+    assert_eq!(ec(code), 0);
+    let body = fs::read_to_string(&emit_path).expect("emitted student exists");
+    assert!(
+        body.contains("\"actor\":\"apr-code\""),
+        "emitted student must declare apr-code actor"
+    );
+    assert!(
+        body.contains("the answer is 4"),
+        "emitted student must contain the apr-stub stdout"
+    );
+}
+
+#[test]
+fn measure_json_output_includes_score_and_apr_bin() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "p", "x");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "anything");
+    let output = Command::new(CCPA_BIN)
+        .args([
+            "measure",
+            "--teacher",
+            teacher.to_str().expect("utf8"),
+            "--apr-bin",
+            stub.to_str().expect("utf8"),
+            "--json",
+        ])
+        .output()
+        .expect("spawn ccpa measure --json");
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("\"score\""));
+    assert!(stdout.contains("\"measured\": true"));
+    assert!(stdout.contains("\"apr_bin\""));
+}
+
+#[test]
+fn measure_emit_student_to_unwritable_path_exits_2() {
+    let dir = tempdir().expect("tempdir");
+    let teacher = write_teacher_fixture(dir.path(), "p", "x");
+    let stub = dir.path().join("apr-stub.sh");
+    write_apr_stub(&stub, "x");
+    let code = run(args(&[
+        "ccpa",
+        "measure",
+        "--teacher",
+        teacher.to_str().expect("utf8"),
+        "--apr-bin",
+        stub.to_str().expect("utf8"),
+        "--emit-student",
+        "/no/such/dir/student.jsonl",
+    ]));
+    assert_eq!(ec(code), 2);
 }
