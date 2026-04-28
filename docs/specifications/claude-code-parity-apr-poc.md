@@ -227,25 +227,35 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M30 all SHIPPED; contract at
-> `claude-code-parity-apr-v1` **v1.18.0** ACTIVE_RUNTIME; corpus at **30**
-> paired canonical fixtures (spec ≥30 target met) with parity-matrix
-> coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
-> HARD-BLOCKING CI gate live since M16; companion ↔ aprender round-trip
-> drift guard live since M22; **100% mutation coverage workspace-wide**
-> (224 mutants caught/unviable, 0 missed) since M25; `ccpa measure`
-> AUTHORED → MEASURED bridge live since M26;
-> **`apr code --emit-trace` upstream + Qwen3-Coder default + qwen3_moe
-> tensor-names contract v1.1.0 + F-TNV-002 falsifier all on aprender
-> main since M28+M29**. Live PR cadence on
+> **Status snapshot (2026-04-28)**: M0–M31 SHIPPED on the audit
+> surface; contract at `claude-code-parity-apr-v1` **v1.19.0**
+> ACTIVE_RUNTIME; corpus at **30** paired canonical fixtures (spec
+> ≥30 target met) with parity-matrix coverage 15/15 reachable
+> (2 OOS at trace boundary); FALSIFY-CCPA-007 HARD-BLOCKING CI gate
+> live since M16; companion ↔ aprender round-trip drift guard live
+> since M22; **100% mutation coverage workspace-wide** (224 mutants
+> caught/unviable, 0 missed) since M25; `ccpa measure` AUTHORED →
+> MEASURED bridge live since M26; **`apr code --emit-trace` +
+> Qwen3-Coder default + qwen3_moe tensor-names contract v1.1.0 +
+> F-TNV-002 falsifier all on aprender main since M28+M29**.
+> M31 (this revision) records the **monorepo scope clarification**:
+> aprender lives in the same monorepo as this companion repo, so
+> there is no out-of-scope or upstream boundary — every file in
+> `paiml/aprender` and `paiml/claude-code-parity-apr` that has to
+> change for this POC to discharge its measured-parity gate is
+> in-scope work for this spec. Live PR cadence on
 > https://github.com/paiml/claude-code-parity-apr.
 >
-> **Outstanding next-goal**: a MEASURED tool-dispatch parity score
-> requires the MoE forward pass (expert routing + per-expert dispatch
-> + weighted aggregation) in realizar/aprender-serve. The contract
-> namespace, falsifier, model availability, and emit-trace plumbing
-> are all in place — only the inference engine is missing. That work
-> is upstream realizar engineering, not a CCPA POC item.
+> **Outstanding next-goal (in-scope, M32)**: drive a MEASURED
+> tool-dispatch parity score by implementing the MoE forward pass
+> (expert routing via `ffn_gate_inp`, per-expert dispatch over
+> `ffn_gate_exps` / `ffn_up_exps` / `ffn_down_exps`, weighted
+> aggregation) in `crates/aprender-serve/` against the `qwen3_moe`
+> architecture declared by `tensor-names-v1` v1.1.0. The contract
+> namespace, falsifier, default-model preference, and emit-trace
+> plumbing are all in place — the inference engine itself is the
+> remaining unit of work, and per the M31 scope clarification it
+> is treated identically to any other companion-repo deliverable.
 
 ### Major phases (M0–M6)
 
@@ -286,7 +296,8 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M27** | Spec-table refresh — sub-milestones table extended M19 → M26; contract v1.14.0 → v1.15.0 | doc-only | #32 |
 | **M28** | Cross-repo: `apr code --emit-trace <path>` flag upstream + Qwen3-Coder-30B-A3B-Instruct as default model + `qwen3-coder` short-name alias. Companion bookkeeping records the launch. | aprender PRs landed via #1102; companion contract v1.15.0 → v1.16.0 | companion #33 |
 | **M29** | Five-whys + provable-contract — Qwen3-Coder GGUF load fail (`Tensor 'blk.0.ffn_up.weight' not found`) traced to GGUF tensor naming being arch-agnostic. Fix: `tensor-names-v1` v1.0.0 → v1.1.0 with `qwen3_moe` arch-key + 4 new MoE layer roles + F-TNV-002 falsifier validated against the real 17.3 GB Qwen3-Coder GGUF byte inventory. | [aprender#1103 merged](https://github.com/paiml/aprender/pull/1103) at 15d504cfe; companion contract v1.16.0 → v1.17.0 | companion #34 |
-| **M30** | This spec-table refresh — extends through M29; contract v1.17.0 → v1.18.0; closes the spec-side audit trail | doc-only | this PR |
+| **M30** | Spec-table refresh — extends through M29; contract v1.17.0 → v1.18.0; closes the spec-side audit trail | doc-only | #35 |
+| **M31** | Monorepo scope clarification — aprender and claude-code-parity-apr live in the same monorepo; "upstream / out of scope / not a CCPA POC item" framing removed from spec + contract status_history; future inference-engine work (M32 MoE forward pass) treated as in-scope companion-repo deliverable | doc-only; contract v1.18.0 → v1.19.0 | this PR |
 
 ## Falsification conditions (12 gates total)
 
