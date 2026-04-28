@@ -16,19 +16,17 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      499f8b978
+aprender_commit:      b7f42619d
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      cbf1695035df1db7c7b87bdc950d3db3196fa6681d91a190cb4db751f2c2fba7
-last_synced_utc:      2026-04-28T11:30:00Z
+contract_sha256:      7b1d79db710a91786033792a68b32a3cc7396472f7f7a61413c3e87728f88752
+last_synced_utc:      2026-04-28T13:00:00Z
 note: |
-  M29 — five-whys + tensor-names-v1 v1.1.0 contract amendment
-  (qwen3_moe coverage + F-TNV-002 falsifier) landed via
-  paiml/aprender#1103. Companion contract bumps v1.16.0 → v1.17.0
-  with the M29 status_history entry detailing the five-whys
-  transcript and the cross-repo fix. Aprender contract-mirror
-  pushed in paired commit 499f8b978 at byte-identical sha256
-  cbf1695035df1db7c7b87bdc950d3db3196fa6681d91a190cb4db751f2c2fba7.
+  M30 — final spec-table refresh extending sub-milestones table
+  through M29; closes the spec-side audit trail. Companion contract
+  bumps v1.17.0 → v1.18.0; aprender contract-mirror pushed in paired
+  commit b7f42619d at byte-identical sha256
+  7b1d79db710a91786033792a68b32a3cc7396472f7f7a61413c3e87728f88752.

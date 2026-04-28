@@ -227,20 +227,25 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M26 all SHIPPED; contract at
-> `claude-code-parity-apr-v1` **v1.14.0** ACTIVE_RUNTIME; corpus at **30**
+> **Status snapshot (2026-04-28)**: M0–M30 all SHIPPED; contract at
+> `claude-code-parity-apr-v1` **v1.18.0** ACTIVE_RUNTIME; corpus at **30**
 > paired canonical fixtures (spec ≥30 target met) with parity-matrix
 > coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
 > HARD-BLOCKING CI gate live since M16; companion ↔ aprender round-trip
 > drift guard live since M22; **100% mutation coverage workspace-wide**
 > (224 mutants caught/unviable, 0 missed) since M25; `ccpa measure`
-> AUTHORED → MEASURED bridge live since M26. Live PR cadence on
+> AUTHORED → MEASURED bridge live since M26;
+> **`apr code --emit-trace` upstream + Qwen3-Coder default + qwen3_moe
+> tensor-names contract v1.1.0 + F-TNV-002 falsifier all on aprender
+> main since M28+M29**. Live PR cadence on
 > https://github.com/paiml/claude-code-parity-apr.
 >
-> **Outstanding next-goal**: a non-tautological FALSIFY-CCPA-013
-> discharge requires `apr code --emit-trace` to land upstream in
-> aprender so tool-dispatch records become observable; tracked as
-> M28 candidate (M27 was this doc-refresh).
+> **Outstanding next-goal**: a MEASURED tool-dispatch parity score
+> requires the MoE forward pass (expert routing + per-expert dispatch
+> + weighted aggregation) in realizar/aprender-serve. The contract
+> namespace, falsifier, model availability, and emit-trace plumbing
+> are all in place — only the inference engine is missing. That work
+> is upstream realizar engineering, not a CCPA POC item.
 
 ### Major phases (M0–M6)
 
@@ -278,7 +283,10 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M24** | 100% mutation coverage on `ccpa-differ` (gate kernel) — 5 kill-tests close arm-deletion + && → \|\| gaps | 122 caught + 8 unviable + 0 missed across 130 mutants; contract v1.11.0 → v1.12.0 | #29 |
 | **M25** | 100% mutation coverage workspace-wide (remaining 4 crates) — 3 kill-tests on `ccpa-cli` close `main` exit-code propagation + uncovered/OOS print branches | 193 caught + 31 unviable + 0 missed across 224 mutants; contract v1.12.0 → v1.13.0 | #30 |
 | **M26** | `ccpa measure` AUTHORED → MEASURED bridge subcommand — drives live `apr code -p` against teacher's user_prompt, builds synthetic student trace, scores via compute_parity_score; refuses tool_use teachers (text-only path; tool dispatch waits on M28) | text-only score-1.0 vacuous; tool-dispatch path requires `apr code --emit-trace` | #31 |
-| **M27** | This doc-refresh — sub-milestones table extended M19 → M26; contract v1.14.0 → v1.15.0 | doc-only | this PR |
+| **M27** | Spec-table refresh — sub-milestones table extended M19 → M26; contract v1.14.0 → v1.15.0 | doc-only | #32 |
+| **M28** | Cross-repo: `apr code --emit-trace <path>` flag upstream + Qwen3-Coder-30B-A3B-Instruct as default model + `qwen3-coder` short-name alias. Companion bookkeeping records the launch. | aprender PRs landed via #1102; companion contract v1.15.0 → v1.16.0 | companion #33 |
+| **M29** | Five-whys + provable-contract — Qwen3-Coder GGUF load fail (`Tensor 'blk.0.ffn_up.weight' not found`) traced to GGUF tensor naming being arch-agnostic. Fix: `tensor-names-v1` v1.0.0 → v1.1.0 with `qwen3_moe` arch-key + 4 new MoE layer roles + F-TNV-002 falsifier validated against the real 17.3 GB Qwen3-Coder GGUF byte inventory. | [aprender#1103 merged](https://github.com/paiml/aprender/pull/1103) at 15d504cfe; companion contract v1.16.0 → v1.17.0 | companion #34 |
+| **M30** | This spec-table refresh — extends through M29; contract v1.17.0 → v1.18.0; closes the spec-side audit trail | doc-only | this PR |
 
 ## Falsification conditions (12 gates total)
 
