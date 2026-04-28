@@ -16,17 +16,21 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      52531ab01
+aprender_commit:      8549cdc69
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      a16fe007981c13b6b44dca554659a7bb6209431ff77f69f0a4ca90b5145022a0
-last_synced_utc:      2026-04-28T08:00:00Z
+contract_sha256:      e979ddfde0540810e06cfc2ea3ed77a4a4e2ec1b7fb63133c32ab064c1172cdb
+last_synced_utc:      2026-04-28T08:30:00Z
 note: |
-  M27 — spec milestone-table refresh M19 → M26. Contract bumps
-  v1.14.0 → v1.15.0 with the M27 status_history entry (no code or
-  contract-surface change). Aprender mirror pushed in paired commit
-  52531ab01 at byte-identical sha256
-  a16fe007981c13b6b44dca554659a7bb6209431ff77f69f0a4ca90b5145022a0.
+  M28 — `apr code --emit-trace` upstream PR opened (paiml/aprender#1100).
+  Companion contract bumps v1.15.0 → v1.16.0 with the M28 status_history
+  entry. Aprender contract-mirror pushed in paired commit 8549cdc69 at
+  byte-identical sha256
+  e979ddfde0540810e06cfc2ea3ed77a4a4e2ec1b7fb63133c32ab064c1172cdb.
+
+  The apr-cli feature change itself lives on a separate aprender branch
+  (feat/apr-code-emit-trace-m28, paiml/aprender#1100) — that PR's CI
+  + merge is independent from this contract bump.
