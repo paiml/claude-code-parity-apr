@@ -227,8 +227,9 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M31 SHIPPED on the audit
-> surface; contract at `claude-code-parity-apr-v1` **v1.19.0**
+> **Status snapshot (2026-04-28)**: M0–M32a SHIPPED on the audit
+> surface (M32a merged to aprender main, M32b PR open); contract at
+> `claude-code-parity-apr-v1` **v1.19.0**
 > ACTIVE_RUNTIME; corpus at **30** paired canonical fixtures (spec
 > ≥30 target met) with parity-matrix coverage 15/15 reachable
 > (2 OOS at trace boundary); FALSIFY-CCPA-007 HARD-BLOCKING CI gate
@@ -246,16 +247,33 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 > in-scope work for this spec. Live PR cadence on
 > https://github.com/paiml/claude-code-parity-apr.
 >
-> **Outstanding next-goal (in-scope, M32)**: drive a MEASURED
-> tool-dispatch parity score by implementing the MoE forward pass
-> (expert routing via `ffn_gate_inp`, per-expert dispatch over
-> `ffn_gate_exps` / `ffn_up_exps` / `ffn_down_exps`, weighted
-> aggregation) in `crates/aprender-serve/` against the `qwen3_moe`
-> architecture declared by `tensor-names-v1` v1.1.0. The contract
-> namespace, falsifier, default-model preference, and emit-trace
-> plumbing are all in place — the inference engine itself is the
-> remaining unit of work, and per the M31 scope clarification it
-> is treated identically to any other companion-repo deliverable.
+> **M32 staged plan in flight (2026-04-28)**: **M32a**
+> `qwen3-moe-forward-v1.yaml` SCAFFOLD contract MERGED to aprender
+> main at [paiml/aprender#1104](https://github.com/paiml/aprender/pull/1104)
+> (squash commit `78101494c`); composes existing kernels
+> (tensor-names-v1 v1.1.0 + moe-router-v1 + moe-expert-dispatch-v1
+> + qwen3moe-shapes-v1 + swiglu/silu/rmsnorm/rope) and names 5
+> acceptance criteria + 4 staged implementation phases + 4
+> falsification tests. **M32b** in flight at
+> [paiml/aprender#1106](https://github.com/paiml/aprender/pull/1106):
+> replaces the cryptic `Tensor 'blk.0.ffn_up.weight' not found`
+> error with a structured `RealizarError::UnsupportedOperation
+> { operation: "moe_forward_pass" }` that names the contract id;
+> live-verified on lambda-vector RTX 4090 against the cached
+> 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf.
+>
+> **Outstanding next-goal (in-scope, M32c → M32d)**: drive a
+> MEASURED tool-dispatch parity score by wiring the existing
+> pure-Rust `moe_forward_token` (in
+> `crates/aprender-serve/src/gpu/scheduler/moe_dispatch.rs`,
+> already implements router + per-expert SwiGLU + weighted
+> aggregation) into the FFN dispatch site, then validating
+> numerical parity vs llama.cpp Q4_K + HF FP16 references per
+> CLAUDE.md ground-truth checklist. Discharging M32d flips
+> `qwen3-moe-forward-v1` from DRAFT to ACTIVE_RUNTIME and unblocks
+> companion-repo FALSIFY-CCPA-013 measured parity score. Per the
+> M31 scope clarification, M32c+ is treated identically to any
+> other companion-repo deliverable.
 
 ### Major phases (M0–M6)
 
