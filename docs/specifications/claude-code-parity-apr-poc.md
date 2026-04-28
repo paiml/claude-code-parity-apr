@@ -227,13 +227,20 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-27)**: M0–M19 all SHIPPED; contract at
-> `claude-code-parity-apr-v1` v1.7.0 ACTIVE_RUNTIME; corpus at **30**
+> **Status snapshot (2026-04-28)**: M0–M26 all SHIPPED; contract at
+> `claude-code-parity-apr-v1` **v1.14.0** ACTIVE_RUNTIME; corpus at **30**
 > paired canonical fixtures (spec ≥30 target met) with parity-matrix
 > coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
-> HARD-BLOCKING CI gate live since M16. All four non-Error
-> `StopReason` variants exercised. Live PR cadence on
+> HARD-BLOCKING CI gate live since M16; companion ↔ aprender round-trip
+> drift guard live since M22; **100% mutation coverage workspace-wide**
+> (224 mutants caught/unviable, 0 missed) since M25; `ccpa measure`
+> AUTHORED → MEASURED bridge live since M26. Live PR cadence on
 > https://github.com/paiml/claude-code-parity-apr.
+>
+> **Outstanding next-goal**: a non-tautological FALSIFY-CCPA-013
+> discharge requires `apr code --emit-trace` to land upstream in
+> aprender so tool-dispatch records become observable; tracked as
+> M28 candidate (M27 was this doc-refresh).
 
 ### Major phases (M0–M6)
 
@@ -263,7 +270,15 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M16** | FALSIFY-CCPA-007 informational → HARD-BLOCKING; OOS exclusion mechanism (`--oos-rows`) shipped for `keyboard-shortcuts` + `status-line` | 15/15 reachable, gate PASS; contract v1.3.0 → v1.4.0 | #21 |
 | **M17** | Spec milestone table refreshed to reflect M0–M16; contract v1.4.0 → v1.5.0 | doc-only | #22 |
 | **M18** | Corpus depth 19 → 24; 5 schema-v2 surface variants (Bash multiline, Edit replace_all, HookDecision::Block, SkillSource::UserInvoked, StopReason::MaxTokens) | 1.0000 / 24 fixtures; contract v1.5.0 → v1.6.0 | #23 |
-| **M19** | Corpus complete 24 → 30 (spec ≥30 target met); multi-tool sequences + multi-turn correction + StopReason::StopSequence | 1.0000 / 30 fixtures; contract v1.6.0 → v1.7.0 | this PR |
+| **M19** | Corpus complete 24 → 30 (spec ≥30 target met); multi-tool sequences + multi-turn correction + StopReason::StopSequence | 1.0000 / 30 fixtures; contract v1.6.0 → v1.7.0 | #24 |
+| **M20** | README truth-up — badges (v1.2.0 → v1.7.0), behavioral-gates table flipped from "planned" to ✅ ACTIVE, architecture diagram revised post-rescope | doc-only; contract v1.7.0 → v1.8.0 | #25 |
+| **M21** | Aprender-side mirror sync v1.2.0 → v1.8.0 (6 revisions of drift cleared); first round-trip closure | byte-identical sha256 across both repos; contract v1.8.0 → v1.9.0 | #27 (squash inc. M21) |
+| **M22** | `pin-check-roundtrip.sh` CI guard installed — fails any companion bump unpaired with aprender mirror | drift class mechanically prevented; contract v1.9.0 → v1.10.0 | #27 |
+| **M23** | `CONTRIBUTING.md` authored — source-of-truth split, fixture-authoring workflow, 4-step contract-bump ritual, gate→remediation lookup, anti-patterns | doc-only; contract v1.10.0 → v1.11.0 | #28 |
+| **M24** | 100% mutation coverage on `ccpa-differ` (gate kernel) — 5 kill-tests close arm-deletion + && → \|\| gaps | 122 caught + 8 unviable + 0 missed across 130 mutants; contract v1.11.0 → v1.12.0 | #29 |
+| **M25** | 100% mutation coverage workspace-wide (remaining 4 crates) — 3 kill-tests on `ccpa-cli` close `main` exit-code propagation + uncovered/OOS print branches | 193 caught + 31 unviable + 0 missed across 224 mutants; contract v1.12.0 → v1.13.0 | #30 |
+| **M26** | `ccpa measure` AUTHORED → MEASURED bridge subcommand — drives live `apr code -p` against teacher's user_prompt, builds synthetic student trace, scores via compute_parity_score; refuses tool_use teachers (text-only path; tool dispatch waits on M28) | text-only score-1.0 vacuous; tool-dispatch path requires `apr code --emit-trace` | #31 |
+| **M27** | This doc-refresh — sub-milestones table extended M19 → M26; contract v1.14.0 → v1.15.0 | doc-only | this PR |
 
 ## Falsification conditions (12 gates total)
 
