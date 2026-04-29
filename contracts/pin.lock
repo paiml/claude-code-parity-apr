@@ -16,23 +16,24 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      0804d4645
+aprender_commit:      a8623f650
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      ee5e903d234d2b21a64822e05303d950efa8b5858e0f701d684fc7093d8dd693
-last_synced_utc:      2026-04-28T14:00:00Z
+contract_sha256:      da0eea852de3bdbc953d00b01ddcdde4ef6e4b461e92d288661304fa526de06b
+last_synced_utc:      2026-04-29T08:35:00Z
 note: |
-  M31 — monorepo scope clarification. Rescinds the "upstream / out
-  of scope / not a CCPA POC item" framing previously used in
-  v1.17.0 (M29) and v1.18.0 (M30) status_history entries. Operator
-  clarified that paiml/aprender and paiml/claude-code-parity-apr
-  live in the same monorepo; every file in either repo that has to
-  change for this POC to discharge its measured-parity gate is
-  in-scope companion-repo work, including the M32 MoE forward-pass.
-  Companion contract bumps v1.18.0 → v1.19.0; aprender
-  contract-mirror pushed in paired commit 0804d4645 at byte-
-  identical sha256
-  ee5e903d234d2b21a64822e05303d950efa8b5858e0f701d684fc7093d8dd693.
+  M32c.2.2 → M32c.2.2.2.1.3 chain SHIPPED. The full CPU MoE forward
+  chain is wired end-to-end and FALSIFY-QW3-MOE-FORWARD-003 is
+  LIVE-DISCHARGED on lambda-vector RTX 4090: `apr run` against the
+  cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf emits real
+  tokens. 8 aprender PRs merged in this cycle (#1119 → #1126);
+  the underlying M32c.2.2.2.1.3 discharge merged at aprender main
+  squash commit a902eea93 (PR #1126).
+  Companion contract bumps v1.19.0 → v1.20.0; M22 paired aprender
+  contract-mirror pushed at commit a8623f650 on branch
+  feat/claude-code-parity-apr-poc-spec (PR #1078) at byte-identical
+  sha256
+  da0eea852de3bdbc953d00b01ddcdde4ef6e4b461e92d288661304fa526de06b.

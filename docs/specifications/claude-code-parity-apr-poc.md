@@ -227,61 +227,64 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-04-28)**: M0–M32c.2.1 SHIPPED on the
-> audit surface (M32a + M32b + M32c.1 + M32c.2 + M32c.2.1 all
-> merged to aprender main; the qwen3_moe load path now succeeds
-> end-to-end and the contract-named refusal moved to forward
-> dispatch); contract at `claude-code-parity-apr-v1` **v1.19.0**
-> ACTIVE_RUNTIME; corpus at **30** paired canonical fixtures (spec
-> ≥30 target met) with parity-matrix coverage 15/15 reachable
-> (2 OOS at trace boundary); FALSIFY-CCPA-007 HARD-BLOCKING CI gate
-> live since M16; companion ↔ aprender round-trip drift guard live
-> since M22; **100% mutation coverage workspace-wide** (224 mutants
-> caught/unviable, 0 missed) since M25; `ccpa measure` AUTHORED →
-> MEASURED bridge live since M26; **`apr code --emit-trace` +
-> Qwen3-Coder default + qwen3_moe tensor-names contract v1.1.0 +
+> **Status snapshot (2026-04-29)**: M0–M32c.2.2.2.1.3 SHIPPED on the
+> audit surface — the entire CPU MoE forward chain is now wired
+> end-to-end and `apr run` emits real tokens against the cached
+> 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf on lambda-vector
+> RTX 4090 (live evidence: prompt "M32c.2.2.2.1.4 live falsifier
+> 2026-04-29: write the letter q." emitted "." in 130.83s).
+> Contract at `claude-code-parity-apr-v1` **v1.20.0** ACTIVE_RUNTIME;
+> contract `qwen3-moe-forward-v1` at v1.2.0 still DRAFT (flips to
+> ACTIVE_RUNTIME at M32d numerical-parity discharge). Corpus at **30**
+> paired canonical fixtures (spec ≥30 target met) with parity-matrix
+> coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
+> HARD-BLOCKING CI gate live since M16; companion ↔ aprender round-trip
+> drift guard live since M22; **100% mutation coverage workspace-wide**
+> (224 mutants caught/unviable, 0 missed) since M25; `ccpa measure`
+> AUTHORED → MEASURED bridge live since M26; **`apr code --emit-trace`
+> + Qwen3-Coder default + qwen3_moe tensor-names contract v1.1.0 +
 > F-TNV-002 falsifier all on aprender main since M28+M29**.
-> M31 (this revision) records the **monorepo scope clarification**:
-> aprender lives in the same monorepo as this companion repo, so
-> there is no out-of-scope or upstream boundary — every file in
-> `paiml/aprender` and `paiml/claude-code-parity-apr` that has to
-> change for this POC to discharge its measured-parity gate is
-> in-scope work for this spec. Live PR cadence on
-> https://github.com/paiml/claude-code-parity-apr.
+> M31 records the **monorepo scope clarification**: aprender lives
+> in the same monorepo as this companion repo, so there is no
+> out-of-scope or upstream boundary — every file in `paiml/aprender`
+> and `paiml/claude-code-parity-apr` that has to change for this POC
+> to discharge its measured-parity gate is in-scope work for this spec.
+> Live PR cadence on https://github.com/paiml/claude-code-parity-apr.
 >
-> **M32 staged plan in flight (2026-04-28)**: **M32a**
-> `qwen3-moe-forward-v1.yaml` SCAFFOLD contract MERGED to aprender
-> main at [paiml/aprender#1104](https://github.com/paiml/aprender/pull/1104)
-> (squash commit `78101494c`); composes existing kernels
-> (tensor-names-v1 v1.1.0 + moe-router-v1 + moe-expert-dispatch-v1
-> + qwen3moe-shapes-v1 + swiglu/silu/rmsnorm/rope) and names 5
-> acceptance criteria + 4 staged implementation phases + 4
-> falsification tests. **M32b** MERGED at
-> [paiml/aprender#1106](https://github.com/paiml/aprender/pull/1106)
-> (squash commit `90cc293a7`): replaces the cryptic
-> `Tensor 'blk.0.ffn_up.weight' not found` error with a structured
-> `RealizarError::UnsupportedOperation { operation: "moe_forward_pass" }`
-> that names the contract id; live-verified on lambda-vector
-> RTX 4090 against the cached 17.3 GB
-> Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf. Both
-> `QuantizedGGUFTransformer::from_gguf` (apr run path) and
-> `GGUFTransformer::from_gguf` (F32 / convert path) now refuse
-> qwen3_moe with the contract-named error before reaching the
-> dense-FFN tensor lookup. 2 falsifier tests discharge
-> FALSIFY-QW3-MOE-FORWARD-002.
+> **M32 chain status (2026-04-29)**: M32a (contract scaffold,
+> aprender#1104) + M32b (arch-aware FFN load, aprender#1106) +
+> **M32c.1** (Qwen3MoeQuantizedLayer + load_qwen3_moe_layer,
+> aprender#1116) + **M32c.2** (from_gguf_for_moe constructor,
+> aprender#1117) + **M32c.2.1** (load-time → forward-time refusal,
+> aprender#1118) + **M32c.2.2** (dequant strategy contract amendment
+> v1.0.0 → v1.1.0, aprender#1119) + **M32c.2.2.0** (expert_byte_slice
+> adapter, aprender#1120) + **M32c.2.2.1** (expert_swiglu_quantized
+> per-expert SwiGLU, aprender#1121) + **M32c.2.2.2.0**
+> (moe_ffn_forward_layer single-layer dispatch, aprender#1122) +
+> **M32c.2.2.2.1** (integration-strategy contract amendment v1.1.0
+> → v1.2.0, aprender#1123) + **M32c.2.2.2.1.1**
+> (`OwnedQuantizedModel::forward_qwen3_moe` method, aprender#1124) +
+> **M32c.2.2.2.1.2** (`run_qwen3_moe_generate` autoregressive loop,
+> aprender#1125) + **M32c.2.2.2.1.3** (dispatch flip in
+> `inference_result.rs` + Q4_K_M qtype-aware `matvec_for_qtype`
+> dispatch, aprender#1126) ALL MERGED. **FALSIFY-QW3-MOE-FORWARD-003
+> live-discharged on lambda-vector RTX 4090** — `apr run` against the
+> cached 17.3 GB Q4_K_M GGUF emits tokens.
 >
-> **Outstanding next-goal (in-scope, M32c → M32d)**: drive a
-> MEASURED tool-dispatch parity score by wiring the existing
-> pure-Rust `moe_forward_token` (in
-> `crates/aprender-serve/src/gpu/scheduler/moe_dispatch.rs`,
-> already implements router + per-expert SwiGLU + weighted
-> aggregation) into the FFN dispatch site, then validating
-> numerical parity vs llama.cpp Q4_K + HF FP16 references per
-> CLAUDE.md ground-truth checklist. Discharging M32d flips
-> `qwen3-moe-forward-v1` from DRAFT to ACTIVE_RUNTIME and unblocks
-> companion-repo FALSIFY-CCPA-013 measured parity score. Per the
-> M31 scope clarification, M32c+ is treated identically to any
-> other companion-repo deliverable.
+> **In-flight**: M32c.2.2.2.1.4 — live `apr run` falsifier
+> (`crates/apr-cli/tests/qwen3_moe_apr_run_live_falsifier.rs`,
+> F-QW3-MOE-C22214-001) pinning the dispatch-flip discharge in
+> CI / regression-prevention — **aprender PR #1127 in CI** (5/7
+> green at snapshot time).
+>
+> **Outstanding next-goal (in-scope, M32d)**: numerical parity vs
+> llama.cpp Q4_K (primary) + HF transformers FP16 (secondary) on
+> greedy decode of a fixed prompt — `cosine_similarity > 0.99` on
+> logits per AC_QW3_MOE_001 + AC_QW3_MOE_005, discharging
+> FALSIFY-QW3-MOE-FORWARD-004. Discharge flips `qwen3-moe-forward-v1`
+> DRAFT → ACTIVE_RUNTIME and unblocks companion-repo FALSIFY-CCPA-013
+> measured parity score. Per the M31 scope clarification, M32d is
+> treated identically to any other companion-repo deliverable.
 
 ### Major phases (M0–M6)
 
@@ -329,6 +332,14 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M32c.1** | `Qwen3MoeQuantizedLayer` struct + `load_qwen3_moe_layer()` loader using the M29 contract namespace (`blk.{L}.ffn_gate_inp/ffn_gate_exps/ffn_up_exps/ffn_down_exps.weight`). Live verification: 4 MoE tensors per layer × 48 layers = 192 expert-tensor descriptors loaded from the cached 17.3 GB GGUF; total expert bytes 17.5 GB matches file size. | aprender [#1116 merged](https://github.com/paiml/aprender/pull/1116) at ced9fe32b | (companion bookkeeping in this PR) |
 | **M32c.2** | `QuantizedGGUFTransformer::from_gguf_for_moe` constructor — qwen3_moe-aware sibling of `from_gguf`. Adds `moe_layers: Vec<Option<Qwen3MoeQuantizedLayer>>` field parallel to `layers`. Loads non-FFN portion via `load_quantized_layer_moe_skeleton`; dense FFN fields stub as zero-element placeholders; `moe_layers[i] = Some(...)` for every L. | aprender [#1117 merged](https://github.com/paiml/aprender/pull/1117) at ffd0b246f | (companion bookkeeping in this PR) |
 | **M32c.2.1** | Flip `from_gguf` dispatch to `from_gguf_for_moe` for arch == qwen3_moe; replace M32b's load-time `UnsupportedOperation` with a forward-time `UnsupportedOperation { operation: "moe_forward_dispatch" }` at `gguf_gpu_generate.rs`. Live `apr run` against 17.3 GB GGUF now reaches inference attempt; error reports load succeeded, only forward dispatch unwired. M32b test updated. | aprender [#1118 merged](https://github.com/paiml/aprender/pull/1118) at 97c808e29 | this PR |
+| **M32c.2.2** | Contract amendment recording the M32c.2.2 implementation strategy: **LAZY-FUSED-MATVEC** (per-token forward keeps the 4 MoE expert tensors in their on-disk Q4_K/Q6_K/F32 form and dequantizes inline through `fused_q4k_parallel_matvec` / `fused_q6k_parallel_matvec` row-major matvec kernels per CLAUDE.md LAYOUT-002 row-major mandate). Decision rationale: preserves the 8× memory-bandwidth advantage; avoids materializing 18 GB of dense FP32 expert tensors. Bumps `qwen3-moe-forward-v1` v1.0.0 → v1.1.0. | aprender [#1119 merged](https://github.com/paiml/aprender/pull/1119) at 590b8d6aa | this PR |
+| **M32c.2.2.0** | `expert_byte_slice` adapter — given `(layer_idx, expert_idx, role)`, returns the `&[u8]` slice into the mmapped GGUF for that expert's quantized tensor. Reuses the M32c.1 `Qwen3MoeQuantizedLayer` descriptor (offsets, qtype, byte sizes). Per-expert sizes vary by qtype: Q4_K [768, 2048] = 884,736 bytes; Q6_K [2048, 768] = 1,290,240 bytes. | aprender [#1120 merged](https://github.com/paiml/aprender/pull/1120) at db3436da9 | this PR |
+| **M32c.2.2.1** | `expert_swiglu_quantized` — per-expert SwiGLU FFN dispatch using LAZY-FUSED-MATVEC: gate_proj + up_proj via `fused_q4k_parallel_matvec`, SwiGLU activation, down_proj via `fused_q6k_parallel_matvec`, all reading from `expert_byte_slice`. Returns `Vec<f32>` of shape `[hidden_dim]`. Pure-CPU row-major. | aprender [#1121 merged](https://github.com/paiml/aprender/pull/1121) at 4dd9ec21e | this PR |
+| **M32c.2.2.2.0** | `moe_ffn_forward_layer` — single-layer MoE FFN dispatch. Composes router (softmax + top-k=8) + per-token expert routing + `expert_swiglu_quantized` per-expert call + weighted aggregation. Shape: `[hidden_dim]` in → `[hidden_dim]` out. Replaces dense FFN block at one layer index. | aprender [#1122 merged](https://github.com/paiml/aprender/pull/1122) at 1ab8e7fc5 | this PR |
+| **M32c.2.2.2.1** | Contract amendment recording the M32c.2.2.2.1 integration architecture decision. Three approaches compared: (A) field-add to `OwnedQuantizedModel` across 99 sites, (B) parallel `run_qwen3_moe_generate` function, (C) wrapper struct. Chose hybrid: method `forward_qwen3_moe` on `OwnedQuantizedModel` taking MoE descriptors as parameters (zero field-add, zero attention/RoPE duplication) + parallel `run_qwen3_moe_generate` autoregressive loop (zero touch on dense path). Bumps `qwen3-moe-forward-v1` v1.1.0 → v1.2.0. | aprender [#1123 merged](https://github.com/paiml/aprender/pull/1123) at bd0871803 | this PR |
+| **M32c.2.2.2.1.1** | `OwnedQuantizedModel::forward_qwen3_moe` — single-token forward method. Mirrors `forward()` step-for-step except FFN site calls `moe_ffn_forward_layer`. Reuses existing `&self` methods for qkv_matmul, apply_rope, causal_attention, fused_matmul, lm_head — zero duplication. Test `f_qw3_moe_c22211_001` exercises end-to-end against cached 17.3 GB GGUF: logits.len() == 151936, all finite, argmax in vocab range. | aprender [#1124 merged](https://github.com/paiml/aprender/pull/1124) at 10c74c400 | this PR |
+| **M32c.2.2.2.1.2** | `run_qwen3_moe_generate` — autoregressive generation loop. Reads MoE config (num_experts, k, intermediate) from GGUF metadata via new `expert_count()` / `expert_used_count()` / `expert_feed_forward_length()` accessors on `GGUFModel`. Loads per-layer `Qwen3MoeQuantizedLayer` descriptors once, then full-prefill-per-token loop with greedy argmax sampling. No KV cache (M32d follow-up). Sibling of `run_gguf_generate` for qwen3_moe arch. | aprender [#1125 merged](https://github.com/paiml/aprender/pull/1125) at 16dcfe765 | this PR |
+| **M32c.2.2.2.1.3** | **Dispatch flip in `inference_result.rs`** routing `qwen3_moe` arch to `run_qwen3_moe_generate` instead of `run_gguf_generate`. **Plus Q4_K_M qtype-aware dispatch** (`matvec_for_qtype` helper) — Q4_K_M GGUF mixes Q4_K (qtype=12) and Q6_K (qtype=14) within and across layers, so per-expert matmul must dispatch on `tensor.qtype` at runtime instead of hardcoding kernel by role. **FALSIFY-QW3-MOE-FORWARD-003 LIVE DISCHARGE** on lambda-vector RTX 4090: `apr run` against cached 17.3 GB GGUF emits "aaaaaaaa" / "." (any non-whitespace) end-to-end. | aprender [#1126 merged](https://github.com/paiml/aprender/pull/1126) at a902eea93 | this PR |
 
 ## Falsification conditions (12 gates total)
 
