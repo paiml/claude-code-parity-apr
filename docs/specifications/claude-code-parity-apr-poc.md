@@ -384,6 +384,201 @@ Each gate maps to one falsification test in `crates/ccpa-*/tests/falsify_ccpa_NN
 | **2603.23611** | LLMORPH — *Cataloged Metamorphic Relations for NLP* | CCPA-004 | 191 catalogued metamorphic relations directly populate per-tool `equality` rules in `tool_equivalence_rules`. |
 | **2102.05351** (referenced in apr-cli-qa-spec) | Coverage-completeness invariants | CCPA-010, CCPA-011 | Background for 100 %-coverage / 100 %-comply invariants. |
 
+## M32d FAST PATH — five-whys + concrete next 6–13 PRs
+
+> **Authored 2026-05-01 (M34) to break the gibberish-output deadlock.**
+> Forward chain works (M32c.2.2.2.1.3 LIVE-DISCHARGED). Output is
+> `%%%%%%%%`. M32d numerical-parity scaffolding (#1128/#1129/#1130/#1131)
+> exists but the actual fixes haven't started. This section is the
+> plan to convert "vague gibberish" into "measured cosine number" and
+> close it.
+
+### Five-whys anchor
+
+**Symptom**: `apr run ~/.cache/pacha/models/2b88b180a790988f.gguf
+--prompt "What is 2+2?" --max-tokens 8` exits 0 in ~52s and emits
+`%%%%%%%%`. Forward path executes, logits are finite (per
+`f_qw3_moe_c22211_001`), but output is repetitive nonsense.
+
+| Why | Answer | Implication |
+|-----|--------|-------------|
+| 1. Why output `%%%%%%%%`? | Greedy argmax keeps picking the same token regardless of prior context. | Sampling code is fine; the problem is upstream of sampling. |
+| 2. Why does argmax keep picking the same token? | Logits are dominated by ONE position with huge margin over runners-up, and that position doesn't shift with new context. | The forward pass is producing a context-invariant output direction. |
+| 3. Why is the output context-invariant? | Hidden state through 48 layers is converging to (or starting at) a near-constant subspace. Either (a) attention isn't routing context, (b) FFN is collapsing to ~0, (c) MoE is degenerating to one expert, (d) RMSNorm/residual is wiping signal, or (e) one of the above plus quantization scale error. | Bug is somewhere in the per-layer arithmetic. We do NOT yet know which layer or which sub-component. |
+| 4. Why don't we know which layer? | Because we haven't compared to a reference. `apr trace` exists but returns null per-layer stats for `qwen3_moe` (forward goes through `run_qwen3_moe_generate`, not the traced path). M32d.1 fixture script exists but hasn't been run. M32d.2 cosine gate is `#[ignore]`d until the fixture lands. | We are flying blind. The FAST PATH is to stop flying blind. |
+| 5 (root). What's the cheapest experiment that yields the most signal? | Generate the M32d.1 HF FP16 reference logits, run M32d.2 cosine `--include-ignored` to see HOW wrong (one number), then add per-layer trace and bisect. **Bisection over 48 layers + 6 sub-components per layer is ~9 cosine comparisons to localize.** | The plan below. |
+
+### FAST PATH — ordered, gated, falsifiable
+
+Each step has an exit criterion. If a step's criterion fails, the next
+step in the plan changes. Every step is one PR or less.
+
+#### Step 1 — measure how wrong (1 PR, 1–2h wall + ~30 min HF download)
+
+**Action**: run `scripts/generate_qwen3_moe_fp16_logits.py` once on
+lambda-vector RTX 4090, commit the resulting fixture
+`crates/aprender-serve/tests/fixtures/qwen3_moe_fp16_logits_pos0.json`.
+
+**Exit criterion**: `cargo test -p aprender-serve --test
+qwen3_moe_parity --features cuda --release -- --include-ignored
+f_qw3_moe_parity_001` runs and reports a concrete cosine number
+(any number — the test currently can't even run because the
+fixture isn't present).
+
+**Decision**:
+- if cosine ≥ 0.99 → we're already done, the gibberish is a sampling
+  bug; flip the falsifier from `#[ignore]` to live and move to
+  apr-code integration (skip Steps 2–4).
+- if 0.5 ≤ cosine < 0.99 → forward is "kinda right"; few targeted
+  fixes likely close it. Proceed to Step 2.
+- if cosine < 0.5 (likely) → forward is structurally wrong. Proceed
+  to Step 2 with bisection over all 48 layers.
+
+**Falsifier introduced**: `FALSIFY-QW3-MOE-FORWARD-004` (this is
+already declared by M32d.0 in the contract; Step 1 produces the
+first concrete value to record).
+
+#### Step 2 — wire per-layer trace for qwen3_moe (1 PR, ~1d)
+
+**Action**: extend `forward_qwen3_moe` in
+`crates/aprender-serve/src/gguf/qwen3_moe_load.rs` to optionally
+emit per-layer hidden-state L2 + dim-wise mean/std into the JSON
+that `apr trace --json --payload` returns. Today that output is null
+for qwen3_moe because the trace path traces `OwnedQuantizedModel`'s
+non-MoE forward. Add a parallel `forward_qwen3_moe_traced` (or a
+`&mut Option<TracePayload>` parameter) that records each of the 48
+layer outputs.
+
+**Exit criterion**: `apr trace --json --payload <gguf>
+--prompt "What is 2+2?"` returns non-null `output_stats` for every
+`transformer_block_N` entry, with finite L2 norms.
+
+**Why this slice exists**: without it, Step 3 has nowhere to
+write the bisection comparison.
+
+#### Step 3 — bisect to first divergent layer (1 PR, ~half-day)
+
+**Action**: extend `qwen3_moe_parity.rs` test with a per-layer
+cosine harness. The HF fixture from Step 1 is captured at the
+output of every transformer block (re-run script with
+`--emit-hidden-states` flag — already on the script's TODO list per
+its docstring). The Rust test reads the per-layer reference and
+compares to per-layer apr trace output, asserting ≥0.99 cosine
+layer-by-layer.
+
+**Exit criterion**: the test names ONE specific
+`transformer_block_N` as the first layer where cosine drops
+below 0.99. Until that layer, apr is correct; from that layer
+onward, apr diverges.
+
+**Triage**: if N == 0, bug is in (token embedding) ∪ (attention
+sub-block of layer 0). If N > 0 and layers 0..N-1 all green, bug
+is localized to layer N's attention OR layer N's MoE FFN OR layer
+N's residual/RMSNorm.
+
+#### Step 4 — sub-bisect within the divergent layer (1–2 PRs, ~1d)
+
+**Action**: within layer N's forward, snapshot intermediate values
+at component boundaries (after RMSNorm, after Q/K/V projection,
+after RoPE, after attention output, after attention residual, after
+post-attention RMSNorm, after MoE router, after each of the top-k
+expert outputs, after weighted aggregation, after FFN residual).
+Compare each to HF reference (Step 1 with `--emit-component-states`).
+
+**Exit criterion**: cosine drop is localized to ONE component.
+That component is the bug site.
+
+**Priors on which component will be the culprit** (in
+descending probability based on aprender's known bug history per
+CLAUDE.md LAYOUT-001/002 mandate):
+
+| Rank | Component | Prior | Why this is high-prior |
+|------|-----------|-------|------------------------|
+| 1 | Per-expert weight LAYOUT (transpose) | ~30% | LAYOUT-001/002 has been the #1 source of MoE-port bugs; per-expert tensors `[N_e, intermediate, hidden]` row-major slicing is easy to get wrong; "olumbia+lsi nunca/localENTS" gibberish in CLAUDE.md is the tell. |
+| 2 | Q4_K_M dequant scale (super-scale + sub-min interaction) | ~20% | Q4_K_M mixes Q4_K and Q6_K; M32c.2.2.2.1.3 already had to add `matvec_for_qtype` runtime dispatch to handle this; possible scale accumulator bug remains. |
+| 3 | Qwen3 per-head Q/K RMSNorm | ~15% | Qwen3 is the only major arch with per-head Q/K RMSNorm; `attn_q_norm.weight` and `attn_k_norm.weight` exist on every layer per GH-279 and are easy to miss in the new MoE forward. |
+| 4 | RoPE θ=1e7 (vs default 1e4) | ~10% | Qwen3-Coder uses high-base RoPE; if the forward defaults to θ=1e4, freqs are off by 3 orders of magnitude. |
+| 5 | MoE router softmax | ~10% | Top-k selection requires post-softmax renormalization (per `moe-router-v1`); easy to drop the renormalize step. |
+| 6 | Token embedding dequant | ~10% | Embeddings are usually Q4_K in Q4_K_M files; if dequant is wrong, layer 0 input is wrong, everything downstream is wrong. |
+| 7 | Other | ~5% | KV cache layout, residual scaling, output norm, lm_head transpose. |
+
+**Decision tree**:
+- if culprit is rank 1 (LAYOUT) → fix is a single transpose call;
+  Step 5.
+- if rank 2 (Q4_K_M) → fix is in `matvec_for_qtype` dequant inner
+  loop; Step 5.
+- if rank 3 (per-head Q/K norm) → wire `attn_q_norm` /
+  `attn_k_norm` into `forward_qwen3_moe` after Q/K projection;
+  Step 5.
+- if rank 4 (RoPE θ) → read `general.rope.freq_base` from GGUF
+  metadata and thread into `apply_rope`; Step 5.
+- if rank 5 (router softmax) → review against `moe-router-v1`
+  contract; Step 5.
+- if rank 6 (embedding) → check token_embd.weight dequant matches
+  HF (cosine ≥ 0.99); Step 5.
+- if rank 7 → ad-hoc; Step 5 with new sub-PR.
+
+#### Step 5 — apply targeted fix (1–8 PRs, depends on Step 4 outcome)
+
+**Action**: write the smallest fix that resolves the localized
+component cosine. Each fix is its own PR with a falsifier that
+asserts the now-passing component cosine.
+
+**Exit criterion**: Step 3's per-layer cosine harness passes for
+all 48 layers (cosine ≥ 0.99 every layer).
+
+**Pessimistic case**: 5–8 fixes if multiple components compound.
+**Realistic case**: 2–4 fixes (LAYOUT + Q4_K_M + per-head norm).
+**Optimistic case**: 1 fix (LAYOUT alone).
+
+#### Step 6 — discharge (1 PR)
+
+**Action**:
+- run `apr run` and verify text is sensible (~"4" or similar
+  arithmetic answer).
+- `qwen3-moe-forward-v1` v1.3.0 → v1.4.0, status DRAFT →
+  ACTIVE_RUNTIME.
+- companion `claude-code-parity-apr-v1` v1.21.0 → v1.22.0 with
+  M35 status_history entry recording M32d discharge.
+- run `ccpa measure` against a tool-dispatching teacher fixture
+  (the FALSIFY-CCPA-013 measured-parity gate this whole POC was
+  authored to drive).
+- if CCPA-013 cosine ≥ 0.95 across the corpus → POC's headline
+  claim is now mechanically asserted, not synthetic.
+
+### Estimated total cost
+
+| Outcome | PRs | Wall-clock |
+|---------|-----|------------|
+| Lucky single-bug (rank-1 only) | 4–6 | 2–3 days |
+| Realistic (2–4 compounded bugs) | 8–10 | 4–6 days |
+| Pessimistic (structural cascade) | 12–15 | 1–2 weeks |
+
+### Why this is the FAST path (and not "just iterate on output until it stops being gibberish")
+
+Naive iteration on `apr run` output has no localization signal — every
+attempted fix is a full forward run + visual judgement of gibberish.
+Steps 1–4 of this plan invest ~2 days to convert the problem from
+"the model is wrong somewhere" to "this exact cosine number at this
+exact layer at this exact component is wrong by this exact margin".
+Once localized, each fix is targeted and provable. The investment
+in diagnostics dominates the schedule for the first 3 PRs and
+inverts the schedule for everything after.
+
+### Cross-references
+
+- Numbers above (cosine thresholds, K=8, N_experts=128, L=48) are
+  from `contracts/qwen3-moe-forward-v1.yaml` v1.3.0 §
+  `qwen3_coder_30b_a3b_instantiation`.
+- "LAYOUT-001/002 row-major mandate" is `CLAUDE.md` §
+  "CRITICAL: LAYOUT-002 Row-Major Mandate" in
+  `crates/aprender-serve/CLAUDE.md`.
+- "Qwen3 per-head Q/K RMSNorm" is GH-279 in aprender-serve, with
+  `attn_q_norm.weight` / `attn_k_norm.weight` already plumbed through
+  `OwnedQuantizedLayer` per `gguf/quantized.rs:312-315`.
+- `apr trace` capability and `apr trace --payload` discipline are
+  per `feedback_apr_trace_not_eprintln` (root memory).
+
 ## Falsification run history
 
 | Run | Date | Revision | Verdict | Notes |

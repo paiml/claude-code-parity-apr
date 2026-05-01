@@ -16,34 +16,86 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      3ea8114c8
+aprender_commit:      cf5c7875c
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      f4ea18b1acaea56ef8ef40fc857e5057e06e0627232be5b248dad6389b68e846
-last_synced_utc:      2026-05-01T08:00:00Z
+contract_sha256:      12f4bcb74110279b2341e2510aabc52970d605708b707262df593bc0bfb1f797
+last_synced_utc:      2026-05-01T20:00:00Z
 note: |
-  M33 audit-trail bump. Records aprender PRs that landed since the
-  v1.20.0 snapshot but were not yet reflected on companion side:
+  M34 five-whys FAST PATH bump. The companion contract advances
+  v1.21.0 → v1.22.0; aprender mirror push at commit cf5c7875c on
+  branch feat/claude-code-parity-apr-poc-spec (PR #1078) at
+  byte-identical sha256
+  12f4bcb74110279b2341e2510aabc52970d605708b707262df593bc0bfb1f797.
 
-    #1127 (M32c.2.2.2.1.4) — live `apr run` regression test pinning
-      FALSIFY-QW3-MOE-FORWARD-003 against the cached 17.3 GB
-      Qwen3-Coder GGUF.
-    #1128 (M32d.0) — qwen3-moe-forward-v1 contract v1.2.0 → v1.3.0
-      (parity strategy: cosine vs llama.cpp Q4_K + HF FP16).
-    #1129 (M32d.1) — generate_qwen3_moe_fp16_logits.py fixture script.
-    #1130 (M32d.2) — qwen3_moe_parity.rs cosine gate (F-QW3-MOE-PARITY-001).
-    #1131 (M32d.3) — qwen3_moe_argmax_parity.rs llama.cpp argmax sanity
-      (F-QW3-MOE-PARITY-002).
+  What this bump records:
 
-  Live re-verify on lambda-vector RTX 4090 (2026-05-01): `apr run`
-  against cached 17.3 GB Qwen3-Coder GGUF still exits 0 in 62.5s with
-  /\S/ stdout, output gibberish ("%%%%%%%%") pending M32d cosine fix.
+    M34 (companion-only) — adds the spec section "M32d FAST PATH —
+      five-whys + concrete next 6–13 PRs" to
+      docs/specifications/claude-code-parity-apr-poc.md and one new
+      status_history entry to the contract YAML. NO code change.
 
-  Companion contract bumps v1.20.0 → v1.21.0; M22 paired aprender
-  contract-mirror pushed at commit 3ea8114c8 on branch
-  feat/claude-code-parity-apr-poc-spec (PR #1078) at byte-identical
-  sha256
-  f4ea18b1acaea56ef8ef40fc857e5057e06e0627232be5b248dad6389b68e846.
+  Why it matters:
+
+    M32d (numerical parity vs llama.cpp Q4_K + HF FP16) has been open
+    since 2026-04-23 with `apr run` emitting "%%%%%%%%" gibberish
+    against the cached 17.3 GB Qwen3-Coder GGUF. Forward-chain
+    plumbing is correct (`apr run` exits 0 in 62.5s); divergence is
+    numeric. M34 converts the open work from "iterate on output until
+    it stops being gibberish" (no localization signal) to "produce
+    concrete cosine numbers at each layer-component boundary,
+    localize divergence, target fix" via a 6-step ordered-and-gated
+    plan with HF FP16 fixture as the comparison anchor.
+
+  Five-whys summary (full version in spec + contract status_history):
+
+    1. Why "%%%%%%%%"?       greedy argmax repeats one token
+    2. Why?                  logits dominated by one direction
+                             regardless of context
+    3. Why?                  hidden state is context-invariant through
+                             all 48 layers
+    4. Why?                  bug in attention/FFN/MoE/RMSNorm/quant —
+                             unknown which because we have NO per-layer
+                             reference comparison anywhere in tree
+    5. Cheapest experiment:  HF FP16 fixture (M32d.1 script exists,
+                             hasn't been run) → cosine number → wire
+                             `apr trace --payload` for qwen3_moe →
+                             bisect.
+
+  6-step plan:
+    1 — run M32d.1 script, commit fixture, get a cosine number.
+    2 — wire `apr trace --payload` into qwen3_moe forward (today
+        returns null per-layer stats).
+    3 — bisect per-layer cosine, name first divergent layer.
+    4 — sub-bisect that layer's components, name root cause.
+    5 — apply 1–8 targeted fixes, each its own falsifier.
+    6 — discharge: qwen3-moe-forward-v1 DRAFT → ACTIVE_RUNTIME,
+        ccpa measure runs against teacher fixture,
+        FALSIFY-CCPA-013 measured (not synthetic) for the first time.
+
+  Component priors at Step 4 (LAYOUT-001/002 + bug history):
+    rank 1 — per-expert weight LAYOUT (transpose) — 30%
+    rank 2 — Q4_K_M dequant scale interaction — 20%
+    rank 3 — Qwen3 per-head Q/K RMSNorm — 15%
+    rank 4 — RoPE θ=1e7 vs default 1e4 — 10%
+    rank 5 — MoE router softmax renormalize — 10%
+    rank 6 — token embedding dequant — 10%
+    rank 7 — KV cache / lm_head transpose / other — 5%
+
+  Estimated total cost:
+    lucky (single bug)          4– 6 PRs   2–3 days wall
+    realistic (2–4 compounded)  8–10 PRs   4–6 days wall
+    pessimistic (structural)   12–15 PRs   1–2 weeks wall
+
+  What this PR does NOT ship: any of the M32d fixes themselves. M34
+  is planning + diagnosis-of-the-diagnostic-gap. Step 1 (run the
+  fixture script) is the next companion PR after M34, and that step
+  is operator-confirm because it requires ~60 GB HF download + ~30
+  min multi-device offload forward on a 30B-A3B model.
+
+  Audit-trail (M33) section retained one bump back for context — see
+  prior pin.lock entry at commit 3ea8114c8 for the M32c.2.2.2.1.4 +
+  M32d.0/.1/.2/.3 audit recording.
