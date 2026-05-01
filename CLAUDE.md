@@ -2,7 +2,7 @@
 
 ## Methodology: contract-first
 
-This is a **contract-first** repo: every behavior gate (`FALSIFY-CCPA-001..012`) is encoded as a falsifiable assertion in `contracts/claude-code-parity-apr-v1.yaml` *before* code lands. Tests prove the gate; `pv validate` proves the contract; `pmat comply` proves the project's compliance posture (CB-1400 et al.). No code ships without a contract.
+This is a **contract-first** repo: every behavior gate (`FALSIFY-CCPA-001..013`) is encoded as a falsifiable assertion in `contracts/claude-code-parity-apr-v1.yaml` *before* code lands. Tests prove the gate; `pv validate` proves the contract; `pmat comply` proves the project's compliance posture (CB-1400 et al.). No code ships without a contract.
 
 ## Repo overview
 
@@ -50,6 +50,7 @@ Mirrors aprender's policy. `pmat query` returns quality-annotated, semantically 
 | FALSIFY-CCPA-012 | `pv_contract_gate_on_commit` | M0+ |
 | FALSIFY-CCPA-001 | `trace_schema_roundtrip` | M1 |
 | FALSIFY-CCPA-002..008 | behavioral parity | M3..M6 |
+| FALSIFY-CCPA-013 | `first_recorded_parity_score` (flips ACTIVE_ALGORITHM_LEVEL → ACTIVE_RUNTIME) | M11 (synthetic discharge); awaits M32d for measured discharge |
 
 ## Forbidden tools
 
