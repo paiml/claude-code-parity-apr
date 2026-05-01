@@ -599,14 +599,15 @@ inverts the schedule for everything after.
 
 | # | Risk / question | Mitigation | Falsifiable by |
 |---|-----------------|------------|----------------|
-| R1 | Recording the live Anthropic API costs $$ per fixture | Cap corpus at ~30 short fixtures; record once, replay forever | Fixture-count ≤ budget asserted by CI step `wc -l fixtures/*.jsonl` ≤ 30 000 lines |
-| R2 | Claude Code may pin its own Anthropic auth, refuse `ANTHROPIC_BASE_URL` override | Verify pre-M2 with a hello-world prompt; fallback rejected (PCAP capture is fragile) | M2 PR includes one-liner CI step exercising override; failure blocks M2 |
+| R1 | ~~Recording the live Anthropic API costs $$ per fixture~~ **OBSOLETE post-M2.3 rescope** ("we will not call api, we will assume claude code"). Fixtures are now AUTHORED canonical references in `fixtures/canonical/`. | n/a (risk no longer applies) | n/a |
+| R2 | ~~Claude Code may pin its own Anthropic auth, refuse `ANTHROPIC_BASE_URL` override~~ **OBSOLETE post-M2.3 rescope** — recording proxy is OOS. | n/a (risk no longer applies) | n/a |
 | R3 | Tool-call equivalence for Edit/Write is non-trivial | Per-tool equivalence rules in `ccpa-differ`, contracted in YAML | FALSIFY-CCPA-004 — directly |
 | R4 | Claude Code roadmap may add tools we don't have in `apr code` | New tools surface as `OrchestrationDrift::UnknownToolName` | FALSIFY-CCPA-004 — directly (gate FAILs until `apr-code-parity-v1.yaml` flips a row) |
 | R5 | New repo conflicts with monorepo single-source-of-truth | Companion repo is canonical for *enforcement*; aprender stays canonical for *contract text*. `pin.lock` pins authoritative commit hash | FALSIFY-CCPA-012 — pre-commit hook rejects stale pins |
 | R6 | `apr code`'s `LlmDriver` trait may not be public-stable enough for an external repo | PMAT-CODE-LLM-DRIVER-PUBLIC-001 (pre-req for M3) | M3 PR exists ⇔ PMAT-CODE-LLM-DRIVER-PUBLIC-001 closed |
 | R7 | 100 % line coverage may produce test-for-coverage's-sake noise on a tiny POC | Tradeoff accepted: POC is small (~5 crates), 100 % is achievable. If a function genuinely cannot be covered, the function is unjustified — delete it. | FALSIFY-CCPA-011 — directly |
 | R8 | `pmat comply check --strict` may reject patterns aprender itself uses | Companion repo is greenfield; we author to comply. If we hit a genuine `pmat comply` bug, the fix is upstream pmat, not a `--allow` flag | FALSIFY-CCPA-010 — directly |
+| R9 | **M32d numerical-correctness blocker** — `apr run` against Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf produces `%%%%%%%%` gibberish even though the forward chain executes end-to-end. Until cosine ≥0.99 vs HF FP16 reference is achieved, FALSIFY-CCPA-013's measured (vs synthetic) discharge cannot land. | M34 ships the **five-whys FAST PATH** (spec § "M32d FAST PATH"): 6-step ordered plan, exit criteria per step, component priors (LAYOUT 30%, Q4_K_M 20%, per-head Q-K norm 15%, RoPE 10%, router softmax 10%, embed 10%, other 5%). Estimated 4-6 PRs lucky / 8-10 realistic / 12-15 pessimistic. Step 1 (run M32d.1 fixture script) is operator-confirm. | FALSIFY-QW3-MOE-PARITY-001 (HF FP16 cosine ≥0.99) AND FALSIFY-QW3-MOE-PARITY-002 (llama.cpp argmax sanity) on `qwen3-moe-forward-v1` v1.3.0 |
 
 ## References
 
