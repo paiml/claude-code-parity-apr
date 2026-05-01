@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/claude-code-parity-apr/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg)](https://github.com/paiml/claude-code-parity-apr#license)
-[![Contract](https://img.shields.io/badge/contract-v1.7.0-green.svg)](contracts/claude-code-parity-apr-v1.yaml)
+[![Contract](https://img.shields.io/badge/contract-v1.22.0-green.svg)](contracts/claude-code-parity-apr-v1.yaml)
 [![Status](https://img.shields.io/badge/status-ACTIVE__RUNTIME-green.svg)](contracts/claude-code-parity-apr-v1.yaml)
 [![Gates](https://img.shields.io/badge/gates-13%2F13%20discharged-brightgreen.svg)](contracts/claude-code-parity-apr-v1.yaml)
 [![Parity](https://img.shields.io/badge/measured%20parity-1.0000-brightgreen.svg)](fixtures/canonical/measured-parity.json)
@@ -21,13 +21,19 @@ walks the two traces, applies per-tool semantic-equivalence rules,
 and emits a falsifiable parity score plus a closed-enum drift
 category for any mismatch.
 
-**Status (2026-04-27)**: M0–M19 all SHIPPED. Contract at v1.7.0
+**Status (2026-05-01)**: M0–M34 all SHIPPED. Contract at v1.22.0
 ACTIVE_RUNTIME. Corpus complete at the spec-prescribed 30 fixtures
 (all score 1.0). Parity-matrix coverage 15/15 reachable
 (2 OOS at trace boundary). FALSIFY-CCPA-007 hard-blocking on every PR
 since M16. The HTTPS-proxy recording path is intentionally OOS post
 the "we will not call api, we will assume claude code" re-scope —
-fixtures are AUTHORED canonical references, not live recordings.
+fixtures are AUTHORED canonical references, not live recordings. The
+**M32d numerical-parity gate** (cosine vs llama.cpp Q4_K + HF FP16
+on Qwen3-Coder-30B-A3B-Instruct) is the open work — `apr run` emits
+tokens end-to-end against the cached 17.3 GB GGUF but output text
+is gibberish pending forward-pass numerical fixes. M34 (2026-05-01)
+ships the **five-whys FAST PATH plan** with 6 ordered-and-gated
+steps to discharge M32d (see spec §"M32d FAST PATH").
 
 ## Usage
 
