@@ -217,8 +217,8 @@ Calling this "distillation" is not metaphorical. The framing maps directly onto 
 |-------------|----------|
 | Teacher network | Claude Code (closed-source orchestration over claude-sonnet-4.6) |
 | Student network | `apr code` (open orchestration over Qwen3-Coder-30B-A3B-Q4_K_M via realizar) |
-| Soft target distribution | Recorded action stream (the assistant turns + tool round-trips) |
-| Demonstration corpus | `fixtures/*.ccpa-trace.jsonl` (≥30 sessions covering 17/21 parity rows) |
+| Soft target distribution | AUTHORED action stream (the assistant turns + tool round-trips), per the M2.3 rescope away from live HTTPS-proxy recording |
+| Demonstration corpus | `fixtures/canonical/*.ccpa-trace.jsonl` (30 sessions covering 15/15 reachable rows of `apr-code-parity-v1.yaml` after OOS exclusion of `keyboard-shortcuts` + `status-line`) |
 | Loss function | `1 − parity_score`, where `parity_score = matched_actions / total_actions` |
 | Optimizer step | File-by-file PR review of `apr code` orchestration, driven by drift report |
 | Convergence criterion | Aggregate `parity_score ≥ 0.95` (FALSIFY-CCPA-008) |
@@ -227,9 +227,11 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-01)**: M0–M32c.2.2.2.1.4 SHIPPED on the
-> audit surface — the entire CPU MoE forward chain is wired
-> end-to-end AND pinned by a live regression test. `apr run` emits
+> **Status snapshot (2026-05-01)**: M0–M34 SHIPPED on the audit
+> surface (M0–M32c.2.2.2.1.4 implementation, M33 audit-trail
+> bookkeeping, M34 five-whys FAST PATH plan for the open M32d
+> numerical-parity discharge). The entire CPU MoE forward chain is
+> wired end-to-end AND pinned by a live regression test. `apr run` emits
 > tokens against the cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-
 > Q4_K_M.gguf on lambda-vector RTX 4090 (most recent live re-verify
 > 2026-05-01: prompt "What is 2+2?" max-tokens=8 → exit 0 in 62.5s,
