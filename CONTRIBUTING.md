@@ -126,10 +126,10 @@ Steps:
   `0018-hook-pre-tool-use` and `0027-hook-block` for the canonical
   ordering.
 
-## Bumping the contract (the M22 4-step ritual)
+## Bumping the contract (the M22 5-step ritual)
 
 The contract is byte-identical across `paiml/aprender` and this repo.
-Bumping it requires four steps, in order:
+Bumping it requires five steps, in order:
 
 ```
 1. Edit contract here:        contracts/claude-code-parity-apr-v1.yaml
@@ -140,7 +140,16 @@ Bumping it requires four steps, in order:
 3. Pin the new hash:          edit contracts/pin.lock — set
                               `aprender_commit: abcd1234e`
                               `last_synced_utc: <now>`
-4. Push your companion-side:  CI runs scripts/pin-check.sh AND
+4. Refresh human-readable
+   roll-up views:             — README.md badges (Contract version, status block dates)
+                              — docs/specifications/...md "Sub-milestones (M11+)" table
+                              — docs/specifications/...md "Falsification run history" table
+                              — docs/specifications/...md status snapshot blockquote
+                              — CONTRIBUTING.md status footer (this file)
+                              These are NOT mechanically guarded by pin-check;
+                              a kaizen sweep is the backstop. Step 4 makes the
+                              sweep unnecessary.
+5. Push your companion-side:  CI runs scripts/pin-check.sh AND
                               scripts/pin-check-roundtrip.sh; both must pass.
 ```
 
@@ -153,6 +162,13 @@ pin-check-roundtrip FAIL - companion vs aprender bytes diverge
 ```
 
 This is the M21 drift class; the M22 guard makes it impossible to land.
+
+Skipping step 4 → no mechanical failure, but the README and spec
+will silently drift out of sync with the contract. Confirmed
+historical drift class (see commits b96b089, 1eff3f8, aada9ea,
+ce6bcbc, 93fbd53 — five docs-only sweeps caught this on M34 alone).
+Step 4 was added 2026-05-01 to make the drift class visible at
+authoring time instead of catching it on the next kaizen sweep.
 
 The companion-side `status_history` entry should record the bump
 reason (M-numbered), the version transition (e.g. `v1.10.0 → v1.11.0`),
