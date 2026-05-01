@@ -56,7 +56,7 @@ The "distillation" framing is not metaphorical — see Hinton et al. *Distilling
 - ❌ Replacing `apr-code-parity-v1.yaml`. That static matrix stays — this POC is **runtime** parity, the missing fourth leg.
 - ❌ Live network in CI. Every replay reads from a recorded fixture; no `api.anthropic.com` egress in the test path (FALSIFY-CCPA-006).
 - ❌ A new agent runtime. We use existing `apr code` unchanged; the POC is observation + diff infra.
-- ❌ Modifying Claude Code. We instrument it via the existing `ANTHROPIC_BASE_URL` env var — closed-source binary stays closed.
+- ❌ Modifying Claude Code. Closed-source binary stays closed. (Original M0 wording mentioned `ANTHROPIC_BASE_URL` env-var instrumentation for HTTPS-proxy recording; that path was rescoped OOS in M2.3 — "we will not call api, we will assume claude code". Fixtures are AUTHORED in `fixtures/canonical/`, not recorded.)
 - ❌ Tolerated coverage gaps. Companion-repo bound is **100 %** line coverage (FALSIFY-CCPA-011), not the aprender 95 % floor — POC is small, no excuse.
 
 ## Companion-repo source-of-truth invariants
@@ -91,7 +91,7 @@ Four invariants, **online from M0** (before any actual parity work), enforced as
 - **Falsifiable claim**: in CI logs, the line `pv validate contracts/claude-code-parity-apr-v1.yaml` is followed by exit code 0 within the same job.
 - **Bash workarounds rejected** per `feedback_pv_not_bash_for_contracts.md` and CLAUDE.md § "Contract Validation: DOGFOOD pv, NEVER bash" — if `pv` rejects the contract, fix the contract or extend `aprender-contracts/src/schema/`, never bypass with shell.
 
-These four invariants are necessary preconditions for *any* of the parity gates (FALSIFY-CCPA-001..008) to be trustworthy. A red CI on the companion repo invalidates every claim downstream.
+These four invariants are necessary preconditions for *any* of the parity gates (FALSIFY-CCPA-001..008 + CCPA-013) to be trustworthy. A red CI on the companion repo invalidates every claim downstream.
 
 ## Architecture
 
