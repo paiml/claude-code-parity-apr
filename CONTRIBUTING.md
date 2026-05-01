@@ -221,5 +221,8 @@ is the project blueprint. Major behavioral changes update both:
 1. The contract's `status_history` (factual, machine-readable record).
 2. The spec markdown (narrative + milestone roll-up).
 
-Status as of v1.10.0: M0–M22 all SHIPPED; corpus complete (30/30); 13/13
-gates green; companion ↔ aprender round-trip mechanically guarded.
+Status as of v1.22.0 (2026-05-01): M0–M34 all SHIPPED; corpus complete
+(30/30); 13/13 gates green; companion ↔ aprender round-trip
+mechanically guarded. M32d numerical-parity gate is the open work —
+M34 ships the five-whys FAST PATH plan to close it (see spec §"M32d
+FAST PATH").
