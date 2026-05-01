@@ -95,12 +95,31 @@ These four invariants are necessary preconditions for *any* of the parity gates 
 
 ## Architecture
 
+> **Diagram below shows the original M0 design.** Phase 1 (RECORD via
+> live HTTPS proxy) was rescoped OOS at M2.3 ("we will not call api,
+> we will assume claude code"). In the shipping architecture, Phase
+> 1's `.ccpa-trace.jsonl` fixtures are AUTHORED in
+> `fixtures/canonical/` rather than recorded from a live Anthropic
+> session. Phases 2 and 3 are unchanged — the differ + the
+> `RecordedDriver` LLM mock both consume the same JSONL schema
+> regardless of provenance. The diagram is preserved as historical
+> reference because it explains why the schema looks the way it does
+> (every tool round-trip passes through the Anthropic API in the
+> teacher, so the trace records prompts + tool_use blocks + tool_result
+> blocks + final assistant turns at message granularity).
+
 ```
                     ┌──────────────────────────────────────────────────┐
                     │  Phase 1: RECORD (teacher demonstrations)        │
+                    │                                                  │
+                    │  Original M0 vision  (now AUTHORED post-M2.3):   │
   user prompt ─────►│   Claude Code ──HTTP──► ccpa-recorder ──► fixture│
                     │                  ▲             │                 │
                     │                  └──── api.anthropic.com (live)  │
+                    │                                                  │
+                    │  Shipping path:  fixtures/canonical/<id>/        │
+                    │                  teacher.ccpa-trace.jsonl        │
+                    │                  AUTHORED to schema, no live API │
                     └──────────────────────────────────────────────────┘
                                         │
                                         ▼ (one .ccpa-trace.jsonl file)
@@ -109,7 +128,8 @@ These four invariants are necessary preconditions for *any* of the parity gates 
                     │   fixture ──► ccpa-replayer ──► apr code         │
                     │                  ▲                  │            │
                     │                  └─ mocked LLM ◄────┘            │
-                    │     (returns the recorded assistant turn)        │
+                    │     (returns the recorded teacher's assistant    │
+                    │      turn — same regardless of fixture origin)   │
                     └──────────────────────────────────────────────────┘
                                         │
                                         ▼ (one .ccpa-trace.jsonl file)
@@ -120,9 +140,15 @@ These four invariants are necessary preconditions for *any* of the parity gates 
                     └──────────────────────────────────────────────────┘
 ```
 
-### Why a recording HTTP proxy is sufficient (asserted by FALSIFY-CCPA-001)
+### Original Phase 1 rationale — now historical (asserted by FALSIFY-CCPA-001)
 
-Claude Code is closed-source, so we can't hook its tool execution directly. We don't need to: every tool round-trip already round-trips through the Anthropic API. Claude Code submits `tool_result` blocks back to Anthropic on the next request, so a recording HTTPS proxy at `ANTHROPIC_BASE_URL` captures the full action stream — prompts, tool calls, tool outputs, final messages — without any CLI wrapping. **The proxy is the recorder.** This claim is mechanically falsifiable: FALSIFY-CCPA-001 asserts every committed fixture is a complete, schema-valid action trace; failure (truncation, missing tool round-trip) flips the gate.
+This section preserves the M0 reasoning for why a recording HTTPS proxy
+would have been sufficient, because the trace schema's shape (tool
+round-trips at message granularity) follows from this argument.
+**Post-M2.3, Phase 1 is AUTHORED**, but the schema invariant remains:
+every committed fixture must be a complete, schema-valid action trace.
+
+Claude Code is closed-source, so we can't hook its tool execution directly. We don't need to: every tool round-trip already round-trips through the Anthropic API. Claude Code submits `tool_result` blocks back to Anthropic on the next request, so a recording HTTPS proxy at `ANTHROPIC_BASE_URL` would capture the full action stream — prompts, tool calls, tool outputs, final messages — without any CLI wrapping. **In the original M0 design the proxy was the recorder.** Whether the trace is recorded or AUTHORED, the same schema invariant applies and is mechanically falsifiable: FALSIFY-CCPA-001 asserts every committed fixture is a complete, schema-valid action trace; failure (truncation, missing tool round-trip) flips the gate.
 
 ### Why `apr code` replay needs LLM mocking (asserted by FALSIFY-CCPA-002 + FALSIFY-CCPA-003)
 
