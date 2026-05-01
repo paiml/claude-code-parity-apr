@@ -16,24 +16,34 @@
 #   - FALSIFY-CCPA-012 (pv_contract_gate_on_commit)
 
 aprender_repo:        paiml/aprender
-aprender_commit:      a8623f650
+aprender_commit:      3ea8114c8
 aprender_branch:      feat/claude-code-parity-apr-poc-spec
 aprender_pr:          1078
 aprender_pr_state:    OPEN
 aprender_path:        contracts/claude-code-parity-apr-v1.yaml
 contract_path:        contracts/claude-code-parity-apr-v1.yaml
-contract_sha256:      da0eea852de3bdbc953d00b01ddcdde4ef6e4b461e92d288661304fa526de06b
-last_synced_utc:      2026-04-29T08:35:00Z
+contract_sha256:      f4ea18b1acaea56ef8ef40fc857e5057e06e0627232be5b248dad6389b68e846
+last_synced_utc:      2026-05-01T08:00:00Z
 note: |
-  M32c.2.2 → M32c.2.2.2.1.3 chain SHIPPED. The full CPU MoE forward
-  chain is wired end-to-end and FALSIFY-QW3-MOE-FORWARD-003 is
-  LIVE-DISCHARGED on lambda-vector RTX 4090: `apr run` against the
-  cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf emits real
-  tokens. 8 aprender PRs merged in this cycle (#1119 → #1126);
-  the underlying M32c.2.2.2.1.3 discharge merged at aprender main
-  squash commit a902eea93 (PR #1126).
-  Companion contract bumps v1.19.0 → v1.20.0; M22 paired aprender
-  contract-mirror pushed at commit a8623f650 on branch
+  M33 audit-trail bump. Records aprender PRs that landed since the
+  v1.20.0 snapshot but were not yet reflected on companion side:
+
+    #1127 (M32c.2.2.2.1.4) — live `apr run` regression test pinning
+      FALSIFY-QW3-MOE-FORWARD-003 against the cached 17.3 GB
+      Qwen3-Coder GGUF.
+    #1128 (M32d.0) — qwen3-moe-forward-v1 contract v1.2.0 → v1.3.0
+      (parity strategy: cosine vs llama.cpp Q4_K + HF FP16).
+    #1129 (M32d.1) — generate_qwen3_moe_fp16_logits.py fixture script.
+    #1130 (M32d.2) — qwen3_moe_parity.rs cosine gate (F-QW3-MOE-PARITY-001).
+    #1131 (M32d.3) — qwen3_moe_argmax_parity.rs llama.cpp argmax sanity
+      (F-QW3-MOE-PARITY-002).
+
+  Live re-verify on lambda-vector RTX 4090 (2026-05-01): `apr run`
+  against cached 17.3 GB Qwen3-Coder GGUF still exits 0 in 62.5s with
+  /\S/ stdout, output gibberish ("%%%%%%%%") pending M32d cosine fix.
+
+  Companion contract bumps v1.20.0 → v1.21.0; M22 paired aprender
+  contract-mirror pushed at commit 3ea8114c8 on branch
   feat/claude-code-parity-apr-poc-spec (PR #1078) at byte-identical
   sha256
-  da0eea852de3bdbc953d00b01ddcdde4ef6e4b461e92d288661304fa526de06b.
+  f4ea18b1acaea56ef8ef40fc857e5057e06e0627232be5b248dad6389b68e846.
