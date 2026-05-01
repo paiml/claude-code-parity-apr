@@ -174,22 +174,36 @@ claude-code-parity-apr/                 # source of truth for code, fixtures, CI
 ├── .github/workflows/
 │   └── ci.yml                          # ci/gate job (FALSIFY-CCPA-009 enforces required check)
 ├── .pmat-comply.toml                   # FALSIFY-CCPA-010 config, 100 % strict
-├── Makefile                            # `make tier3` runs all 12 gates locally
+├── Makefile                            # `make tier3` runs all 13 gates locally
 ├── crates/
 │   ├── ccpa-trace/                     # serde schema for .ccpa-trace.jsonl
-│   ├── ccpa-recorder/                  # mitm-style HTTPS proxy at ANTHROPIC_BASE_URL
+│   ├── ccpa-recorder/                  # original M0 vision: mitm-style HTTPS
+│   │                                   # proxy at ANTHROPIC_BASE_URL. OOS post-
+│   │                                   # M2.3 rescope; crate retained as
+│   │                                   # scaffolding for the schema-roundtrip path.
 │   ├── ccpa-replayer/                  # drives `apr code` with mocked LLM responses
 │   ├── ccpa-differ/                    # semantic diff + parity score
-│   └── ccpa-cli/                       # `ccpa record|replay|diff|report`  (binary: `ccpa`)
+│   └── ccpa-cli/                       # `ccpa diff|corpus|coverage|validate|measure`
+│                                       # (binary: `ccpa`)
 ├── contracts/
-│   ├── claude-code-parity-apr-v1.yaml  # SOURCE-OF-TRUTH copy after M1; pre-M1 lives in aprender/contracts/
-│   └── pin.lock                        # pinned commit-hash of authoritative aprender contract
-├── fixtures/                           # checked-in recorded sessions
-│   ├── 0001-edit-readme.ccpa-trace.jsonl
-│   ├── 0002-fix-failing-test.ccpa-trace.jsonl
-│   └── ...
+│   ├── claude-code-parity-apr-v1.yaml  # MIRROR of aprender/contracts/...v1.yaml
+│   │                                   # (M22 byte-identical guard via pin.lock)
+│   └── pin.lock                        # pinned commit-hash + sha256 of authoritative
+│                                       # aprender contract
+├── fixtures/                           # AUTHORED canonical sessions (M2.3 rescope)
+│   ├── canonical/                      # 30 paired teacher/student fixtures
+│   │   ├── 0001-edit-readme/
+│   │   │   ├── teacher.ccpa-trace.jsonl
+│   │   │   ├── student.ccpa-trace.jsonl
+│   │   │   └── meta.toml               # per-fixture parity-matrix row + tags
+│   │   ├── 0002-fix-failing-test/
+│   │   └── ...                         # 30 total per FALSIFY-CCPA-007
+│   ├── regression/                     # M13.5 bidirectional sensitivity corpus
+│   │                                   # (deliberate drift; meter MUST score < 1)
+│   └── synthetic/                      # M26 measure-bridge synthetic traces
 └── docs/
-    └── architecture.md                 # links back to this seeding spec
+    └── specifications/
+        └── claude-code-parity-apr-poc.md   # this spec
 ```
 
 **Naming**: `ccpa` = claude-code-parity-apr. Binary name is `ccpa`. Repo name `claude-code-parity-apr` is explicit on GitHub.
