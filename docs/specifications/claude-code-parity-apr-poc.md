@@ -236,8 +236,9 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 > stdout matches /\S/). Output text is gibberish ("%%%%%%%%") because
 > numerical-correctness fixes are M32d's job — the forward path and
 > the audit chain are correct, the cosine-vs-llama.cpp gate is what
-> remains. Contract at `claude-code-parity-apr-v1` **v1.21.0**
-> ACTIVE_RUNTIME (M33 audit-trail bump for M32c.2.2.2.1.4); contract
+> remains. Contract at `claude-code-parity-apr-v1` **v1.22.0**
+> ACTIVE_RUNTIME (M34 five-whys FAST PATH for M32d numerical parity);
+> contract
 > `qwen3-moe-forward-v1` at v1.3.0 still DRAFT (flips to
 > ACTIVE_RUNTIME at M32d numerical-parity discharge). Corpus at **30**
 > paired canonical fixtures (spec ≥30 target met) with parity-matrix
@@ -538,8 +539,9 @@ all 48 layers (cosine ≥ 0.99 every layer).
   arithmetic answer).
 - `qwen3-moe-forward-v1` v1.3.0 → v1.4.0, status DRAFT →
   ACTIVE_RUNTIME.
-- companion `claude-code-parity-apr-v1` v1.21.0 → v1.22.0 with
-  M35 status_history entry recording M32d discharge.
+- companion `claude-code-parity-apr-v1` v1.22.0 → v1.23.0 with
+  M35 status_history entry recording M32d discharge (v1.22.0 was
+  already consumed by M34 for the FAST PATH plan itself).
 - run `ccpa measure` against a tool-dispatching teacher fixture
   (the FALSIFY-CCPA-013 measured-parity gate this whole POC was
   authored to drive).
