@@ -2,7 +2,7 @@
 
 **Version**: 1.23.0
 **Date**: 2026-05-02
-**Status**: ACTIVE_RUNTIME — M0–M36 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9)
+**Status**: ACTIVE_RUNTIME — M0–M37 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9)
 **Source of truth**: https://github.com/paiml/claude-code-parity-apr (canonical for enforcement; aprender mirrors only the contract YAML byte-for-byte via `pin.lock`)
 **Companion-repo invariants** (must be green on every PR — see § Companion-repo source-of-truth invariants):
 1. GitHub Actions `ci/gate` green (required status check) → **FALSIFY-CCPA-009**
@@ -267,7 +267,7 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-02)**: M0–M35 SHIPPED. M32d
+> **Status snapshot (2026-05-02)**: M0–M37 SHIPPED. M32d
 > **FUNCTIONALLY DISCHARGED** 2026-05-02 via aprender PR #1228 squash
 > 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle). Output transition on
 > lambda-vector RTX 4090 against the cached 17.3 GB Qwen3-Coder-30B-
