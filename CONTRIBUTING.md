@@ -206,7 +206,7 @@ When CI fails, the failing step's name maps to a gate ID:
 | `cargo llvm-cov`          | FALSIFY-CCPA-011              | add tests for any uncovered function/line; gate is 100% functions ∧ ≥99% lines |
 | `pv validate`             | FALSIFY-CCPA-012 (a)          | YAML schema or pv-rule violation; restructure the contract to fit the existing schema |
 | `pin-check`               | FALSIFY-CCPA-012 (b)          | local contract bytes don't match `pin.lock`; usually means you edited the contract without re-hashing |
-| `pin-check-roundtrip`     | FALSIFY-CCPA-012 (c)          | aprender-side bytes don't match local; you skipped step 2 or 3 of the 4-step ritual |
+| `pin-check-roundtrip`     | FALSIFY-CCPA-012 (c)          | aprender-side bytes don't match local; you skipped step 2 or 3 of the 5-step ritual |
 | `ccpa corpus canonical/`  | FALSIFY-CCPA-013 runtime      | a fixture pair scores < 1.0; inspect the drift category |
 | `ccpa corpus regression/` | (meter sensitivity)           | regression corpus PASSED — meter is broken; debug the differ |
 | `ccpa coverage`           | FALSIFY-CCPA-007 hard gate    | a reachable parity-matrix row is uncovered; author a fixture for it |
