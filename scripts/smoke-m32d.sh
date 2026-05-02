@@ -70,12 +70,16 @@ echo
 #   - exit 0 from apr
 #   - emit at least 5 non-whitespace chars in the Output: section
 #   - NOT contain "%%%%%%%%" or other M32d-pre-fix gibberish patterns
+#   - contain the prompt-specific expected substring (semantic gate;
+#     catches the "coherent but wrong" regression class — e.g.,
+#     "Capital of France is Berlin")
 fail_count=0
 
 run_prompt() {
     local label="$1"
     local prompt="$2"
     local max_tokens="$3"
+    local expect="$4"
 
     echo "──────────────────────────────────────────────────────────────"
     echo "smoke-m32d: ${label}"
@@ -116,12 +120,21 @@ run_prompt() {
         return
     fi
 
+    # Gate 3: prompt-specific expected substring (semantic gate). Catches
+    # the "coherent but wrong" regression class — e.g., output `5 + 7 = 13`
+    # would pass gates 1+2 but fail this gate.
+    if [[ -n "${expect}" ]] && ! echo "${output}" | grep -qF "${expect}"; then
+        echo "  FAIL: output does NOT contain expected substring '${expect}'"
+        fail_count=$((fail_count + 1))
+        return
+    fi
+
     echo "  PASS"
 }
 
-run_prompt "math"        "What is 5+7?"          12
-run_prompt "geography"   "Capital of France:"    10
-run_prompt "translation" "Translate to Spanish: Hello world" 16
+run_prompt "math"        "What is 5+7?"                       12 "12"
+run_prompt "geography"   "Capital of France:"                 10 "Paris"
+run_prompt "translation" "Translate to Spanish: Hello world"  16 "Hola"
 
 echo "──────────────────────────────────────────────────────────────"
 if [[ "${fail_count}" -gt 0 ]]; then
