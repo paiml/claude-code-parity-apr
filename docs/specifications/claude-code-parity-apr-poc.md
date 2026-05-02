@@ -404,7 +404,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M36** | Companion-only post-discharge drift sweep — applies the M22 5-step ritual extension (step 4: refresh human-readable roll-up views) to M32d's discharge surface. Updates: README badge `v1.22.0 → v1.23.0` + status block `M0-M34 → M0-M35` + M32d "open work" → "FUNCTIONALLY DISCHARGED" with output transition narrative; CONTRIBUTING status footer parallel; spec status snapshot `qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL`; R9 risk struck through as DISCHARGED with cross-reference to PR #1228. Same drift class the M22 5-step ritual was extended to address — closing the README/CONTRIBUTING/spec lag against ground-truth. **Does NOT modify** the original "M34 FAST PATH" spec section (lines ~430-620) — preserved as historical reference for retrospective comparison; component-prior table (rank-3 Q/K norm 15% + rank-4 RoPE θ 10%) empirically confirmed load-bearing. | direct main commit `3fd90d0` | this PR |
 | **M37** | Companion-only sub-milestones backfill (this PR) — adds milestone-table rows for the M32d implementation PRs (#1222, #1228, #1242, #1401) plus M35/M36 audit-trail+drift-sweep companion commits. Closes the gap between status snapshot ("M0–M36 SHIPPED") and the sub-milestones table tail (which previously stopped at M34). No contract bump; spec markdown only. Same drift class M22 step 4 addresses. | direct main commit (this PR) | this PR |
 
-## Falsification conditions (12 gates total)
+## Falsification conditions (13 gates total)
 
 ### Source-of-truth invariants (M0+)
 
@@ -415,7 +415,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | FALSIFY-CCPA-011 | line_coverage_100pct | M0+ | `cargo llvm-cov --fail-under-lines 100 --fail-uncovered-lines 0` exits 0 |
 | FALSIFY-CCPA-012 | pv_contract_gate_on_commit | M0+ | pre-commit hook + CI both run `pv validate contracts/claude-code-parity-apr-v1.yaml`, exit 0 |
 
-### Behavioral parity gates (M1..M6)
+### Behavioral parity gates (M1..M11)
 
 | ID | Name | Phase | Assertion summary |
 |----|------|-------|-------------------|
@@ -427,6 +427,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | FALSIFY-CCPA-006 | sovereignty_on_replay | M5 | zero outbound sockets to `*.anthropic.com` during replay; CI test container drops all egress except 127.0.0.1 |
 | FALSIFY-CCPA-007 | corpus_coverage | M5 | ≥1 fixture per non-MISSING row of `apr-code-parity-v1.yaml` (currently 17 of 21) |
 | FALSIFY-CCPA-008 | parity_score_bound | M6 | aggregate `parity_score ≥ 0.95` and per-fixture `≥ 0.80` |
+| FALSIFY-CCPA-013 | first_recorded_parity_score | M11 | `fixtures/canonical/measured-parity.json` exists with ≥5 fixtures; aggregate ≥ 0.95; flips contract DRAFT → ACTIVE_RUNTIME (DISCHARGED at 30 fixtures, aggregate 1.0000) |
 
 Each gate maps to one falsification test in `crates/ccpa-*/tests/falsify_ccpa_NNN_*.rs` and is enforced via `pv validate contracts/claude-code-parity-apr-v1.yaml` per the harness policy in `CLAUDE.md § Contract Validation: DOGFOOD pv, NEVER bash`. **No bash/yq/python re-implementation of these gates is permitted.** If `pv validate` does not yet support a needed shape, extend `aprender-contracts/src/schema/` — schema-extension ticket: PMAT-CONTRACTS-CCPA-001.
 
