@@ -2,7 +2,7 @@
 
 **Version**: 1.23.0
 **Date**: 2026-05-02
-**Status**: ACTIVE_RUNTIME — M0–M44 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9); qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL flipped on aprender main 2026-05-02T14:57Z (PR #1409 squash 3a2f2705b)
+**Status**: ACTIVE_RUNTIME — M0–M45 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9); qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL flipped on aprender main 2026-05-02T14:57Z (PR #1409 squash 3a2f2705b)
 **Source of truth**: https://github.com/paiml/claude-code-parity-apr (canonical for enforcement; aprender mirrors only the contract YAML byte-for-byte via `pin.lock`)
 **Companion-repo invariants** (must be green on every PR — see § Companion-repo source-of-truth invariants):
 1. GitHub Actions `ci/gate` green (required status check) → **FALSIFY-CCPA-009**
@@ -267,7 +267,7 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-02)**: M0–M44 SHIPPED. M32d
+> **Status snapshot (2026-05-02)**: M0–M45 SHIPPED. M32d
 > **FUNCTIONALLY DISCHARGED** 2026-05-02 via aprender PR #1228 squash
 > 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle). Output transition on
 > lambda-vector RTX 4090 against the cached 17.3 GB Qwen3-Coder-30B-
@@ -409,7 +409,8 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M41** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the spec's Falsification run history latest "Run N" revision-range end-M against the sub-milestones table tail. Drift class addressed: when a new milestone row is added (M37/M38/M39/M40 cycle), the Run history's "M1–MX" range stayed stale and was caught manually in commit 9ec1ef3 + the same class repeated this turn (Run 1 said "M1–M37" while tail was M40). Detector now catches this 9th cross-reference at authoring time. | direct main commit `bcb892e` | this PR |
 | **M42** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the README's `status-XXX-green.svg` shields.io badge against the contract YAML's top-level `status:` field (with shields.io `__` → `_` un-escape). Drift class addressed: contract bumped DRAFT → ACTIVE_RUNTIME (or any equivalent flip) but README status badge stayed at old value. The badge is the second hit a casual reader sees on the repo home page (right after the CI build badge); silent drift here misleads downstream consumers. Detector now catches this 10th cross-reference. | direct main commit `b8ed239` | this PR |
 | **M43** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the README gates badge `gates-N%2FT%20discharged` denominator T against the spec's stated gate count `(N gates total)`. Drift class addressed: a new gate gets added (the spec's gate count bumps from 13 to 14), but the README gates-X/Y badge denominator stays at 13. The CCPA-013 introduction in M11 is a confirmed instance of this drift class — the spec's `12 gates total` header lagged behind the addition for ~25 milestones until M37 fixed it manually. Detector now catches this 11th cross-reference at authoring time. | direct main commit `b9bb7b9` | this PR |
-| **M44** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the README parity badge `measured%20parity-X.XXXX-brightgreen.svg` against the `measured-parity.json` `aggregate_score` field (with 1e-4 tolerance for badge-rounding to 4 decimals via `awk` float comparison). Drift class addressed: parity meter is re-run on a refreshed fixture set (e.g., new fixture added or behavior changed), aggregate score moves, but the README badge stays at the old value. Currently both at `1.0000`. Detector now catches this 12th cross-reference. | direct main commit (this PR) | this PR |
+| **M44** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the README parity badge `measured%20parity-X.XXXX-brightgreen.svg` against the `measured-parity.json` `aggregate_score` field (with 1e-4 tolerance for badge-rounding to 4 decimals via `awk` float comparison). Drift class addressed: parity meter is re-run on a refreshed fixture set (e.g., new fixture added or behavior changed), aggregate score moves, but the README badge stays at the old value. Currently both at `1.0000`. Detector now catches this 12th cross-reference. | direct main commit `1ad2a76` | this PR |
+| **M45** | Companion-only `scripts/smoke-m32d.sh` — codifies the M32d dogfood loop into a repeatable smoke test (3 prompts × 3 domains: math `5+7=12`, geography `Capital of France: Paris`, translation `Hello world → ¡Hola mundo!`). Each prompt's output gated by 2 assertions: (a) ≥5 non-whitespace chars, (b) does NOT contain the M32d-pre-fix gibberish marker `%%%%%%%`. Operator-opt-in via `make smoke-m32d` (NOT in `make tier3` because requires 17.3 GB cached GGUF + ~3min runtime). Drift class addressed: a future aprender PR re-introduces gibberish output (per-head Q/K RMSNorm regression, rope_theta wrong default, chat template change, etc.) — currently only manual ad-hoc dogfood would catch this; M45 makes it 1 command. Codifies what the M37/M38/M40/M41/M42/M43/M44 cycles ran manually each iteration (math + geography + translation prompts dogfooded ~10 times across this session). | direct main commit (this PR) | this PR |
 
 ## Falsification conditions (13 gates total)
 
@@ -651,7 +652,7 @@ inverts the schedule for everything after.
 | Run | Date | Revision | Verdict | Notes |
 |-----|------|----------|---------|-------|
 | Run 0 | 2026-04-26 | original spec PR | **NOT YET RUN** (historical) | Spec authored; companion repo not yet scaffolded; gates 009–012 not yet wired. |
-| Run 1 | 2026-04-26 → 2026-05-02 | M1–M44 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). M32d FUNCTIONALLY DISCHARGED 2026-05-02 (M35 audit-trail bump records aprender PR #1228 squash 5235aaeb9). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
+| Run 1 | 2026-04-26 → 2026-05-02 | M1–M45 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). M32d FUNCTIONALLY DISCHARGED 2026-05-02 (M35 audit-trail bump records aprender PR #1228 squash 5235aaeb9). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
 
 (Subsequent runs append below in the apr-cli-qa-spec.md format: gate / status / evidence per row. The status_history block in the contract YAML is the byte-precise audit; this table is the human roll-up.)
 

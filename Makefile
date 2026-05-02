@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift mutants parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift smoke-m32d mutants parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -67,6 +67,9 @@ pin-check-roundtrip:
 
 check-doc-drift:
 	bash scripts/check-doc-drift.sh
+
+smoke-m32d:
+	bash scripts/smoke-m32d.sh
 
 mutants:
 	cargo mutants -p ccpa-differ --no-times --timeout 90
