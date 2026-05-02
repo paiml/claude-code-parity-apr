@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift smoke-m32d mutants parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift smoke-m32d bashrs-lint mutants parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -32,6 +32,7 @@ help:
 	@echo
 	@echo "Operator-opt-in (NOT in tier3):"
 	@echo "  make smoke-m32d         dogfood prompts vs cached Qwen3-Coder GGUF    (M45)"
+	@echo "  make bashrs-lint        lint all scripts/*.sh via bashrs (soft check)"
 	@echo
 	@echo "Setup:"
 	@echo "  make install-tools  cargo install pmat aprender-contracts-cli cargo-llvm-cov"
@@ -81,6 +82,10 @@ test-doc-drift:
 
 smoke-m32d:
 	bash scripts/smoke-m32d.sh
+
+bashrs-lint:
+	@command -v bashrs >/dev/null 2>&1 || { echo "bashrs-lint: bashrs not on PATH (cargo install bashrs)"; exit 1; }
+	bashrs lint scripts/*.sh
 
 mutants:
 	cargo mutants -p ccpa-differ --no-times --timeout 90
