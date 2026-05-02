@@ -74,6 +74,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bash scripts/pin-check-roundtrip.sh contracts/pin.lock
 
+      # ── M22 step 4 — human-readable roll-up drift guard (M38) ──
+      # Asserts spec header / status snapshot / README / CONTRIBUTING
+      # M-counts all match the sub-milestones table tail, plus stated
+      # gate count matches FALSIFY-CCPA-NNN row marker count. Codifies
+      # the drift class M22 step 4 added on 2026-05-01 ("These are NOT
+      # mechanically guarded by pin-check; a kaizen sweep is the
+      # backstop"). M37 alone produced 6 drift-fix commits this catches.
+      - name: check-doc-drift (M22 step 4 — kaizen backstop)
+        run: bash scripts/check-doc-drift.sh
+
       # ── Build + lint ──
       - name: cargo fmt --check
         run: cargo fmt --all -- --check

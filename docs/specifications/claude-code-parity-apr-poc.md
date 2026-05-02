@@ -2,7 +2,7 @@
 
 **Version**: 1.23.0
 **Date**: 2026-05-02
-**Status**: ACTIVE_RUNTIME — M0–M37 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9)
+**Status**: ACTIVE_RUNTIME — M0–M38 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9)
 **Source of truth**: https://github.com/paiml/claude-code-parity-apr (canonical for enforcement; aprender mirrors only the contract YAML byte-for-byte via `pin.lock`)
 **Companion-repo invariants** (must be green on every PR — see § Companion-repo source-of-truth invariants):
 1. GitHub Actions `ci/gate` green (required status check) → **FALSIFY-CCPA-009**
@@ -267,7 +267,7 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-02)**: M0–M37 SHIPPED. M32d
+> **Status snapshot (2026-05-02)**: M0–M38 SHIPPED. M32d
 > **FUNCTIONALLY DISCHARGED** 2026-05-02 via aprender PR #1228 squash
 > 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle). Output transition on
 > lambda-vector RTX 4090 against the cached 17.3 GB Qwen3-Coder-30B-
@@ -403,6 +403,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M35** | Companion-only audit-trail bump recording M32d functional discharge — contract v1.22.0 → v1.23.0 with full `status_history` entry cross-referencing aprender PRs #1222 / #1226 (squashed) / #1228 / #1242 / #1401, embedded live evidence (4 prompts × multi-domain output verification on lambda-vector RTX 4090 against cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf), output transition timeline, and cost-vs-estimate analysis (5 PRs / ~6 hours actual = lucky-case bound). pin.lock refresh `aprender_commit cf5c7875c → 16f25af06`, `sha256 12f4bcb74110...→7818bd73a545...`, M22 paired-mirror push at byte-identical sha256. **NOT discharged**: cosine ≥0.99 vs HF FP16 (operator-confirm pending ~60 GB download); GPU MoE path; sub-FFN MoE breakdown in `apr trace` (Step 3 + 4 work bypassed because the rank-3 + rank-4 fix was sufficient). | direct main commit `ca75ed0` | this PR |
 | **M36** | Companion-only post-discharge drift sweep — applies the M22 5-step ritual extension (step 4: refresh human-readable roll-up views) to M32d's discharge surface. Updates: README badge `v1.22.0 → v1.23.0` + status block `M0-M34 → M0-M35` + M32d "open work" → "FUNCTIONALLY DISCHARGED" with output transition narrative; CONTRIBUTING status footer parallel; spec status snapshot `qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL`; R9 risk struck through as DISCHARGED with cross-reference to PR #1228. Same drift class the M22 5-step ritual was extended to address — closing the README/CONTRIBUTING/spec lag against ground-truth. **Does NOT modify** the original "M34 FAST PATH" spec section (lines ~430-620) — preserved as historical reference for retrospective comparison; component-prior table (rank-3 Q/K norm 15% + rank-4 RoPE θ 10%) empirically confirmed load-bearing. | direct main commit `3fd90d0` | this PR |
 | **M37** | Companion-only sub-milestones backfill (this PR) — adds milestone-table rows for the M32d implementation PRs (#1222, #1228, #1242, #1401) plus M35/M36 audit-trail+drift-sweep companion commits. Closes the gap between status snapshot ("M0–M36 SHIPPED") and the sub-milestones table tail (which previously stopped at M34). No contract bump; spec markdown only. Same drift class M22 step 4 addresses. | direct main commit (this PR) | this PR |
+| **M38** | Companion-only mechanical doc-drift detector — `scripts/check-doc-drift.sh` (asserts spec header / status snapshot / README / CONTRIBUTING M-counts all match the sub-milestones table tail; asserts stated gate count matches FALSIFY-CCPA-NNN row marker count). Wired into `make tier3` (between `pin-check` and the build steps), CI workflow `.github/workflows/ci.yml` (between `pin-check-roundtrip` and `cargo fmt --check`), and the pre-commit hook installed by `scripts/install-hooks.sh`. Codifies M22 step 4's drift-class backstop ("These are NOT mechanically guarded by pin-check; a kaizen sweep is the backstop") into authoring time. M37 alone produced 6 drift-fix commits this script's asserts would have caught. Same drift class as the M22 5-step ritual; the M22 mechanical guard now extends to step 4 too. | direct main commit (this PR) | this PR |
 
 ## Falsification conditions (13 gates total)
 

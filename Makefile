@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip mutants parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift mutants parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -65,6 +65,9 @@ pin-check:
 pin-check-roundtrip:
 	bash scripts/pin-check-roundtrip.sh contracts/pin.lock
 
+check-doc-drift:
+	bash scripts/check-doc-drift.sh
+
 mutants:
 	cargo mutants -p ccpa-differ --no-times --timeout 90
 
@@ -84,7 +87,7 @@ tier1: fmt-check clippy build
 
 tier2: tier1 test
 
-tier3: tier2 cov pmat-comply pv-validate pin-check
+tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift
 	@echo
 	@echo "✅ All 4 source-of-truth gates green:"
 	@echo "   FALSIFY-CCPA-009  (branch protection — set via GitHub, not local)"

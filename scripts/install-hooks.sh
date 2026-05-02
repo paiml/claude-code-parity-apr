@@ -27,6 +27,7 @@ fi
 
 pv validate contracts/claude-code-parity-apr-v1.yaml
 bash scripts/pin-check.sh contracts/pin.lock
+bash scripts/check-doc-drift.sh
 HOOK
 
 chmod +x "${PRE_COMMIT}"
