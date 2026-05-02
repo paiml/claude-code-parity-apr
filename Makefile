@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift smoke-m32d mutants parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift smoke-m32d mutants parity tier1 tier2 tier3 install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -68,6 +68,9 @@ pin-check-roundtrip:
 check-doc-drift:
 	bash scripts/check-doc-drift.sh
 
+test-doc-drift:
+	bash scripts/test-doc-drift.sh
+
 smoke-m32d:
 	bash scripts/smoke-m32d.sh
 
@@ -90,7 +93,7 @@ tier1: fmt-check clippy build
 
 tier2: tier1 test
 
-tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift
+tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift test-doc-drift
 	@echo
 	@echo "✅ All 4 source-of-truth gates green:"
 	@echo "   FALSIFY-CCPA-009  (branch protection — set via GitHub, not local)"

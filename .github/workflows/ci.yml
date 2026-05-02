@@ -84,6 +84,14 @@ jobs:
       - name: check-doc-drift (M22 step 4 — kaizen backstop)
         run: bash scripts/check-doc-drift.sh
 
+      # ── M46 — meta-test for the drift detector itself ──
+      # Verifies every drift class in check-doc-drift.sh is correctly
+      # caught by deliberately corrupting each, asserting the detector
+      # exits 1 with the expected message, then restoring. Catches the
+      # silent-regression class where a refactor breaks an assert.
+      - name: test-doc-drift (M46 — drift-detector self-test)
+        run: bash scripts/test-doc-drift.sh
+
       # ── Build + lint ──
       - name: cargo fmt --check
         run: cargo fmt --all -- --check
