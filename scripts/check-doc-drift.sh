@@ -29,6 +29,8 @@
 #   9. README status badge `status-X-green.svg` matches contract YAML
 #      top-level `status:` field
 #  10. README gates badge `gates-N%2FT` denominator T == stated gate count
+#  11. README parity badge `measured%20parity-X.XXXX` ≈ measured-parity.json
+#      aggregate_score (within 1e-4 tolerance for badge rounding)
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -223,6 +225,24 @@ if [[ -d "${CORPUS_DIR}" && -f "${PARITY_JSON}" ]]; then
         | sed -E 's/corpus-([0-9]+)%20%2F%2030/\1/')
     if [[ -n "${readme_corpus}" && "${readme_corpus}" != "${actual_corpus}" ]]; then
         report "${README} badge says corpus-${readme_corpus}/30 but actual corpus has ${actual_corpus} NNNN-* dirs"
+    fi
+fi
+
+# 9c. README parity badge `measured%20parity-X.XXXX-brightgreen.svg`
+#     value must match measured-parity.json's `aggregate_score`. Drift
+#     class: parity meter is re-run, aggregate changes, but badge stays.
+if [[ -f "${PARITY_JSON}" ]]; then
+    json_aggregate=$(awk '/"aggregate_score":/ {gsub(/[ ,]/, "", $2); print $2; exit}' "${PARITY_JSON}")
+    readme_parity=$(grep -oE 'measured%20parity-[0-9]+\.[0-9]+-' "${README}" \
+        | head -1 \
+        | sed -E 's/measured%20parity-([0-9.]+)-/\1/')
+    if [[ -n "${json_aggregate}" && -n "${readme_parity}" ]]; then
+        # Normalize: README uses 4 decimals (1.0000) but JSON has 1.0.
+        # Compare as floats via awk: |a - b| < 0.00005.
+        if ! awk -v a="${json_aggregate}" -v b="${readme_parity}" \
+            'BEGIN { exit !(((a-b)*(a-b) < 0.00000001)) }'; then
+            report "${README} parity badge says ${readme_parity} but ${PARITY_JSON} aggregate_score is ${json_aggregate}"
+        fi
     fi
 fi
 
