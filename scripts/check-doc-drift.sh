@@ -22,6 +22,8 @@
 #   6. README badge / README status / CONTRIBUTING status / spec status
 #      snapshot all quote the same vX.Y.Z as the contract YAML's
 #      metadata.version
+#   7. measured-parity.json fixture_count == count(NNNN-* dirs in
+#      fixtures/canonical/) AND README badge `corpus-N/30` matches
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -192,6 +194,33 @@ if [[ -n "${contract_ver}" ]]; then
     fi
 fi
 
+# 8. Corpus count cross-references — measured-parity.json's fixture_count
+#    must equal count(NNNN-* fixture dirs in fixtures/canonical/), and
+#    the README badge `corpus-N%20%2F%2030` must equal the same N. Same
+#    drift class as M-count: when fixtures are added/removed, the
+#    measured-parity meta + README badge must follow.
+CORPUS_DIR="${5:-fixtures/canonical}"
+PARITY_JSON="${6:-fixtures/canonical/measured-parity.json}"
+
+if [[ -d "${CORPUS_DIR}" && -f "${PARITY_JSON}" ]]; then
+    actual_corpus=$(find "${CORPUS_DIR}" -mindepth 1 -maxdepth 1 -type d \
+        -name '[0-9][0-9][0-9][0-9]-*' \
+        | wc -l)
+    json_corpus=$(awk '/"fixture_count":/ {gsub(/[ ,]/, "", $2); print $2; exit}' "${PARITY_JSON}")
+
+    if [[ -n "${json_corpus}" && "${json_corpus}" != "${actual_corpus}" ]]; then
+        report "${PARITY_JSON} fixture_count=${json_corpus} but actual corpus has ${actual_corpus} NNNN-* dirs"
+    fi
+
+    # README badge: corpus-N%20%2F%2030 (URL-encoded "N / 30")
+    readme_corpus=$(grep -oE 'corpus-[0-9]+%20%2F%2030' "${README}" \
+        | head -1 \
+        | sed -E 's/corpus-([0-9]+)%20%2F%2030/\1/')
+    if [[ -n "${readme_corpus}" && "${readme_corpus}" != "${actual_corpus}" ]]; then
+        report "${README} badge says corpus-${readme_corpus}/30 but actual corpus has ${actual_corpus} NNNN-* dirs"
+    fi
+fi
+
 if [[ "${drift_count}" -gt 0 ]]; then
     cat >&2 <<EOF
 
@@ -212,4 +241,7 @@ echo "  sub-milestones table tail:  M${tail_m}"
 echo "  stated gate count:          ${stated_gates} (matches ${actual_gates} CCPA row markers)"
 if [[ -n "${contract_ver}" ]]; then
     echo "  contract YAML version:      v${contract_ver} (matches all 4 cross-references)"
+fi
+if [[ -n "${actual_corpus:-}" ]]; then
+    echo "  corpus fixture count:       ${actual_corpus} (matches measured-parity.json + README badge)"
 fi
