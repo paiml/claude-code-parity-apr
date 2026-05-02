@@ -24,6 +24,8 @@
 #      metadata.version
 #   7. measured-parity.json fixture_count == count(NNNN-* dirs in
 #      fixtures/canonical/) AND README badge `corpus-N/30` matches
+#   8. Spec Falsification run history latest "Run N" revision range
+#      "M1–MX" end-M matches sub-milestones table tail M
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -219,6 +221,19 @@ if [[ -d "${CORPUS_DIR}" && -f "${PARITY_JSON}" ]]; then
     if [[ -n "${readme_corpus}" && "${readme_corpus}" != "${actual_corpus}" ]]; then
         report "${README} badge says corpus-${readme_corpus}/30 but actual corpus has ${actual_corpus} NNNN-* dirs"
     fi
+fi
+
+# 9. Falsification run history — the most recent open Run row's revision
+#    range "M1–MX" must end at the same M as the sub-milestones table
+#    tail. Catches the class where a new milestone row gets added but the
+#    Run history's "M1–MN" range stays stale (caught manually as drift in
+#    9ec1ef3 + this commit).
+run_end_m=$(grep -oE '\| Run [0-9]+ \|.*M1[–-]M[0-9]+' "${SPEC}" \
+    | tail -1 \
+    | sed -E 's/.*M1[–-]M([0-9]+).*/\1/')
+
+if [[ -n "${run_end_m}" && "${run_end_m}" != "${tail_m}" ]]; then
+    report "spec Falsification run history latest row says M1–M${run_end_m} but sub-milestones table tail is M${tail_m}"
 fi
 
 if [[ "${drift_count}" -gt 0 ]]; then
