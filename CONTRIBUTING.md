@@ -48,6 +48,8 @@ make tier3
 - `pmat comply check` (`is_compliant=true`, 0 Fail-status)
 - `pv validate` + `pv lint`
 - `pin-check.sh` (sha256 match)
+- `check-doc-drift.sh` (M22 step 4 backstop — 12 cross-references)
+- `test-doc-drift.sh` (M46 — meta-test for drift detector)
 
 For the round-trip companion ↔ aprender check (requires `gh` + a token
 with `contents:read` on `paiml/aprender`):
@@ -55,6 +57,20 @@ with `contents:read` on `paiml/aprender`):
 ```bash
 make pin-check-roundtrip
 ```
+
+For operator-opt-in dogfood verification (requires the cached 17.3 GB
+Qwen3-Coder GGUF; takes ~3 min):
+
+```bash
+make smoke-m32d
+```
+
+`smoke-m32d` runs 3 prompts × 3 domains (math `5+7=12`, geography
+`Capital of France: Paris`, translation `Hello world → ¡Hola mundo!`)
+and asserts each output passes 3 gates: ≥5 non-whitespace chars,
+NOT containing the M32d-pre-fix gibberish marker `%%%%%%%`, and
+containing the prompt-specific expected substring. Catches future
+regressions of the M32d functional discharge.
 
 ## Adding a new fixture
 
