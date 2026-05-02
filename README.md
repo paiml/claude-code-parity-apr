@@ -21,7 +21,7 @@ walks the two traces, applies per-tool semantic-equivalence rules,
 and emits a falsifiable parity score plus a closed-enum drift
 category for any mismatch.
 
-**Status (2026-05-02)**: M0–M41 all SHIPPED. Contract at v1.23.0
+**Status (2026-05-02)**: M0–M42 all SHIPPED. Contract at v1.23.0
 ACTIVE_RUNTIME. Corpus complete at the spec-prescribed 30 fixtures
 (all score 1.0). Parity-matrix coverage 15/15 reachable
 (2 OOS at trace boundary). FALSIFY-CCPA-007 hard-blocking on every PR

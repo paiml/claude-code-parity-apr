@@ -26,6 +26,8 @@
 #      fixtures/canonical/) AND README badge `corpus-N/30` matches
 #   8. Spec Falsification run history latest "Run N" revision range
 #      "M1–MX" end-M matches sub-milestones table tail M
+#   9. README status badge `status-X-green.svg` matches contract YAML
+#      top-level `status:` field
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -220,6 +222,23 @@ if [[ -d "${CORPUS_DIR}" && -f "${PARITY_JSON}" ]]; then
         | sed -E 's/corpus-([0-9]+)%20%2F%2030/\1/')
     if [[ -n "${readme_corpus}" && "${readme_corpus}" != "${actual_corpus}" ]]; then
         report "${README} badge says corpus-${readme_corpus}/30 but actual corpus has ${actual_corpus} NNNN-* dirs"
+    fi
+fi
+
+# 9a. Contract status badge — README's `status-X-green.svg` badge text
+#     (with `__` substituted back to `_`) must equal the YAML's top-level
+#     `status:` field. Drift class: contract bumped DRAFT → ACTIVE_RUNTIME
+#     (or any equivalent flip) but README badge stays at old value.
+if [[ -n "${contract_ver}" ]]; then
+    contract_status=$(awk '/^status:/ {print $2; exit}' "${CONTRACT_YAML}")
+
+    readme_status_badge=$(grep -oE 'status-[A-Z_]+-' "${README}" \
+        | head -1 \
+        | sed -E 's/status-(.*)-/\1/' \
+        | sed 's/__/_/g')
+    if [[ -n "${contract_status}" && -n "${readme_status_badge}" \
+          && "${readme_status_badge}" != "${contract_status}" ]]; then
+        report "${README} status badge says '${readme_status_badge}' but contract YAML status is '${contract_status}'"
     fi
 fi
 
