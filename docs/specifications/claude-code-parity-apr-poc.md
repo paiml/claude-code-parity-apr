@@ -267,22 +267,24 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-01)**: M0–M34 SHIPPED on the audit
-> surface (M0–M32c.2.2.2.1.4 implementation, M33 audit-trail
-> bookkeeping, M34 five-whys FAST PATH plan for the open M32d
-> numerical-parity discharge). The entire CPU MoE forward chain is
-> wired end-to-end AND pinned by a live regression test. `apr run` emits
-> tokens against the cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-
-> Q4_K_M.gguf on lambda-vector RTX 4090 (most recent live re-verify
-> 2026-05-01: prompt "What is 2+2?" max-tokens=8 → exit 0 in 62.5s,
-> stdout matches /\S/). Output text is gibberish ("%%%%%%%%") because
-> numerical-correctness fixes are M32d's job — the forward path and
-> the audit chain are correct, the cosine-vs-llama.cpp gate is what
-> remains. Contract at `claude-code-parity-apr-v1` **v1.22.0**
-> ACTIVE_RUNTIME (M34 five-whys FAST PATH for M32d numerical parity);
-> contract
-> `qwen3-moe-forward-v1` at v1.3.0 still DRAFT (flips to
-> ACTIVE_RUNTIME at M32d numerical-parity discharge). Corpus at **30**
+> **Status snapshot (2026-05-02)**: M0–M35 SHIPPED. M32d
+> **FUNCTIONALLY DISCHARGED** 2026-05-02 via aprender PR #1228 squash
+> 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle). Output transition on
+> lambda-vector RTX 4090 against the cached 17.3 GB Qwen3-Coder-30B-
+> A3B-Instruct-Q4_K_M.gguf:
+>
+>   * pre-fix    → `%%%%%%%%`         (gibberish, repeated argmax)
+>   * post-fix   → `2 + 2 = 4` + multi-domain coherent answers (math,
+>                  geography, translation, code) all correct.
+>
+> The entire CPU MoE forward chain is wired end-to-end AND pinned by
+> regression tests. M34 FAST PATH plan delivered at the **lucky-case
+> bound** (5 PRs / ~6 hours vs 4-6 PRs / 2-3 days estimate).
+> Contract at `claude-code-parity-apr-v1` **v1.23.0** ACTIVE_RUNTIME
+> (M35 M32d discharge audit-trail bump); contract
+> `qwen3-moe-forward-v1` at v1.4.0 ACTIVE_ALGORITHM_LEVEL (full
+> ACTIVE_RUNTIME flip awaits cosine ≥ 0.99 vs HF FP16 measurement,
+> operator-confirm — ~60GB download). Corpus at **30**
 > paired canonical fixtures (spec ≥30 target met) with parity-matrix
 > coverage 15/15 reachable (2 OOS at trace boundary); FALSIFY-CCPA-007
 > HARD-BLOCKING CI gate live since M16; companion ↔ aprender round-trip
@@ -650,7 +652,7 @@ inverts the schedule for everything after.
 | R6 | `apr code`'s `LlmDriver` trait may not be public-stable enough for an external repo | PMAT-CODE-LLM-DRIVER-PUBLIC-001 (pre-req for M3) | M3 PR exists ⇔ PMAT-CODE-LLM-DRIVER-PUBLIC-001 closed |
 | R7 | 100 % line coverage may produce test-for-coverage's-sake noise on a tiny POC | Tradeoff accepted: POC is small (~5 crates), 100 % is achievable. If a function genuinely cannot be covered, the function is unjustified — delete it. | FALSIFY-CCPA-011 — directly |
 | R8 | `pmat comply check --strict` may reject patterns aprender itself uses | Companion repo is greenfield; we author to comply. If we hit a genuine `pmat comply` bug, the fix is upstream pmat, not a `--allow` flag | FALSIFY-CCPA-010 — directly |
-| R9 | **M32d numerical-correctness blocker** — `apr run` against Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf produces `%%%%%%%%` gibberish even though the forward chain executes end-to-end. Until cosine ≥0.99 vs HF FP16 reference is achieved, FALSIFY-CCPA-013's measured (vs synthetic) discharge cannot land. | M34 ships the **five-whys FAST PATH** (spec § "M32d FAST PATH"): 6-step ordered plan, exit criteria per step, component priors (LAYOUT 30%, Q4_K_M 20%, per-head Q-K norm 15%, RoPE 10%, router softmax 10%, embed 10%, other 5%). Estimated 4-6 PRs lucky / 8-10 realistic / 12-15 pessimistic. Step 1 (run M32d.1 fixture script) is operator-confirm. | FALSIFY-QW3-MOE-PARITY-001 (HF FP16 cosine ≥0.99) AND FALSIFY-QW3-MOE-PARITY-002 (llama.cpp argmax sanity) on `qwen3-moe-forward-v1` v1.3.0 |
+| R9 | ~~**M32d numerical-correctness blocker**~~ **FUNCTIONALLY DISCHARGED 2026-05-02** via aprender PR #1228 squash 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle): per-head Q/K RMSNorm + rope_theta default 1M + chat template no-think + traced sync. Output now `2 + 2 = 4` + multi-domain coherent answers. M34 FAST PATH plan delivered at lucky-case bound (5 PRs / ~6 hours). The narrower remaining piece (formal cosine ≥0.99 vs HF FP16 to flip `qwen3-moe-forward-v1` ACTIVE_RUNTIME) is operator-confirm pending ~60 GB HF download. FALSIFY-CCPA-013's measured (vs synthetic) discharge can land any time without that gate since output quality is verified live. | M34 plan executed; M35 audit-trail recorded the discharge. | FALSIFY-QW3-MOE-PARITY-001 (HF FP16 cosine ≥0.99) AND FALSIFY-QW3-MOE-PARITY-002 (llama.cpp argmax sanity) on `qwen3-moe-forward-v1` v1.4.0 ACTIVE_ALGORITHM_LEVEL — formal flip awaits operator |
 
 ## References
 

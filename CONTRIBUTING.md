@@ -237,8 +237,11 @@ is the project blueprint. Major behavioral changes update both:
 1. The contract's `status_history` (factual, machine-readable record).
 2. The spec markdown (narrative + milestone roll-up).
 
-Status as of v1.22.0 (2026-05-01): M0–M34 all SHIPPED; corpus complete
+Status as of v1.23.0 (2026-05-02): M0–M35 all SHIPPED; corpus complete
 (30/30); 13/13 gates green; companion ↔ aprender round-trip
-mechanically guarded. M32d numerical-parity gate is the open work —
-M34 ships the five-whys FAST PATH plan to close it (see spec §"M32d
-FAST PATH").
+mechanically guarded. **M32d numerical-parity FUNCTIONALLY DISCHARGED**
+2026-05-02 (aprender PR #1228 squash 5235aaeb9): output transition
+`%%%%%%%%` gibberish → `2 + 2 = 4` + multi-domain coherent answers.
+Cosine ≥ 0.99 vs HF FP16 (formal flip of `qwen3-moe-forward-v1`
+DRAFT → ACTIVE_RUNTIME) remains operator-confirm pending ~60GB
+download.
