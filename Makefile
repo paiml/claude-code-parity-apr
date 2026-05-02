@@ -93,10 +93,14 @@ mutants:
 
 parity:
 	@echo "=== canonical corpus (must PASS) ==="
-	ccpa corpus fixtures/canonical/
+	@if command -v ccpa >/dev/null 2>&1; then ccpa corpus fixtures/canonical/; \
+	else cargo run -p ccpa-cli --release --quiet -- corpus fixtures/canonical/; fi
 	@echo
 	@echo "=== regression corpus (must FAIL) ==="
-	@set +e; ccpa corpus fixtures/regression/; code=$$?; set -e; \
+	@set +e; \
+	if command -v ccpa >/dev/null 2>&1; then ccpa corpus fixtures/regression/; \
+	else cargo run -p ccpa-cli --release --quiet -- corpus fixtures/regression/; fi; \
+	code=$$?; set -e; \
 	if [ "$$code" -eq 0 ]; then \
 		echo "ERROR: regression corpus passed — meter is broken!"; exit 1; \
 	else \
@@ -107,7 +111,7 @@ tier1: fmt-check clippy build
 
 tier2: tier1 test
 
-tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift test-doc-drift
+tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift test-doc-drift parity
 
 # `make ci` mirrors the EXACT sequence in .github/workflows/ci.yml. Use
 # this when you want to verify a PR will pass CI locally before push;
