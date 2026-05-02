@@ -6,7 +6,7 @@
 # Refs: docs/specifications/claude-code-parity-apr-poc.md
 #       § Companion-repo source-of-truth invariants
 
-.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift smoke-m32d bashrs-lint mutants parity tier1 tier2 tier3 install-hooks install-tools
+.PHONY: help fmt fmt-check clippy build test cov pmat-comply pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift smoke-m32d bashrs-lint mutants parity tier1 tier2 tier3 ci install-hooks install-tools
 
 help:
 	@echo "claude-code-parity-apr — local gates (mirror of CI)"
@@ -15,6 +15,7 @@ help:
 	@echo "  make tier1          fmt + clippy + check          (<1s)"
 	@echo "  make tier2          tier1 + tests                 (<5s)"
 	@echo "  make tier3          tier2 + cov + comply + pv     (1-5min)"
+	@echo "  make ci             EXACT mirror of CI workflow   (5-10min; requires ccpa on PATH)"
 	@echo
 	@echo "Individual gates:"
 	@echo "  make fmt-check          cargo fmt --check"
@@ -107,6 +108,13 @@ tier1: fmt-check clippy build
 tier2: tier1 test
 
 tier3: tier2 cov pmat-comply pv-validate pin-check check-doc-drift test-doc-drift
+
+# `make ci` mirrors the EXACT sequence in .github/workflows/ci.yml. Use
+# this when you want to verify a PR will pass CI locally before push;
+# `make tier3` is faster but omits the cross-repo `ccpa coverage` step
+# and the corpus parity gates. Requires ccpa binary on PATH (via
+# `cargo install --path crates/ccpa-cli` or `cargo run -p ccpa-cli --`).
+ci: pv-validate pin-check pin-check-roundtrip check-doc-drift test-doc-drift fmt-check clippy build test cov parity pmat-comply
 	@echo
 	@echo "✅ All 4 source-of-truth gates green:"
 	@echo "   FALSIFY-CCPA-009  (branch protection — set via GitHub, not local)"
