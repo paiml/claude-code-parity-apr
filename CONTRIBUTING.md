@@ -211,6 +211,8 @@ When CI fails, the failing step's name maps to a gate ID:
 | `ccpa corpus regression/` | (meter sensitivity)           | regression corpus PASSED — meter is broken; debug the differ |
 | `ccpa coverage`           | FALSIFY-CCPA-007 hard gate    | a reachable parity-matrix row is uncovered; author a fixture for it |
 | `pmat comply check`       | FALSIFY-CCPA-010              | `is_compliant=false` or any Fail-status check; address the root cause |
+| `check-doc-drift`         | (M22 step 4 — kaizen backstop) | spec/README/CONTRIBUTING M-count, gate-count, contract-version, corpus-count, status-badge, or parity-badge cross-reference is stale; the FAIL message names the offending file + offending value + expected value |
+| `test-doc-drift`          | (M46 — drift-detector self-test) | one of the 10 drift classes was NOT caught by `check-doc-drift.sh`; the failing test number names which class; check whether the corresponding regex / sed / awk in `scripts/check-doc-drift.sh` was inadvertently broken |
 
 ## What NOT to do
 
