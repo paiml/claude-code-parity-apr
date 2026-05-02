@@ -28,6 +28,7 @@
 #      "M1–MX" end-M matches sub-milestones table tail M
 #   9. README status badge `status-X-green.svg` matches contract YAML
 #      top-level `status:` field
+#  10. README gates badge `gates-N%2FT` denominator T == stated gate count
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -222,6 +223,21 @@ if [[ -d "${CORPUS_DIR}" && -f "${PARITY_JSON}" ]]; then
         | sed -E 's/corpus-([0-9]+)%20%2F%2030/\1/')
     if [[ -n "${readme_corpus}" && "${readme_corpus}" != "${actual_corpus}" ]]; then
         report "${README} badge says corpus-${readme_corpus}/30 but actual corpus has ${actual_corpus} NNNN-* dirs"
+    fi
+fi
+
+# 9b. README gates badge `gates-N%2FT%20discharged` — N (numerator)
+#     must be ≤ stated_gates and T (denominator) must equal stated_gates
+#     when all gates are discharged. Currently spec is at 13/13 — drift
+#     class addressed: a new gate gets added, stated_gates bumps to 14,
+#     but the README badge stays at 13/13.
+readme_gates=$(grep -oE 'gates-[0-9]+%2F[0-9]+' "${README}" \
+    | head -1 \
+    | sed -E 's/gates-([0-9]+)%2F([0-9]+)/\1\/\2/')
+if [[ -n "${readme_gates}" && -n "${stated_gates}" ]]; then
+    readme_denom=${readme_gates#*/}
+    if [[ "${readme_denom}" != "${stated_gates}" ]]; then
+        report "${README} gates badge denominator is ${readme_denom} but spec stated_gates is ${stated_gates}"
     fi
 fi
 
