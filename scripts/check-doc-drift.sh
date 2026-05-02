@@ -19,6 +19,9 @@
 #   4. CONTRIBUTING  "M0–MX all SHIPPED" == header M
 #   5. Spec section header "Falsification conditions (N gates total)"
 #      == count(FALSIFY-CCPA-NNN row markers in the gate tables)
+#   6. README badge / README status / CONTRIBUTING status / spec status
+#      snapshot all quote the same vX.Y.Z as the contract YAML's
+#      metadata.version
 #
 # This is NOT a re-implementation of `pv validate` (forbidden per
 # CLAUDE.md § "DOGFOOD pv, NEVER bash"); it operates on docs/markdown
@@ -141,6 +144,54 @@ elif [[ "${stated_gates}" != "${actual_gates}" ]]; then
     report "spec header says (${stated_gates} gates total) but found ${actual_gates} FALSIFY-CCPA-NNN row markers"
 fi
 
+# 7. Contract version cross-references — README badge / README status
+#    block / CONTRIBUTING status footer / spec status snapshot must all
+#    quote the same vN.M.K as contracts/claude-code-parity-apr-v1.yaml's
+#    metadata.version. M22 ritual step 1 bumps the YAML; step 4 refreshes
+#    these mentions; this asserts step 4 was actually applied.
+CONTRACT_YAML="${4:-contracts/claude-code-parity-apr-v1.yaml}"
+contract_ver=""
+if [[ -f "${CONTRACT_YAML}" ]]; then
+    # Top-level `version: "X.Y.Z"` is canonical. The YAML also has nested
+    # metadata.version + amendment_history version: entries (different
+    # semantics). Anchor strictly to start-of-line.
+    contract_ver=$(awk '/^version:/ {gsub(/[ "]/, "", $2); print $2; exit}' "${CONTRACT_YAML}")
+fi
+
+if [[ -n "${contract_ver}" ]]; then
+    # README badge: contract-vX.Y.Z-green.svg
+    readme_badge=$(grep -oE 'contract-v[0-9]+\.[0-9]+\.[0-9]+-' "${README}" \
+        | head -1 \
+        | sed -E 's/contract-v(.*)-/\1/')
+    if [[ -n "${readme_badge}" && "${readme_badge}" != "${contract_ver}" ]]; then
+        report "${README} badge says contract-v${readme_badge} but contract YAML metadata.version is v${contract_ver}"
+    fi
+
+    # README status: "Contract at vX.Y.Z"
+    readme_status=$(grep -oE 'Contract at v[0-9]+\.[0-9]+\.[0-9]+' "${README}" \
+        | head -1 \
+        | sed -E 's/Contract at v//')
+    if [[ -n "${readme_status}" && "${readme_status}" != "${contract_ver}" ]]; then
+        report "${README} 'Contract at v${readme_status}' but contract YAML metadata.version is v${contract_ver}"
+    fi
+
+    # CONTRIBUTING status: "Status as of vX.Y.Z"
+    contributing_ver=$(grep -oE 'Status as of v[0-9]+\.[0-9]+\.[0-9]+' "${CONTRIBUTING}" \
+        | head -1 \
+        | sed -E 's/Status as of v//')
+    if [[ -n "${contributing_ver}" && "${contributing_ver}" != "${contract_ver}" ]]; then
+        report "${CONTRIBUTING} 'Status as of v${contributing_ver}' but contract YAML metadata.version is v${contract_ver}"
+    fi
+
+    # Spec status snapshot: "claude-code-parity-apr-v1 vX.Y.Z"
+    spec_ver=$(grep -oE 'claude-code-parity-apr-v1[^v]*v[0-9]+\.[0-9]+\.[0-9]+' "${SPEC}" \
+        | head -1 \
+        | sed -E 's/.*v([0-9]+\.[0-9]+\.[0-9]+)$/\1/')
+    if [[ -n "${spec_ver}" && "${spec_ver}" != "${contract_ver}" ]]; then
+        report "${SPEC} status snapshot 'claude-code-parity-apr-v1 v${spec_ver}' but contract YAML metadata.version is v${contract_ver}"
+    fi
+fi
+
 if [[ "${drift_count}" -gt 0 ]]; then
     cat >&2 <<EOF
 
@@ -159,3 +210,6 @@ fi
 echo "check-doc-drift OK"
 echo "  sub-milestones table tail:  M${tail_m}"
 echo "  stated gate count:          ${stated_gates} (matches ${actual_gates} CCPA row markers)"
+if [[ -n "${contract_ver}" ]]; then
+    echo "  contract YAML version:      v${contract_ver} (matches all 4 cross-references)"
+fi
