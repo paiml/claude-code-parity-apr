@@ -644,7 +644,7 @@ inverts the schedule for everything after.
 | Run | Date | Revision | Verdict | Notes |
 |-----|------|----------|---------|-------|
 | Run 0 | 2026-04-26 | original spec PR | **NOT YET RUN** (historical) | Spec authored; companion repo not yet scaffolded; gates 009–012 not yet wired. |
-| Run 1 | 2026-04-26 → 2026-05-01 | M1–M34 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
+| Run 1 | 2026-04-26 → 2026-05-02 | M1–M37 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). M32d FUNCTIONALLY DISCHARGED 2026-05-02 (M35 audit-trail bump records aprender PR #1228 squash 5235aaeb9). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
 
 (Subsequent runs append below in the apr-cli-qa-spec.md format: gate / status / evidence per row. The status_history block in the contract YAML is the byte-precise audit; this table is the human roll-up.)
 
