@@ -4,7 +4,7 @@
 # these thresholds — see contracts/claude-code-parity-apr-v1.yaml.
 [thresholds]
 test_coverage = 100         # FALSIFY-CCPA-011 enforces 100% line cov
-mutation_coverage = 80      # advisory; not gated until M6
+mutation_coverage = 100     # 100% workspace-wide since M25 (224 mutants caught/unviable, 0 missed)
 max_complexity = 10
 max_line_length = 120
 
