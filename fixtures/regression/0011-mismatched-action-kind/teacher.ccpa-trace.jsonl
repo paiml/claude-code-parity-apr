@@ -1,0 +1,5 @@
+{"v":1,"kind":"session_start","session_id":"reg-0011","ts":"2026-05-03T07:00:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"/sql-review SELECT * FROM users"}
+{"v":1,"kind":"skill_invocation","turn":0,"name":"sql-review","source":"user_invoked","instructions_injected":true}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"Avoid SELECT *; specify columns."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":1,"stop_reason":"end_turn","elapsed_ms":380,"tokens_in":120,"tokens_out":12}

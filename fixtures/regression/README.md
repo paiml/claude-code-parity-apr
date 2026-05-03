@@ -23,6 +23,7 @@ fixture mistake.
 | `0008-missing-skill-invocation` | teacher invokes `/code-review` skill, student doesn't | `MissingSkillInvocation` |
 | `0009-extra-skill-invocation` | student auto-invokes `regex-explainer` skill, teacher doesn't | `ExtraSkillInvocation` |
 | `0010-mismatched-skill-invocation` | both invoke `sql-review`; teacher `user_invoked`+`instructions_injected:true`, student `auto_matched`+`false` | `MismatchedSkillInvocation` |
+| `0011-mismatched-action-kind` | teacher fires `Skill(sql-review)` at action[0]; student fires `Tool(Bash)` at action[0] (cross-kind same-position) | `MismatchedActionKind` |
 
 CI runs both corpora and asserts opposite outcomes; see
 `.github/workflows/ci.yml § "regression corpus must FAIL"`.

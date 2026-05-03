@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"reg-0011","ts":"2026-05-03T07:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"/sql-review SELECT * FROM users"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_s11","name":"Bash","input":{"command":"sqlfluff lint --dialect=ansi -"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_s11","ok":true,"content":"SELECT * is a smell","side_effects":{"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Avoid SELECT *; specify columns."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":1200,"tokens_in":180,"tokens_out":18}
