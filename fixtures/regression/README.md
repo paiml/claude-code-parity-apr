@@ -25,5 +25,21 @@ fixture mistake.
 | `0010-mismatched-skill-invocation` | both invoke `sql-review`; teacher `user_invoked`+`instructions_injected:true`, student `auto_matched`+`false` | `MismatchedSkillInvocation` |
 | `0011-mismatched-action-kind` | teacher fires `Skill(sql-review)` at action[0]; student fires `Tool(Bash)` at action[0] (cross-kind same-position) | `MismatchedActionKind` |
 
+## DriftCategory coverage
+
+The 11 fixtures above exercise **12 of 12 trace-stream `DriftCategory`
+variants** (the per-pair `MismatchedToolName` is covered both by 0001
+input-only drift and 0004 name drift; all other variants have a
+dedicated fixture).
+
+The 13th variant — `MismatchedFileState` — is **out of scope for the
+trace-only regression corpus**. It comes from
+`crates/ccpa-differ/src/file_mutation.rs` which compares two
+`FileState` (path → sha256 BTreeMap) snapshots taken at session
+boundaries, NOT the action-stream extracted from `.ccpa-trace.jsonl`
+records. It is exercised by the 15 tests in
+[`crates/ccpa-differ/tests/falsify_ccpa_005_file_mutation.rs`](../../crates/ccpa-differ/tests/falsify_ccpa_005_file_mutation.rs)
+under FALSIFY-CCPA-005.
+
 CI runs both corpora and asserts opposite outcomes; see
 `.github/workflows/ci.yml § "regression corpus must FAIL"`.
