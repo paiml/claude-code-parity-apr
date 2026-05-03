@@ -20,6 +20,9 @@ fixture mistake.
 | `0005-missing-hook-event` | teacher fires `PreToolUse` hook on `Bash`, student doesn't | `MissingHookEvent` |
 | `0006-extra-hook-event` | student fires `PreToolUse` hook on `Read`, teacher doesn't | `ExtraHookEvent` |
 | `0007-mismatched-hook-event` | both fire `PreToolUse` on `Bash`/`rm`; teacher decision `block`, student decision `warn` | `MismatchedHookEvent` |
+| `0008-missing-skill-invocation` | teacher invokes `/code-review` skill, student doesn't | `MissingSkillInvocation` |
+| `0009-extra-skill-invocation` | student auto-invokes `regex-explainer` skill, teacher doesn't | `ExtraSkillInvocation` |
+| `0010-mismatched-skill-invocation` | both invoke `sql-review`; teacher `user_invoked`+`instructions_injected:true`, student `auto_matched`+`false` | `MismatchedSkillInvocation` |
 
 CI runs both corpora and asserts opposite outcomes; see
 `.github/workflows/ci.yml § "regression corpus must FAIL"`.

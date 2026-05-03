@@ -1,0 +1,4 @@
+{"v":1,"kind":"session_start","session_id":"reg-0008","ts":"2026-05-03T06:15:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4c3b2a1d0e9f8a7b6c5d4e3f2a1b0c9d8e7"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"/code-review please look at this PR diff"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"PR looks good, two minor nits on naming."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":1,"stop_reason":"end_turn","elapsed_ms":550,"tokens_in":160,"tokens_out":18}

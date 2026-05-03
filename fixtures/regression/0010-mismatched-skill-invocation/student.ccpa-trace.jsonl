@@ -1,0 +1,5 @@
+{"v":1,"kind":"session_start","session_id":"reg-0010","ts":"2026-05-03T06:45:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"/sql-review look at this query"}
+{"v":1,"kind":"skill_invocation","turn":0,"name":"sql-review","source":"auto_matched","instructions_injected":false}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"text","text":"Avoid SELECT *; specify columns."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":1,"stop_reason":"end_turn","elapsed_ms":430,"tokens_in":150,"tokens_out":12}
