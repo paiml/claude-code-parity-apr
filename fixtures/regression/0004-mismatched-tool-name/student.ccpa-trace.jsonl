@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"reg-0004","ts":"2026-05-03T05:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4c3"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Show me the contents of README.md"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_s1","name":"Bash","input":{"command":"cat /repo/README.md"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_s1","ok":true,"content":"# Project README\n\nDescription here.","side_effects":{"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"The README describes the project."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":4,"stop_reason":"end_turn","elapsed_ms":920,"tokens_in":280,"tokens_out":18}
