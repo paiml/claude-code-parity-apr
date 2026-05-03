@@ -17,6 +17,7 @@ fixture mistake.
 | `0002-missing-edit` | teacher emits 2 tool calls, student emits 1 | `MissingToolCall` |
 | `0003-extra-tool` | student adds an extra Read | `ExtraToolCall` |
 | `0004-mismatched-tool-name` | teacher uses `Read`, student uses `Bash`/`cat` (same intent, different tool) | `MismatchedToolName` |
+| `0005-missing-hook-event` | teacher fires `PreToolUse` hook on `Bash`, student doesn't | `MissingHookEvent` |
 
 CI runs both corpora and asserts opposite outcomes; see
 `.github/workflows/ci.yml § "regression corpus must FAIL"`.
