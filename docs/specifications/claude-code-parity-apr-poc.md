@@ -2,7 +2,7 @@
 
 **Version**: 1.23.0
 **Date**: 2026-05-02
-**Status**: ACTIVE_RUNTIME — M0–M46 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9); qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL flipped on aprender main 2026-05-02T14:57Z (PR #1409 squash 3a2f2705b)
+**Status**: ACTIVE_RUNTIME — M0–M47 SHIPPED; M32d numerical-parity FUNCTIONALLY DISCHARGED 2026-05-02 (aprender PR #1228 squash 5235aaeb9); qwen3-moe-forward-v1 v1.3.0 DRAFT → v1.4.0 ACTIVE_ALGORITHM_LEVEL flipped on aprender main 2026-05-02T14:57Z (PR #1409 squash 3a2f2705b)
 **Source of truth**: https://github.com/paiml/claude-code-parity-apr (canonical for enforcement; aprender mirrors only the contract YAML byte-for-byte via `pin.lock`)
 **Companion-repo invariants** (must be green on every PR — see § Companion-repo source-of-truth invariants):
 1. GitHub Actions `ci/gate` green (required status check) → **FALSIFY-CCPA-009**
@@ -267,7 +267,7 @@ The teacher's *fixtures* are immutable per-revision; the student (`apr code` orc
 
 ## Phases / Milestones
 
-> **Status snapshot (2026-05-02)**: M0–M46 SHIPPED. M32d
+> **Status snapshot (2026-05-02)**: M0–M47 SHIPPED. M32d
 > **FUNCTIONALLY DISCHARGED** 2026-05-02 via aprender PR #1228 squash
 > 5235aaeb9 (Step 5 + 5b + 6 + 7 fix bundle). Output transition on
 > lambda-vector RTX 4090 against the cached 17.3 GB Qwen3-Coder-30B-
@@ -412,6 +412,7 @@ in `contracts/claude-code-parity-apr-v1.yaml § status_history`:
 | **M44** | Companion-only `check-doc-drift.sh` extension — adds 1 more assert cross-referencing the README parity badge `measured%20parity-X.XXXX-brightgreen.svg` against the `measured-parity.json` `aggregate_score` field (with 1e-4 tolerance for badge-rounding to 4 decimals via `awk` float comparison). Drift class addressed: parity meter is re-run on a refreshed fixture set (e.g., new fixture added or behavior changed), aggregate score moves, but the README badge stays at the old value. Currently both at `1.0000`. Detector now catches this 12th cross-reference. | direct main commit `1ad2a76` | this PR |
 | **M45** | Companion-only `scripts/smoke-m32d.sh` — codifies the M32d dogfood loop into a repeatable smoke test (3 prompts × 3 domains: math `5+7=12`, geography `Capital of France: Paris`, translation `Hello world → ¡Hola mundo!`). Each prompt's output gated by 2 assertions: (a) ≥5 non-whitespace chars, (b) does NOT contain the M32d-pre-fix gibberish marker `%%%%%%%`. Operator-opt-in via `make smoke-m32d` (NOT in `make tier3` because requires 17.3 GB cached GGUF + ~3min runtime). Drift class addressed: a future aprender PR re-introduces gibberish output (per-head Q/K RMSNorm regression, rope_theta wrong default, chat template change, etc.) — currently only manual ad-hoc dogfood would catch this; M45 makes it 1 command. Codifies what the M37/M38/M40/M41/M42/M43/M44 cycles ran manually each iteration (math + geography + translation prompts dogfooded ~10 times across this session). | direct main commit `059de8a` | this PR |
 | **M46** | Companion-only `scripts/test-doc-drift.sh` — meta-test for the M38–M44 drift detector itself. The detector can silently regress (a refactor breaks an assert, a regex stops matching, a typo disables a check) — at which point the drift class it was guarding is no longer mechanically prevented. M46 systematically corrupts each drift class (10 classes total at M44), runs the detector, asserts exit 1 with the expected message, restores. Wired into `make tier3` (between `check-doc-drift` and the build steps) AND CI workflow. Pre/post-flight: detector must be clean on live repo before AND after the corruption sweep (catches files left dirty). | direct main commit `151f850` | this PR |
+| **M47** | Companion-only regression-corpus broadening — extended `fixtures/regression/` from 3 fixtures (3 of 13 `DriftCategory` variants) to 11 fixtures (12 of 12 trace-stream variants). Added: 0004 `MismatchedToolName`, 0005 `MissingHookEvent`, 0006 `ExtraHookEvent`, 0007 `MismatchedHookEvent`, 0008 `MissingSkillInvocation`, 0009 `ExtraSkillInvocation`, 0010 `MismatchedSkillInvocation`, 0011 `MismatchedActionKind`. Aggregate score moved 0.5000 → 0.3182 across the 11 fixtures (still well below the 0.95 `passes_gate` threshold; meter sensitivity strengthened). The 13th variant (`MismatchedFileState`) is documented in `fixtures/regression/README.md` as out-of-scope for trace-only regression — it comes from `FileState` snapshots compared at session boundaries (FALSIFY-CCPA-005 `crates/ccpa-differ/tests/falsify_ccpa_005_file_mutation.rs`, 15 unit tests) not from action-stream extraction. Drift class addressed: a future regression breaking any specific `DriftCategory` detector now degrades the regression-corpus aggregate at fixture level, not just the unit-test level. | direct main commits `b0c9210`/`54290f6`/`5787535`/`bf05c87`/`61b894f`/`7c07fcf` | this PR |
 
 ## Falsification conditions (13 gates total)
 
@@ -653,7 +654,7 @@ inverts the schedule for everything after.
 | Run | Date | Revision | Verdict | Notes |
 |-----|------|----------|---------|-------|
 | Run 0 | 2026-04-26 | original spec PR | **NOT YET RUN** (historical) | Spec authored; companion repo not yet scaffolded; gates 009–012 not yet wired. |
-| Run 1 | 2026-04-26 → 2026-05-02 | M1–M46 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). M32d FUNCTIONALLY DISCHARGED 2026-05-02 (M35 audit-trail bump records aprender PR #1228 squash 5235aaeb9). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
+| Run 1 | 2026-04-26 → 2026-05-03 | M1–M47 (every merge to companion main) | **PASS** on every commit | Gates 009–012 (ci/gate green, pmat comply 100%, line coverage ≥99%, pv validate clean) have been hard-blocking on every PR since M1's empty-scaffold landed (FALSIFY-CCPA-009 enforces branch protection from that PR forward). M32d FUNCTIONALLY DISCHARGED 2026-05-02 (M35 audit-trail bump records aprender PR #1228 squash 5235aaeb9). Per-run audit trail lives in `contracts/claude-code-parity-apr-v1.yaml § status_history` (one entry per minor-version bump). |
 
 (Subsequent runs append below in the apr-cli-qa-spec.md format: gate / status / evidence per row. The status_history block in the contract YAML is the byte-precise audit; this table is the human roll-up.)
 
