@@ -1,0 +1,6 @@
+{"v":1,"kind":"session_start","session_id":"reg-0006","ts":"2026-05-03T05:45:00Z","actor":"claude-code","model":"claude-sonnet-4-6","cwd_sha256":"c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4c3b2a1d0e9f8a7b6c5"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"What's in src/lib.rs?"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_h6","name":"Read","input":{"file_path":"src/lib.rs"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_h6","ok":true,"content":"pub fn add(a: i32, b: i32) -> i32 { a + b }","side_effects":{}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"It defines a single `add` function."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":640,"tokens_in":210,"tokens_out":18}

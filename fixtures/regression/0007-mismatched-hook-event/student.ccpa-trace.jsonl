@@ -1,0 +1,7 @@
+{"v":1,"kind":"session_start","session_id":"reg-0007","ts":"2026-05-03T06:00:00Z","actor":"apr-code","model":"qwen3-coder-30b-a3b-q4km","cwd_sha256":"d7e6f5a4c3b2a1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6"}
+{"v":1,"kind":"user_prompt","turn":0,"text":"Delete the temp file"}
+{"v":1,"kind":"assistant_turn","turn":1,"blocks":[{"type":"tool_use","id":"toolu_s7","name":"Bash","input":{"command":"rm /tmp/scratch.txt"}}],"stop_reason":"tool_use"}
+{"v":1,"kind":"hook_event","turn":1,"event":"PreToolUse","matcher":"Bash","decision":"warn","exit_code":1,"output":"rm command flagged but allowed"}
+{"v":1,"kind":"tool_result","turn":2,"tool_use_id":"toolu_s7","ok":true,"content":"","side_effects":{"exit_code":0}}
+{"v":1,"kind":"assistant_turn","turn":3,"blocks":[{"type":"text","text":"Removed the temp file."}],"stop_reason":"end_turn"}
+{"v":1,"kind":"session_end","turn":3,"stop_reason":"end_turn","elapsed_ms":510,"tokens_in":220,"tokens_out":12}
