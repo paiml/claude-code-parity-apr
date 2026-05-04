@@ -50,6 +50,20 @@ In one phrase: **"distill Claude Code's control plane into `apr code` and prove 
 
 The "distillation" framing is not metaphorical — see Hinton et al. *Distilling the Knowledge in a Neural Network* (arXiv:1503.02531) and § Distillation framing below.
 
+### Scope extensions (post-M32 numerical-parity work, formally in-scope per M31 monorepo clarification)
+
+The original M0–M6 POC scope above was limited to action-stream parity over a static teacher fixture: the LLM output itself was treated as opaque. M32 (added 2026-04-29) extended scope to include **numerical correctness of the underlying inference engine** because the AUTHORED-fixture rescope (M2.3) requires `apr code` to drive a real local LLM rather than a recorded API trace, and a broken local LLM produces gibberish that no parity-score can repair.
+
+Three sub-extensions, each with their own arXiv basis:
+
+1. **Quantized-LLM forward correctness** (`qwen3-moe-forward-v1` contract, M32a–M32c.2.2.2.1.4 SHIPPED, M32d FUNCTIONALLY DISCHARGED 2026-05-02). Asserts that `apr run` produces coherent output on the cached 17.3 GB Qwen3-Coder-30B-A3B-Instruct-Q4_K_M GGUF. Output transition (`%%%%%%%%` → `2 + 2 = 4` + multi-domain coherent answers) verified live; the formal cosine ≥ 0.99 vs HF FP16 reference (operator-confirm pending ~60 GB download) flips `qwen3-moe-forward-v1` v1.4.0 ACTIVE_ALGORITHM_LEVEL → ACTIVE_RUNTIME. Academic basis: arXiv:1701.06538 (Shazeer et al., MoE), arXiv:2101.03961 (Fedus et al., Switch Transformers), arXiv:2210.17323 (Frantar et al., GPTQ — quantization-aware reference comparison), arXiv:1910.07467 (Zhang & Sennrich, RMSNorm — empirically load-bearing in M32d Step 5), arXiv:2104.09864 (Su et al., RoPE — load-bearing in M32d Step 5b).
+
+2. **GPU MoE forward path** (post-M32d follow-up, multi-week). Currently the `forward_qwen3_moe` path is CPU-only (LAZY-FUSED-MATVEC over Q4_K/Q6_K rows). A CUDA/wgpu kernel for `forward_qwen3_moe_gpu` is required for production-grade throughput. Academic basis: arXiv:2305.18398 (Dao, FlashAttention-2 — fused-kernel parity discipline), arXiv:2305.05176 (Aminabadi et al., DeepSpeed-MoE — sparse-MoE GPU dispatch).
+
+3. **Sub-FFN MoE diagnostic surface** (M32d Step 4, bypassed because the rank-3+rank-4 fix discharged the symptom; remains useful for future MoE numerical-correctness investigations). Extends `apr trace --json --payload` to emit per-token router output (softmax over experts), top-k expert ids, and per-expert L2 contribution norms. Academic basis: arXiv:1701.06538 (Shazeer et al. — original gated MoE router), arXiv:2202.09368 (Zoph et al., ST-MoE — router-stability instrumentation precedent).
+
+Sub-extensions 1 and 3 are companion-recordable when discharged on aprender main (per M22 paired-mirror invariant). Sub-extension 2 is a multi-week aprender-side feature — the companion will record the milestone-table row when the GPU kernel lands.
+
 ## Non-Goals
 
 - ❌ Reproducing Claude's *language model output*. The teacher's words don't have to match — we only assert tool-call equivalence (FALSIFY-CCPA-004) and post-state equivalence (FALSIFY-CCPA-005).
@@ -452,6 +466,19 @@ Each gate maps to one falsification test in `crates/ccpa-*/tests/falsify_ccpa_NN
 | **2505.03096** | *Chaos Engineering for LLM Systems* | CCPA-006 | Sovereignty enforcement under fault injection — "what if the env leaks an Anthropic key on a replay run" is exactly a chaos-test class. |
 | **2603.23611** | LLMORPH — *Cataloged Metamorphic Relations for NLP* | CCPA-004 | 191 catalogued metamorphic relations directly populate per-tool `equality` rules in `tool_equivalence_rules`. |
 | **2102.05351** (referenced in apr-cli-qa-spec) | Coverage-completeness invariants | CCPA-010, CCPA-011 | Background for 100 %-coverage / 100 %-comply invariants. |
+
+### Scope-extension citations (M32 numerical-parity work)
+
+| arXiv | Title (short) | Applies to | Why |
+|-------|---------------|------------|-----|
+| **1701.06538** | Shazeer et al., *Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer* | qwen3-moe-forward-v1 (Sub-extension 1+3) | Original gated-router top-k MoE formulation. Defines the softmax-then-top-k semantics the `moe-router-v1` and `moe-expert-dispatch-v1` contracts compose, and the per-expert SwiGLU dispatch the M32c.2.2.* chain implements. |
+| **2101.03961** | Fedus et al., *Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity* | qwen3-moe-forward-v1 (Sub-extension 1+2) | Modern MoE forward-path conventions (per-token routing, per-expert FFN, weighted aggregation) — the algorithmic shape that `forward_qwen3_moe` mirrors for Qwen3-Coder-30B-A3B. |
+| **2202.09368** | Zoph et al., *ST-MoE: Designing Stable and Transferable Sparse Expert Models* | qwen3-moe-forward-v1 (Sub-extension 3) | Router-stability instrumentation precedent: per-token router-output logging, top-k expert ids, and per-expert contribution norms. The diagnostic surface M32d Step 4 was scoped to add. |
+| **1910.07467** | Zhang & Sennrich, *Root Mean Square Layer Normalization* | qwen3-moe-forward-v1 (Sub-extension 1, M32d Step 5) | Per-head Q/K RMSNorm was empirically load-bearing in M32d (rank-3 prior, 15 % of FAST PATH cost). The contract's `qkv_q_norm` + `qkv_k_norm` equations follow this paper's RMSNorm definition. |
+| **2104.09864** | Su et al., *RoFormer: Enhanced Transformer with Rotary Position Embedding* | qwen3-moe-forward-v1 (Sub-extension 1, M32d Step 5b) | Rotary Position Embedding (RoPE). M32d Step 5b's `rope_theta` 10K → 1M default for `qwen3_moe`/`qwen3` arches stems from this paper's θ scaling for long-context positional encoding (rank-4 prior, 10 % of FAST PATH cost). |
+| **2210.17323** | Frantar et al., *GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers* | qwen3-moe-forward-v1 (Sub-extension 1, formal cosine gate) | Quantization-aware reference-comparison framework: cosine ≥ 0.99 vs FP16 ground truth at the LM-head logits is the cross-implementation parity criterion the formal flip of v1.4.0 ACTIVE_ALGORITHM_LEVEL → ACTIVE_RUNTIME relies on. Operator-confirm pending ~60 GB Qwen3-Coder-30B-A3B-FP16 download. |
+| **2305.18398** | Dao, *FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning* | qwen3-moe-forward-v1 (Sub-extension 2) | Fused-kernel parity discipline: GPU MoE kernel for `forward_qwen3_moe_gpu` should preserve numerical equivalence with the CPU LAZY-FUSED-MATVEC path, validated via the same cosine ≥ 0.99 gate (Sub-extension 1). |
+| **2305.05176** | Aminabadi et al., *DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale* | qwen3-moe-forward-v1 (Sub-extension 2) | Sparse-MoE GPU dispatch precedent. Production-grade `forward_qwen3_moe_gpu` will need expert-parallel scheduling analogous to DeepSpeed-MoE's expert-slot routing. |
 
 ## M32d FAST PATH — five-whys + concrete next 6–13 PRs
 
